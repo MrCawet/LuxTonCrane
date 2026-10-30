@@ -1,4 +1,4 @@
-use journal::{Journal, ajouter_une_mesure};
+use journal::{Journal, ajouter};
 use mesure::Mesure;
 
 struct JournalEnMémoire {
@@ -35,7 +35,7 @@ fn ajouter_une_mesure_l_enregistre_dans_le_journal() {
         enregistrées: Vec::new(),
     };
 
-    ajouter_une_mesure(
+    ajouter(
         Mesure {
             valeur_lux: 120.0,
             instant_ms: 1_793_000_060_000,
