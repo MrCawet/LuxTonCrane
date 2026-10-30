@@ -1,0 +1,10 @@
+[package]
+name = "journal_sqlite"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+journal = { path = "../journal" }
+mesure = { path = "../mesure" }
+# SQLite est compilé avec la crate : le NDK d'Android ne fournit pas la bibliothèque SQLite du système.
+rusqlite = { version = "0.41.1", features = ["bundled"] }

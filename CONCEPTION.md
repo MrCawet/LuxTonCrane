@@ -23,6 +23,13 @@ Notes de conception provisoires, à confirmer par l'usage.
 - À chaque réveil par l'alarme, on note aussi la position du téléphone, que donne l'accéléromètre : comparée à la précédente, elle dit si le téléphone a changé de position.
 - Le capteur de mouvement significatif réveille le processeur, sans allumer l'écran, quand le téléphone bouge : on note l'heure de ce mouvement. Il se désactive après chaque mouvement signalé, on le réarme donc à chaque fois.
 
+### Choix techniques
+
+- Le journal est une base SQLite, écrite en Rust (`rusqlite`, avec SQLite compilé dedans).
+- Kotlin appelle le métier en Rust à travers un pont généré par UniFFI.
+- L'instant d'une mesure vient de l'horodatage du capteur, converti en heure réelle.
+- Un échec d'enregistrement est écrit dans les journaux d'Android ; la mesure est perdue.
+
 ### À vérifier sur un téléphone
 
 - Le type de service de premier plan exigé depuis Android 14 (`specialUse` ?).
