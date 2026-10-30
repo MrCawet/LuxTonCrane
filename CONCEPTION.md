@@ -19,6 +19,8 @@ Notes de conception provisoires, à confirmer par l'usage.
 - 9 minutes est l'intervalle le plus court qu'Android accorde à une alarme pendant Doze. L'alarme n'a pas besoin d'être exacte : le système peut la décaler.
 - L'alarme réveille le processeur, pas l'écran.
 - Android ne garde le processeur éveillé que le temps de traiter l'alarme, alors que le capteur met un peu de temps à donner sa première valeur : un court wake lock est tenu jusqu'à cette valeur, puis relâché.
+- À chaque réveil par l'alarme, on note aussi si le capteur de proximité est couvert ou non.
+- Le capteur de mouvement significatif réveille le processeur, sans allumer l'écran, quand le téléphone bouge : on note l'heure de ce mouvement. Il se désactive après chaque mouvement signalé, on le réarme donc à chaque fois.
 
 ### À vérifier sur un téléphone
 
