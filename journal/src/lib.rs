@@ -6,3 +6,7 @@ use mesure::Mesure;
 pub trait Journal {
     fn enregistrer(&mut self, mesure: Mesure);
 }
+
+pub fn ajouter_une_mesure(mesure: Mesure, journal: &mut dyn Journal) {
+    journal.enregistrer(mesure);
+}
