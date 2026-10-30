@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       rust: ${{ steps.chemins.outputs.rust }}
+      android: ${{ steps.chemins.outputs.android }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,12 +30,18 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          fichiers=$(git diff --name-only "$BASE" "$HEAD")
+          fichiers=$(git diff --name-only "$BASE...$HEAD")
           echo "$fichiers"
           if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|\.github/)'; then
             echo "rust=true" >> "$GITHUB_OUTPUT"
           else
             echo "rust=false" >> "$GITHUB_OUTPUT"
+          fi
+          # L'application embarque le métier en Rust : elle est recompilée quand l'un ou l'autre change.
+          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|android/|\.github/)'; then
+            echo "android=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "android=false" >> "$GITHUB_OUTPUT"
           fi
 
   rust:
@@ -48,9 +55,21 @@ jobs:
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
 
+  android:
+    needs: changements
+    if: needs.changements.outputs.android == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/preparer-android
+      - run: ./gradlew test assembleDebug
+
   # Seule vérification à exiger dans la protection de main : un job sauté compte comme réussi.
   verdict:
-    needs: [changements, rust]
+    needs: [changements, rust, android]
     if: always()
     runs-on: ubuntu-latest
     steps:
