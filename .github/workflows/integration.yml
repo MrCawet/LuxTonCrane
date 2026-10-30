@@ -1,0 +1,64 @@
+# Protège main : ne tourne que sur les pull requests vers main, jamais sur un push.
+# Le résultat d'une PR suffit à valider main, à condition que GitHub exige une branche à jour avant la fusion.
+name: Intégration
+
+on:
+  pull_request:
+    branches: [main]
+
+# Un nouveau push sur la PR annule l'exécution en cours, devenue inutile.
+concurrency:
+  group: integration-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changements:
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.chemins.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: chemins
+        name: Repère ce que la PR touche
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          fichiers=$(git diff --name-only "$BASE" "$HEAD")
+          echo "$fichiers"
+          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|\.github/)'; then
+            echo "rust=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rust=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  rust:
+    needs: changements
+    if: needs.changements.outputs.rust == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # rustup installe la chaîne fixée par rust-toolchain.toml, avec clippy et rustfmt.
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+
+  # Seule vérification à exiger dans la protection de main : un job sauté compte comme réussi.
+  verdict:
+    needs: [changements, rust]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Échoue si un job a échoué ou a été annulé
+        env:
+          RESULTATS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTATS"
+          if echo "$RESULTATS" | grep -qE 'failure|cancelled'; then
+            exit 1
+          fi
