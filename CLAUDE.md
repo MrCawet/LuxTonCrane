@@ -11,6 +11,8 @@
 - `journal_sqlite/` enregistre le journal dans SQLite ; `pont/` expose le métier à Kotlin par UniFFI (noms sans accents).
 - L'application Android est dans `android/`. Sa compilation compile aussi le pont Rust et génère son code Kotlin ; il faut le NDK Android, `rustup target add aarch64-linux-android` et `cargo install cargo-ndk`.
 - Le SDK Android n'est pas joignable depuis les sessions dans le cloud : l'application ne s'y compile pas. Les tests Kotlin qui n'utilisent pas Android se lancent dans un projet JVM temporaire qui reprend `android/app/src`.
+- CI (`.github/workflows/integration.yml`) : seulement sur les PR vers `main`, jamais sur un push ; un nouveau push annule l'exécution en cours. Les jobs Rust et Android ne tournent que si la PR touche leurs chemins. Seul le job `verdict` est à exiger dans la protection de `main`.
+- CD (`.github/workflows/livraison.yml`) : déclenchée à la main depuis `main`, elle compile l'application et pose un tag daté (`AAAA-MM-JJ-HHMM`, UTC) sur le commit.
 
 Mettre à jour cette section à chaque changement qu'une nouvelle session perdrait du temps à retrouver : commandes fréquentes, particularités du projet, etc.
 
@@ -27,6 +29,7 @@ L'agent fait donc le plus petit changement possible qui répond à la demande, s
 - **Pas d'anticipation.** Aucun cas limite, test, code ou contrat qui n'a pas été demandé : l'agent le propose, il ne l'écrit pas. De même, il ne pose que les questions nécessaires à la demande en cours.
 - **Relire avant de livrer.** Avant de montrer un changement, l'agent relit son diff au regard de [Nommer](#nommer), des règles de code, de lisibilité et de [.claude/rules/rust.md](.claude/rules/rust.md), et corrige ce qui n'y répond pas.
 - **Trier les commits avant de fusionner dans `main`.** L'agent recrée la branche depuis `main` en y reprenant par `git cherry-pick` seulement les commits utiles : il écarte un commit qu'un commit suivant défait, avec celui qui le défait (un test ajouté puis retiré), ou fusionne la correction dans le commit d'origine (un terme écrit faux puis corrigé), en gardant le cycle `test:`, `feat:`, `refactor:` lisible. Un changement de besoin n'est pas une erreur : ses commits restent, ils racontent les décisions de l'opérateur. Il pousse avec `--force-with-lease`, jamais sur `main`, et dit à l'opérateur quels commits il a écartés ou fusionnés.
+- **La CI grandit avec le code.** Chaque nouvelle crate ou nouveau dossier est ajouté aux chemins surveillés par `integration.yml`, dans le même changement.
 - **Éprouver un garde-fou.** Un garde-fou (lint, hook, CI) n'est déclaré en place qu'après l'avoir vu bloquer en conditions réelles.
 
 ## Réponses à l'opérateur
