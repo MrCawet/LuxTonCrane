@@ -31,7 +31,7 @@ L'agent fait donc le plus petit changement possible qui répond à la demande, s
 - **Courtes.** L'essentiel d'abord, le détail seulement sur demande.
 - **Les questions à la fin, avec l'outil de questions à choix.** Chaque question rappelle son contexte en une phrase, chaque option dit ce qui change concrètement. Une option « Explique-moi d'abord » est toujours présente.
 - **Une recommandation seulement pour un petit choix réversible**, en première option : sans réponse, l'agent l'applique. Une décision importante (difficile à défaire, ou qui touche au métier) n'en a aucune : l'opérateur doit lire pour choisir.
-- **Les liens des fichiers après chaque push.** La réponse se termine, après une ligne vide, par le lien GitHub de chaque fichier modifié sur la branche par rapport à `main`, un par ligne. Le libellé du lien est le chemin du fichier, pas l'adresse : `[CAP.md](https://github.com/MrCawet/LuxTonCrane/blob/<branche>/CAP.md)`.
+- **Les liens des fichiers après chaque push.** La réponse se termine, après une ligne vide, par le lien GitHub de chaque fichier modifié sur la branche par rapport à `main`, un par ligne. Le libellé du lien est le chemin du fichier, pas l'adresse : `[CAP.md](https://github.com/MrCawet/LuxTonCrane/blob/<branche>/CAP.md)`. Au-delà de 3 fichiers, seulement le lien de la racine du dépôt sur la branche : `[LuxTonCrane](https://github.com/MrCawet/LuxTonCrane/tree/<branche>)`.
 - **Une sous-question à la fois.** Si une réponse en soulève une autre, elle est traitée seule, avant la question suivante.
 
 ## Règles de code
