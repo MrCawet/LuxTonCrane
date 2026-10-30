@@ -13,7 +13,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/preparer-android
       - name: Compile l'application
         working-directory: android
@@ -21,7 +21,7 @@ jobs:
       - name: Date le tag, en heure UTC
         id: tag
         run: echo "nom=$(date -u +%Y-%m-%d-%H%M)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: luxtoncrane-${{ steps.tag.outputs.nom }}
           path: android/app/build/outputs/apk/debug/*.apk
