@@ -8,6 +8,9 @@
 - L'application est en Kotlin (capteur de lumière, tâche de fond, toutes les API Android) et en Rust (le métier : mesures, rapports).
 - [.claude/rules/rust.md](.claude/rules/rust.md) : règles propres au Rust, à lire avant d'écrire du Rust. Chargées automatiquement dès qu'un fichier `.rs` ou `Cargo.toml` est touché.
 - Le métier est un workspace Cargo à la racine, une crate par sujet (`mesure/`, `journal/`) : `cargo test` à la racine.
+- `journal_sqlite/` enregistre le journal dans SQLite ; `pont/` expose le métier à Kotlin par UniFFI (noms sans accents).
+- L'application Android est dans `android/`. Sa compilation compile aussi le pont Rust et génère son code Kotlin ; il faut le NDK Android, `rustup target add aarch64-linux-android` et `cargo install cargo-ndk`.
+- Le SDK Android n'est pas joignable depuis les sessions dans le cloud : l'application ne s'y compile pas. Les tests Kotlin qui n'utilisent pas Android se lancent dans un projet JVM temporaire qui reprend `android/app/src`.
 
 Mettre à jour cette section à chaque changement qu'une nouvelle session perdrait du temps à retrouver : commandes fréquentes, particularités du projet, etc.
 
