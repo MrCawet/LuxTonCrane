@@ -4,8 +4,10 @@
 
 - [CAP.md](CAP.md) : la vision du projet.
 - [CONCEPTION.md](CONCEPTION.md) : les notes de conception, provisoires.
+- [GLOSSAIRE.md](GLOSSAIRE.md) : les termes du métier.
 - L'application est en Kotlin (capteur de lumière, tâche de fond, toutes les API Android) et en Rust (le métier : mesures, rapports).
 - [.claude/rules/rust.md](.claude/rules/rust.md) : règles propres au Rust, à lire avant d'écrire du Rust. Chargées automatiquement dès qu'un fichier `.rs` ou `Cargo.toml` est touché.
+- Le métier est la crate `metier/` : `cd metier && cargo test`.
 
 Mettre à jour cette section à chaque changement qu'une nouvelle session perdrait du temps à retrouver : commandes fréquentes, particularités du projet, etc.
 
