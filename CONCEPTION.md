@@ -20,6 +20,7 @@ Notes de conception provisoires, à confirmer par l'usage.
 - L'alarme réveille le processeur, pas l'écran.
 - Android ne garde le processeur éveillé que le temps de traiter l'alarme, alors que le capteur met un peu de temps à donner sa première valeur : un court wake lock est tenu jusqu'à cette valeur, puis relâché.
 - À chaque réveil par l'alarme, on note aussi si le capteur de proximité est couvert ou non.
+- À chaque réveil par l'alarme, on note aussi la position du téléphone, que donne l'accéléromètre : comparée à la précédente, elle dit si le téléphone a changé de position.
 - Le capteur de mouvement significatif réveille le processeur, sans allumer l'écran, quand le téléphone bouge : on note l'heure de ce mouvement. Il se désactive après chaque mouvement signalé, on le réarme donc à chaque fois.
 
 ### À vérifier sur un téléphone
