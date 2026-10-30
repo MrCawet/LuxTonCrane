@@ -17,10 +17,11 @@ Notes de conception provisoires, à confirmer par l'usage.
 - Le capteur est fermé quand l'écran s'éteint.
 - Une alarme réveille le téléphone environ toutes les 9 minutes : on ouvre le capteur, on note la première valeur, on le referme.
 - 9 minutes est l'intervalle le plus court qu'Android accorde à une alarme pendant Doze. L'alarme n'a pas besoin d'être exacte : le système peut la décaler.
+- L'alarme réveille le processeur, pas l'écran.
+- Android ne garde le processeur éveillé que le temps de traiter l'alarme, alors que le capteur met un peu de temps à donner sa première valeur : un court wake lock est tenu jusqu'à cette valeur, puis relâché.
 
 ### À vérifier sur un téléphone
 
 - Le type de service de premier plan exigé depuis Android 14 (`specialUse` ?).
 - Le comportement des surcouches des fabricants, qui peuvent arrêter le service.
-- Si un capteur placé sous l'écran donne encore une valeur juste quand l'écran est éteint.
 - Le coût réel des réveils en batterie.
