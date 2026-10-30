@@ -21,3 +21,6 @@ journal_sqlite = { path = "../journal_sqlite" }
 mesure = { path = "../mesure" }
 # Génère le code Kotlin qui appelle ce pont.
 uniffi = "0.32.2"
+
+[dev-dependencies]
+rusqlite = { version = "0.41.1", features = ["bundled"] }
