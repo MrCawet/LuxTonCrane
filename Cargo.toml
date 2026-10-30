@@ -1,0 +1,3 @@
+[workspace]
+members = ["mesure", "journal"]
+resolver = "3"

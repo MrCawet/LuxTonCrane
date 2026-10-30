@@ -3,8 +3,11 @@
 ## Repères
 
 - [CAP.md](CAP.md) : la vision du projet.
+- [CONCEPTION.md](CONCEPTION.md) : les notes de conception, provisoires.
+- [GLOSSAIRE.md](GLOSSAIRE.md) : les termes du métier.
 - L'application est en Kotlin (capteur de lumière, tâche de fond, toutes les API Android) et en Rust (le métier : mesures, rapports).
 - [.claude/rules/rust.md](.claude/rules/rust.md) : règles propres au Rust, à lire avant d'écrire du Rust. Chargées automatiquement dès qu'un fichier `.rs` ou `Cargo.toml` est touché.
+- Le métier est un workspace Cargo à la racine, une crate par sujet (`mesure/`, `journal/`) : `cargo test` à la racine.
 
 Mettre à jour cette section à chaque changement qu'une nouvelle session perdrait du temps à retrouver : commandes fréquentes, particularités du projet, etc.
 
@@ -22,7 +25,6 @@ L'agent fait donc le plus petit changement possible qui répond à la demande, s
 - **Relire avant de livrer.** Avant de montrer un changement, l'agent relit son diff au regard de [Nommer](#nommer), des règles de code, de lisibilité et de [.claude/rules/rust.md](.claude/rules/rust.md), et corrige ce qui n'y répond pas.
 - **Trier les commits avant de fusionner dans `main`.** L'agent recrée la branche depuis `main` en y reprenant par `git cherry-pick` seulement les commits utiles : il écarte un commit qu'un commit suivant défait, avec celui qui le défait (un test ajouté puis retiré), ou fusionne la correction dans le commit d'origine (un terme écrit faux puis corrigé), en gardant le cycle `test:`, `feat:`, `refactor:` lisible. Un changement de besoin n'est pas une erreur : ses commits restent, ils racontent les décisions de l'opérateur. Il pousse avec `--force-with-lease`, jamais sur `main`, et dit à l'opérateur quels commits il a écartés ou fusionnés.
 - **Éprouver un garde-fou.** Un garde-fou (lint, hook, CI) n'est déclaré en place qu'après l'avoir vu bloquer en conditions réelles.
-- **Revue indépendante avant une PR** (à l'essai). Un sous-agent, sans le contexte de la session, relit le code au regard de ce fichier. L'agent transmet ses constats à l'opérateur, en les distinguant des siens.
 
 ## Réponses à l'opérateur
 
