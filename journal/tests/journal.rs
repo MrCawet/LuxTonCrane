@@ -1,4 +1,4 @@
-use journal::Journal;
+use journal::{Journal, ajouter};
 use mesure::Mesure;
 
 struct JournalEnMémoire {
@@ -25,6 +25,27 @@ fn le_journal_garde_la_mesure_enregistrée() {
     let attendue = Mesure {
         valeur_lux: 320.5,
         instant_ms: 1_793_000_000_000,
+    };
+    assert_eq!(journal.enregistrées, vec![attendue]);
+}
+
+#[test]
+fn ajouter_une_mesure_l_enregistre_dans_le_journal() {
+    let mut journal = JournalEnMémoire {
+        enregistrées: Vec::new(),
+    };
+
+    ajouter(
+        Mesure {
+            valeur_lux: 120.0,
+            instant_ms: 1_793_000_060_000,
+        },
+        &mut journal,
+    );
+
+    let attendue = Mesure {
+        valeur_lux: 120.0,
+        instant_ms: 1_793_000_060_000,
     };
     assert_eq!(journal.enregistrées, vec![attendue]);
 }
