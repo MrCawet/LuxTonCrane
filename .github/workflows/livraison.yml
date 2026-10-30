@@ -1,0 +1,33 @@
+# Déclenchée seulement à la main, depuis l'onglet Actions de GitHub.
+name: Livraison
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  livraison:
+    # On ne livre que ce qui est dans main, donc déjà passé par l'intégration.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/preparer-android
+      - name: Compile l'application
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - name: Date le tag, en heure UTC
+        id: tag
+        run: echo "nom=$(date -u +%Y-%m-%d-%H%M)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: luxtoncrane-${{ steps.tag.outputs.nom }}
+          path: android/app/build/outputs/apk/debug/*.apk
+      - name: Pose le tag sur le commit livré
+        env:
+          TAG: ${{ steps.tag.outputs.nom }}
+        run: |
+          git tag "$TAG"
+          git push origin "$TAG"
