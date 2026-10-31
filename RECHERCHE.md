@@ -47,6 +47,56 @@ La dose de **traitement** du retard de phase est différente : **10 000 lx penda
 - L'effet sur l'horloge est démontré. L'effet sur les symptômes du TDAH reste incertain.
 - Les effets disparaissent quand on arrête : il faut les tenir dans la durée.
 
+## Seuils qui font consensus, par aspect de la mission
+
+| Aspect | Seuil de consensus | Sur la lumière ? |
+|---|---|---|
+| **Sommeil en quantité** | au moins **7 h par nuit** chez l'adulte de 18 à 60 ans ; **6 h ou moins**, c'est insuffisant (consensus AASM et SRS, 2015) | non, c'est une durée de sommeil |
+| **Sommeil de qualité** | des horaires réguliers et à la bonne heure (même consensus) ; pour la lumière, au moins 250 lx le jour, au plus 10 lx dans les 3 h avant le coucher, au plus 1 lx la nuit (Brown et al., 2022) | oui, le seul consensus chiffré sur la lumière |
+| **Santé psychique** | **aucun seuil de lumière de consensus** pour la population générale ; des associations seulement (plus de lumière le jour, moins de lumière la nuit) | seulement des doses de traitement (voir plus bas) |
+| **Santé physique** | **aucun seuil de lumière de consensus** chez l'adulte ; des associations seulement (mortalité, maladies cardiovasculaires et métaboliques). Chez l'enfant : au moins **2 h dehors par jour** contre la myopie (International Myopia Institute), sans seuil en lux validé | seulement chez l'enfant, et en temps passé dehors |
+
+Le consensus de Brown et al. a été construit pour le sommeil et l'horloge interne. On l'applique souvent à la santé en général, mais il n'a pas été validé pour la santé psychique ou physique.
+
+## Pathologies liées à la lumière, et thérapies reconnues
+
+Est retenu ici comme « reconnu » ce que des recommandations officielles soutiennent, ou ce que plusieurs essais randomisés confirment.
+
+### Sommeil : les troubles du rythme circadien
+
+Ils sont classés dans l'ICSD-3-TR, la classification internationale des troubles du sommeil.
+
+| Trouble | Comment on le reconnaît | Thérapie par la lumière reconnue |
+|---|---|---|
+| **Retard de phase** (syndrome de retard de phase) | difficulté chronique à s'endormir et à se lever aux heures voulues, depuis au moins 3 mois ; sommeil normal quand les horaires sont libres ; un agenda du sommeil, et si possible une actimétrie, pendant au moins 7 jours (idéalement 14) montre le décalage | **faible** : l'AASM (2015) recommande la mélatonine prise à heure choisie chez l'adulte, et la lumière du matin seulement chez l'enfant et l'adolescent ; preuves jugées insuffisantes pour la lumière chez l'adulte |
+| **Avance de phase** | endormissement et réveil trop tôt, de façon chronique | **faible** : lumière le soir (AASM, 2015) |
+| **Rythme veille-sommeil irrégulier** | sommeil éparpillé sur les 24 h, surtout chez les personnes âgées avec une démence | **faible** : lumière le jour chez la personne âgée avec une démence (AASM, 2015) |
+| **Décalage horaire, travail posté** | troubles liés aux horaires imposés | lumière et obscurité placées selon le sens du décalage ; preuves anciennes et faibles |
+
+### Santé psychique
+
+| Trouble | Comment on le reconnaît | Thérapie par la lumière reconnue |
+|---|---|---|
+| **Dépression saisonnière** (le « caractère saisonnier » du DSM-5) | des épisodes dépressifs qui commencent et finissent aux mêmes saisons, au moins 2 années de suite, plus nombreux que les épisodes hors saison | **forte, et première ligne** (CANMAT 2023, l'Association américaine de psychiatrie) : **10 000 lx de lumière blanche pendant 30 min chaque matin**, pendant toute la saison ; effet souvent en 1 à 2 semaines ; plus de 40 ans de recul |
+| **Dépression non saisonnière** | les critères habituels de la dépression | **reconnue en complément** d'un traitement : méta-analyse de 11 essais en 2024 ; CANMAT la recommande en deuxième ligne (version 2016, à vérifier pour 2023) |
+| **Dépression bipolaire** | une dépression chez une personne avec un trouble bipolaire | **en cours d'évaluation** : résultats mitigés ; un essai positif avec de la lumière à midi ; le risque de bascule vers la manie semble faible et proche du placebo, mais un suivi médical est indispensable |
+| **TDAH** | — | **non reconnu** : de petites études seulement (voir plus haut) |
+
+### Santé physique
+
+| Pathologie | Thérapie par la lumière reconnue |
+|---|---|
+| **Myopie de l'enfant** (prévention) | au moins 2 h dehors par jour (International Myopia Institute) |
+| Jaunisse du nouveau-né, psoriasis, manque de vitamine D | des traitements par lumière bleue ou ultraviolets, ou une question d'ultraviolets : hors du sujet, le capteur de lux ne les mesure pas |
+
+### Précautions de la luminothérapie
+
+- **Effets secondaires :** maux de tête, yeux fatigués, irritabilité, troubles du sommeil si la séance est trop tardive, et rarement une hypomanie.
+- **Avis médical avant de commencer** dans ces cas :
+  - un trouble bipolaire ;
+  - une maladie des yeux ou de la rétine ;
+  - un médicament qui rend sensible à la lumière.
+
 ## Ce que ça change pour LuxTonCrane
 
 - **Les repères à suivre :** la lumière reçue le jour (≥ 250 lx), celle du soir (≤ 10 lx dans les 3 heures avant le coucher) et celle de la nuit (≤ 1 lx). L'heure de la mesure compte autant que sa valeur.
@@ -69,3 +119,9 @@ La dose de **traitement** du retard de phase est différente : **10 000 lx penda
 - Essais de luminothérapie et de mélatonine dans le TDAH : [pilote 2017](https://pubmed.ncbi.nlm.nih.gov/28327443/), [essai ouvert 2006](https://www.psychiatrist.com/jcp/depression/seasonal-affective-disorder/open-trial-light-therapy-adult-attention-deficit-hyperactivity), [van Andel 2021 (PMC8534229)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8534229), [synthèse MDedge](https://www.mdedge.com/psychiatry/article/265590/adhd/adult-adhd-6-studies-nonpharmacologic-interventions/page/0/5), [NICE 2021](https://www.nice.org.uk/guidance/ng87/evidence/2021-exceptional-surveillance-of-attention-deficit-hyperactivity-disorder-diagnosis-and-management-nice-guideline-ng87-10892592253)
 - Recommandations AASM : [arbre de décision](https://aasm.org/wp-content/uploads/2017/07/Intrinsic-CRSWD-Decision-Tree.pdf), [synthèse PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC5573579)
 - Capteurs de lumière des téléphones : [Université d'Alcalá](https://ebuah.uah.es/xmlui/handle/10017/63987), [Université de Lisbonne](https://repositorio.ulisboa.pt/handle/10400.5/31278)
+- Durée de sommeil : [consensus AASM et SRS 2015](https://www.aasm.org/resources/pdf/adultsleepdurationconsensus.pdf)
+- Critères du retard de phase : [brouillon ICSD-3-TR (AASM)](https://aasm.org/wp-content/uploads/2022/05/ICSD-3-TR-CRSWD-Draft.pdf), [MDedge](https://www.mdedge.com/psychiatry/article/63478/sleep-medicine/night-owls-reset-physiologic-clock-delayed-sleep-phase/page/0/1)
+- Dépression et luminothérapie : [CANMAT 2023 (PMC11351064)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11351064/), [synthèse AAFP 2025](https://www.aafp.org/pubs/afp/issues/2025/1000/practice-guidelines-major-depressive-disorder.html), [UBC, dépression saisonnière](https://sad.psychiatry.ubc.ca/?p=425)
+- Effets secondaires et précautions : [American Journal of Psychiatry 1998](https://ajp.psychiatryonline.org/doi/10.1176/ajp.155.2.293), [revue de Vilnius](https://epublications.vu.lt/object/elaba:4663933/index.html), [HealthLinkBC](https://www.healthlinkbc.ca/healthwise/seasonal-affective-disorder-using-light-therapy)
+- Dépression bipolaire : [méta-analyse 2020 (PMC7187384)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7187384/), [Psychiatric News 2018](https://alert.psychnews.org/2018/03/light-therapy-for-bipolar-depression.html)
+- Myopie : [International Myopia Institute 2025](https://myopiainstitute.org/wp-content/uploads/2025/12/i1552-5783-66-15-5_1764652102.9723.pdf), [IMI, rôle de la lumière](https://myopiainstitute.org/?p=31820)
