@@ -47,6 +47,54 @@ La dose de **traitement** du retard de phase est différente : **10 000 lx penda
 - L'effet sur l'horloge est démontré. L'effet sur les symptômes du TDAH reste incertain.
 - Les effets disparaissent quand on arrête : il faut les tenir dans la durée.
 
+## Comment la lumière agit sur le sommeil
+
+### Le capteur : des cellules spéciales de la rétine
+
+Les mécanismes de base sont établis depuis le début des années 2000.
+
+- **Les cellules :** en plus des cônes et des bâtonnets qui servent à voir, la rétine contient des cellules qui ont leur propre pigment, la **mélanopsine**. Elles réagissent surtout à la lumière bleu-cyan, autour de 480 nm.
+- **Leur rôle :** elles ne servent pas à voir. Elles envoient leur signal directement à **l'horloge centrale du cerveau**, les noyaux suprachiasmatiques, qui règle le rythme de tout le corps sur 24 heures.
+- **Pourquoi des lux « mélanopiques » :** ce sont ces cellules qu'on cherche à stimuler, et elles ne voient pas les couleurs comme nous. À intensité égale, une lumière froide les stimule bien plus qu'une lumière chaude.
+
+### Quatre effets, qui dépendent de l'heure
+
+1. **Déplacer l'horloge.** L'horloge humaine tourne un peu plus lentement que 24 h : sans lumière, elle prend du retard chaque jour. La lumière la remet à l'heure, dans un sens qui dépend du moment où on la reçoit.
+   - **Le soir et en début de nuit**, la lumière **retarde** l'horloge : on aura sommeil plus tard.
+   - **En fin de nuit et le matin**, elle l'**avance** : on aura sommeil plus tôt.
+
+   Le basculement se fait vers le point le plus bas de la température du corps, environ 2 h avant le réveil habituel.
+
+   Pour quelqu'un en retard de phase, la lumière du soir aggrave donc le retard, et celle du matin le corrige. C'est la base de la dose de 10 000 lx le matin.
+2. **Bloquer la mélatonine.** La mélatonine est l'hormone qui annonce la nuit au corps. Le soir, la lumière freine sa sécrétion et retarde son début.
+   - **Le système est très sensible :** en moyenne, 50 % de la mélatonine est supprimée dès **25 lx** environ (Phillips et al., *PNAS*, 2019).
+   - **Il retarde aussi l'endormissement :** 10, 30 et 50 lx le soir retardent le début de la mélatonine de 22, 77 et 109 minutes.
+   - **La sensibilité varie énormément d'une personne à l'autre :** jusqu'à **50 fois** plus chez certains.
+
+   C'est pour cela que le seuil du soir est si bas (10 lx) : un salon ordinaire suffit à décaler l'horloge.
+3. **Garder éveillé.** La lumière du soir rend plus alerte, ce qui repousse l'endormissement le jour même, en plus de décaler l'horloge.
+4. **Abîmer la nuit.** Dormir avec la lumière allumée (100 lx, une seule nuit) augmente le rythme cardiaque pendant le sommeil et la résistance à l'insuline le lendemain matin, comparé à une chambre sombre de moins de 3 lx (Mason et al., *PNAS*, 2022). C'est la base du seuil de 1 lx la nuit.
+
+### Pourquoi la lumière du jour aide aussi la nuit
+
+- **Elle désensibilise le soir :** l'horloge s'adapte à la lumière qu'elle a reçue dans la journée. Après des journées bien éclairées, elle réagit moins à la lumière du soir.
+- **Elle renforce le rythme :** des journées claires et des nuits sombres donnent une horloge plus stable.
+
+C'est le rôle du minimum de 250 lx le jour : il ne vise pas seulement l'éveil, il protège aussi la nuit suivante. Le principe est bien établi, mais je n'ai pas vérifié de chiffres précis dans les sources.
+
+### Le cas du retard de phase
+
+- **Une horloge plus sensible :** des personnes avec un retard de phase avancent ou retardent leur horloge d'environ **31 % de plus** que les autres sous la même lumière du soir (Watson et al., *Journal of Physiology*, 2018). Même chez les témoins, plus on est sensible à la lumière, plus l'horloge est tardive.
+- **Un cercle vicieux :** se coucher tard expose à la lumière du soir, qui retarde l'horloge. Se lever tard fait manquer la lumière du matin, qui l'aurait avancée. Les deux s'additionnent.
+- **Les deux leviers :** plus de lumière le matin, et moins le soir.
+
+### Ce qu'on sait, et ce qu'on ne sait pas
+
+- **Bien établi :** le mécanisme (la mélanopsine et l'horloge), le sens des effets selon l'heure, la suppression de la mélatonine et son ordre de grandeur.
+- **Moins sûr :**
+  - les seuils exacts, qui sont des moyennes alors que les sensibilités individuelles varient beaucoup ;
+  - le lien direct entre ces effets sur l'horloge et la « qualité » ressentie du sommeil, qui vient surtout d'études d'observation.
+
 ## Seuils qui font consensus, par aspect de la mission
 
 | Aspect | Seuil de consensus | Sur la lumière ? |
@@ -125,3 +173,6 @@ Ils sont classés dans l'ICSD-3-TR, la classification internationale des trouble
 - Effets secondaires et précautions : [American Journal of Psychiatry 1998](https://ajp.psychiatryonline.org/doi/10.1176/ajp.155.2.293), [revue de Vilnius](https://epublications.vu.lt/object/elaba:4663933/index.html), [HealthLinkBC](https://www.healthlinkbc.ca/healthwise/seasonal-affective-disorder-using-light-therapy)
 - Dépression bipolaire : [méta-analyse 2020 (PMC7187384)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7187384/), [Psychiatric News 2018](https://alert.psychnews.org/2018/03/light-therapy-for-bipolar-depression.html)
 - Myopie : [International Myopia Institute 2025](https://myopiainstitute.org/wp-content/uploads/2025/12/i1552-5783-66-15-5_1764652102.9723.pdf), [IMI, rôle de la lumière](https://myopiainstitute.org/?p=31820)
+- Sensibilité à la lumière du soir : [Phillips 2019 (PMC6575863)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6575863), [Monash](https://www.monash.edu/turner-institute/news-and-events/latest-news/2019-articles/light-the-night-monash-research-finds-that-some-of-us-are-hypersensitive-to-evening-illumination)
+- Sensibilité accrue dans le retard de phase : [Watson 2018 (PubMed)](https://pubmed.ncbi.nlm.nih.gov/30281150/), [PMC6292803](https://pmc.ncbi.nlm.nih.gov/articles/PMC6292803)
+- Lumière pendant le sommeil : [Mason 2022 (PMC8944904)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8944904), [Northwestern](https://news.northwestern.edu/stories/2022/03/close-the-blinds-during-sleep-to-protect-your-health)
