@@ -12,6 +12,12 @@ La référence actuelle est un consensus d'experts publié dans *PLOS Biology* (
 
 L'éclairement mélanopique mesure la lumière telle que la perçoivent les cellules de l'œil qui règlent l'horloge interne. Ces cellules sont surtout sensibles au bleu. Pour la lumière du jour, il vaut à peu près les lux ordinaires. Pour un éclairage chaud (lampe jaune), il est nettement plus bas.
 
+Ces 250 lx sont un minimum pour tout le monde, pas une dose de traitement. Ils paraissent faibles, mais un intérieur est souvent en dessous : environ 100 à 500 lx dans un bureau, quelques dizaines dans un salon le soir.
+
+Pour comparer, dehors en journée on reçoit environ 1 000 à 10 000 lx par temps couvert, et 30 000 à 100 000 lx au soleil.
+
+La dose de **traitement** du retard de phase est différente : **10 000 lx pendant 30 minutes le matin**. C'est ce que donne une lampe de luminothérapie à environ 30 à 60 cm du visage, et c'est la dose utilisée dans les essais cités plus bas. Une demi-heure dehors le matin l'atteint souvent.
+
 ## Lumière et santé
 
 - **Santé psychique :** dans la UK Biobank, environ 86 000 personnes ont porté au poignet un capteur de lumière pendant une semaine (Burns et al., *Nature Mental Health*, 2023). Plus de lumière le jour était associé à moins de dépression, d'automutilation et de psychose. Plus de lumière la nuit était associé à davantage de ces troubles. C'est une association : la maladie peut aussi changer l'exposition à la lumière.
