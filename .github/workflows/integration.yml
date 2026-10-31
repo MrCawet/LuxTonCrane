@@ -32,13 +32,13 @@ jobs:
         run: |
           fichiers=$(git diff --name-only "$BASE...$HEAD")
           echo "$fichiers"
-          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|\.github/)'; then
+          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|rapport/|\.github/)'; then
             echo "rust=true" >> "$GITHUB_OUTPUT"
           else
             echo "rust=false" >> "$GITHUB_OUTPUT"
           fi
           # L'application embarque le métier en Rust : elle est recompilée quand l'un ou l'autre change.
-          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|android/|\.github/)'; then
+          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|rapport/|android/|\.github/)'; then
             echo "android=true" >> "$GITHUB_OUTPUT"
           else
             echo "android=false" >> "$GITHUB_OUTPUT"
