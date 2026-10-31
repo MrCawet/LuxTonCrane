@@ -2,7 +2,8 @@
 
 ## Repères
 
-- [CAP.md](CAP.md) : la vision du projet.
+- [CAP.md](CAP.md) : la mission et la vision du projet.
+- [RECHERCHE.md](RECHERCHE.md) : ce que dit la science sur la lumière, le sommeil, le TDAH et la santé, et ce que ça change pour l'application.
 - [CONCEPTION.md](CONCEPTION.md) : les notes de conception, provisoires.
 - [GLOSSAIRE.md](GLOSSAIRE.md) : les termes du métier.
 - L'application est en Kotlin (capteur de lumière, tâche de fond, toutes les API Android) et en Rust (le métier : mesures, rapports).
