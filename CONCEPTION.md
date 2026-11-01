@@ -2,6 +2,36 @@
 
 Notes de conception provisoires, à confirmer par l'usage.
 
+## Agenda du sommeil
+
+Chaque matin, l'application demande deux notes, une par question, en un clic chacune. Chaque niveau a une définition objective. L'objectif est tenu pour les deux premiers niveaux, qui suivent les critères de la National Sleep Foundation (Ohayon et al., 2017).
+
+### Endormissement
+
+| Niveau | Définition | Objectif |
+|---|---|---|
+| Très bien | endormi en moins de 15 min | tenu |
+| Bien | 15 à 30 min | tenu |
+| Difficile | 30 min à 1 h | non tenu |
+| Très difficile | plus d'1 h | non tenu |
+
+Objectif de lumière lié : au plus 10 lx dans les 3 h avant le coucher.
+
+### Continuité de la nuit
+
+| Niveau | Définition | Objectif |
+|---|---|---|
+| Très bien | aucun réveil dont je me souviens | tenu |
+| Bien | 1 réveil court, rendormi vite | tenu |
+| Hachée | plusieurs réveils, ou plus de 20 min éveillé en tout | non tenu |
+| Très hachée | longtemps éveillé, ou nuit très morcelée | non tenu |
+
+Objectif de lumière lié : au plus 1 lx pendant la nuit.
+
+### À décider
+
+- Les heures de coucher et de lever, qui placent les fenêtres de lumière du soir et de la nuit : estimées par l'écran (son dernier allumage le soir, son premier le matin), avec ou sans correction à la main.
+
 ## Mesure de la lumière
 
 - La mesure tourne dans un service de premier plan, avec une notification permanente : sans lui, Android ne transmet aucune valeur du capteur à une application en arrière-plan.
