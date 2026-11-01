@@ -4,29 +4,33 @@ Notes de conception provisoires, à confirmer par l'usage.
 
 ## Agenda du sommeil
 
-Chaque matin, l'application demande deux notes, une par question, en un clic chacune. Chaque niveau a une définition objective. L'objectif est tenu pour les deux premiers niveaux, qui suivent les critères de la National Sleep Foundation (Ohayon et al., 2017).
+Chaque matin, l'application demande deux notes, une par question, en un clic chacune. Comme on ne peut pas mesurer le temps en s'endormant, chaque niveau est défini par ce qui s'est passé, dont on se souvient sans montre : c'est une échelle à ancrages comportementaux.
+
+Les deux premiers niveaux correspondent à peu près aux objectifs de la National Sleep Foundation (Ohayon et al., 2017) : s'endormir en 30 min au plus, au plus 1 réveil court. C'est une correspondance approximative, pas une mesure.
 
 ### Endormissement
 
-| Niveau | Définition | Objectif |
-|---|---|---|
-| Très bien | endormi en moins de 15 min | tenu |
-| Bien | 15 à 30 min | tenu |
-| Difficile | 30 min à 1 h | non tenu |
-| Très difficile | plus d'1 h | non tenu |
+| Niveau | Ce qui s'est passé |
+|---|---|
+| Immédiat | je ne me souviens pas d'avoir attendu |
+| Calme | j'ai attendu un peu, sans m'agiter ni me dire « je n'arrive pas à dormir » |
+| Agité | je me suis retourné plusieurs fois, ou je me suis dit « je n'arrive pas à dormir » |
+| Abandonné | j'ai renoncé un moment : je me suis levé, j'ai repris le téléphone ou j'ai rallumé la lumière |
 
-Objectif de lumière lié : au plus 10 lx dans les 3 h avant le coucher.
+Objectif : immédiat ou calme. Objectif de lumière lié : au plus 10 lx dans les 3 h avant le coucher.
 
 ### Continuité de la nuit
 
-| Niveau | Définition | Objectif |
-|---|---|---|
-| Très bien | aucun réveil dont je me souviens | tenu |
-| Bien | 1 réveil court, rendormi vite | tenu |
-| Hachée | plusieurs réveils, ou plus de 20 min éveillé en tout | non tenu |
-| Très hachée | longtemps éveillé, ou nuit très morcelée | non tenu |
+| Niveau | Ce qui s'est passé |
+|---|---|
+| Sans réveil | je ne me souviens d'aucun réveil |
+| Réveil bref | réveillé, puis rendormi aussitôt, sans avoir le temps de penser |
+| Réveil long | réveillé, et j'ai mis du temps à me rendormir : j'ai pensé, je me suis retourné |
+| Nuit interrompue | je me suis levé, j'ai pris le téléphone, ou je suis resté éveillé longtemps |
 
-Objectif de lumière lié : au plus 1 lx pendant la nuit.
+Objectif : sans réveil ou réveil bref. Objectif de lumière lié : au plus 1 lx pendant la nuit.
+
+Le niveau le plus bas de chaque échelle peut se recouper avec l'écran du téléphone, allumé après le coucher ou pendant la nuit.
 
 ### À décider
 
