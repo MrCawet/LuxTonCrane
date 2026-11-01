@@ -66,12 +66,23 @@ Le premier rapport. Il couvre une nuit et la journée qui suit.
 | Lumière de la nuit, du coucher au lever | le temps passé au-dessus de 1 lx, la valeur la plus haute, et si l'objectif est tenu |
 | Couverture | pour chaque fenêtre, la part du temps réellement mesurée |
 | Fatigue, le soir suivant | la note, et si l'objectif est tenu |
+| Lumière du matin, dans les 2 h après le lever | le temps passé à 10 000 lx ou plus, et si l'objectif est tenu |
+| Lumière de la journée, du lever à coucher − 3 h | la part du temps mesuré à 250 lx ou plus, et si l'objectif est tenu |
 
 ### Règles de calcul
 
 - Une mesure vaut jusqu'à la suivante, pendant 10 min au plus. Au-delà, le temps compte comme non mesuré. 10 min couvrent l'écart entre deux réveils écran éteint (environ 9 min).
 - La couverture d'une fenêtre est la part de sa durée couverte par une mesure valable.
-- Pas de tolérance : une seule minute au-dessus du seuil suffit à ne pas tenir l'objectif de lumière.
+- Pas de tolérance : une seule minute au-dessus du seuil suffit à ne pas tenir l'objectif du soir ou de la nuit, et une seule minute sous 250 lx suffit à ne pas tenir celui de la journée.
+
+### Objectifs de lumière du matin et de la journée
+
+- **Matin :** au moins 30 min à 10 000 lx ou plus, dans les 2 h après le lever. C'est la dose des essais et de la luminothérapie. Avec un retard de phase, une lumière vive reçue avant le point bas de l'horloge (environ 2 h avant le réveil naturel) peut retarder l'horloge : d'où la fenêtre après le lever.
+- **Journée :** tout le temps mesuré, du lever jusqu'à 3 h avant le coucher, à 250 lx ou plus. Le consensus (Brown et al., 2022) dit « tout au long de la journée », sans part minimale.
+
+### À décider
+
+- Écarter les mesures prises téléphone couvert, dans une poche par exemple, à l'aide du capteur de proximité : sinon elles valent environ 0 lx et font manquer l'objectif de la journée.
 
 ## Mesure de la lumière
 
@@ -106,7 +117,7 @@ Le premier rapport. Il couvre une nuit et la journée qui suit.
 Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
 
 - `stk_stk3bcx Ambient Light Sensor Non-wakeup`, fabricant Sensortek : le capteur standard de lumière (`TYPE_LIGHT`), sans canaux de couleur exposés.
-- **Plage maximale : 4 095,9 lx.** Au-delà, la valeur plafonne : la lumière du jour dehors et une lampe de luminothérapie à 10 000 lx ne sont pas mesurables telles quelles.
+- Plage maximale déclarée : 4 095,9 lx. Elle est fausse : sur ce téléphone, une autre application affiche plusieurs dizaines de milliers de lux dehors.
 - **Résolution : 0,54 lx.** Le seuil de nuit de 1 lx se distingue à peine de 0.
 - Consommation : 0,09 mA.
 - Non-réveil : il ne réveille pas le processeur, comme prévu.
@@ -116,4 +127,4 @@ Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
 - Le type de service de premier plan exigé depuis Android 14 (`specialUse` ?).
 - Le comportement des surcouches des fabricants, qui peuvent arrêter le service.
 - Le coût réel des réveils en batterie.
-- Si le capteur plafonne vraiment à 4 096 lx dehors, ou si sa plage réelle est plus large que celle déclarée.
+- Que LuxTonCrane reçoit bien les valeurs au-delà de 4 096 lx, dehors.
