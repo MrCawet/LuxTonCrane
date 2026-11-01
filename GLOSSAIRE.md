@@ -1,6 +1,6 @@
 # Glossaire
 
-- **Agenda du sommeil** : les deux notes données chaque matin, sur l'endormissement et la continuité de la nuit.
+- **Agenda du sommeil** : ce qu'on note à la main : chaque matin l'endormissement, la continuité de la nuit et les heures du coucher et du lever ; chaque soir la fatigue de la journée.
 - **Continuité de la nuit** : le sommeil sans réveils ; notée chaque matin sur 4 niveaux définis par ce qui s'est passé (sans réveil, réveil bref, réveil long, nuit interrompue). Objectif : sans réveil ou réveil bref.
 - **Échec d'enregistrement** (`ÉchecDEnregistrement`) : le journal n'a pas pu garder une mesure ; il en donne la raison.
 - **Endormissement** : le passage de l'éveil au sommeil une fois couché ; noté chaque matin sur 4 niveaux définis par ce qui s'est passé (immédiat, calme, agité, abandonné). Objectif : immédiat ou calme.
