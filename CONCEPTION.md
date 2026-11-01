@@ -128,3 +128,14 @@ Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
 - Le comportement des surcouches des fabricants, qui peuvent arrêter le service.
 - Le coût réel des réveils en batterie.
 - Que LuxTonCrane reçoit bien les valeurs au-delà de 4 096 lx, dehors.
+
+## Prochaines étapes
+
+Dans cet ordre, chaque étape en TDD et sur sa propre branche :
+
+1. **Domaine Rust du relevé du jour** : les notes de l'agenda, les fenêtres (matin, journée, soir, nuit) tirées des heures du coucher et du lever, les règles de calcul (une mesure vaut 10 min au plus, mesures téléphone couvert écartées) et les objectifs tenus ou non.
+2. **Proximité avec chaque mesure** : lire le capteur de proximité avec chaque mesure de lumière, et le garder dans le journal.
+3. **Agenda du sommeil dans l'application** : les deux notes et les deux roues le matin, la fatigue vers 21 h, avec leur enregistrement.
+4. **Affichage du relevé du jour** dans l'application.
+5. **Mesure écran éteint** : les réveils environ toutes les 9 min, le court wake lock, la proximité, la position et le mouvement significatif décrits plus haut.
+
