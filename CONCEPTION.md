@@ -36,6 +36,25 @@ Le niveau le plus bas de chaque échelle peut se recouper avec l'écran du tél�
 
 Deux questions demandent l'heure du coucher et l'heure du lever, chacune sur une roue qui se déroule par pas de 15 min. Le coucher place la fenêtre de lumière du soir (les 3 h avant) et le début de la nuit ; le lever marque la fin de la nuit.
 
+### Quantité de sommeil
+
+Calculée chaque nuit comme le temps au lit : l'heure du lever moins l'heure du coucher, données par l'agenda. Elle inclut l'endormissement et les réveils.
+
+Objectif de départ : **plus de 7 h**, d'après le consensus AASM et SRS (2015) pour les adultes de 18 à 60 ans. Le besoin réel est inconnu : la fatigue de la journée dira s'il faut l'ajuster.
+
+### Fatigue de la journée
+
+Demandée chaque soir vers 21 h, en un clic, avec des niveaux définis par ce qui s'est passé. Les niveaux s'appuient sur des gestes plutôt que sur la concentration, que le TDAH brouille.
+
+| Niveau | Ce qui s'est passé dans la journée |
+|---|---|
+| Aucune | je n'ai pas pensé à ma fatigue |
+| Légère | je l'ai sentie, sans que ça change ce que je faisais |
+| Gênante | elle m'a ralenti : j'ai dû faire une pause, prendre un café ou relire, ou je me suis forcé à continuer |
+| Somnolence | j'ai lutté pour ne pas m'endormir, ou je me suis endormi sans le vouloir |
+
+Objectif : aucune ou légère. Comparée à la quantité de sommeil de la nuit précédente, elle dit si cette quantité suffit.
+
 ## Mesure de la lumière
 
 - La mesure tourne dans un service de premier plan, avec une notification permanente : sans lui, Android ne transmet aucune valeur du capteur à une application en arrière-plan.
