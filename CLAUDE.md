@@ -12,7 +12,7 @@
 - L'application Android est dans `android/`. Sa compilation compile aussi le pont Rust et génère son code Kotlin ; il faut le NDK Android, `rustup target add aarch64-linux-android` et `cargo install cargo-ndk`.
 - Le SDK Android n'est pas joignable depuis les sessions dans le cloud : l'application ne s'y compile pas. Les tests Kotlin qui n'utilisent pas Android se lancent dans un projet JVM temporaire qui reprend `android/app/src`.
 - CI (`.github/workflows/integration.yml`) : seulement sur les PR vers `main`, jamais sur un push ; un nouveau push annule l'exécution en cours. Les jobs Rust et Android ne tournent que si la PR touche leurs chemins. Seul le job `verdict` est à exiger dans la protection de `main`.
-- CD (`.github/workflows/livraison.yml`) : déclenchée à la main depuis `main`, elle compile l'application et pose un tag daté (`AAAA-MM-JJ-HHMM`, UTC) sur le commit.
+- CD (`.github/workflows/livraison.yml`) : déclenchée à la main depuis `main`, elle compile l'application et crée une release GitHub, qui pose un tag daté (`AAAA-MM-JJ-HHMM`, UTC) sur le commit et porte l'APK.
 
 Mettre à jour cette section à chaque changement qu'une nouvelle session perdrait du temps à retrouver : commandes fréquentes, particularités du projet, etc.
 

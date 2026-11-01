@@ -21,13 +21,11 @@ jobs:
       - name: Date le tag, en heure UTC
         id: tag
         run: echo "nom=$(date -u +%Y-%m-%d-%H%M)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: luxtoncrane-${{ steps.tag.outputs.nom }}
-          path: android/app/build/outputs/apk/debug/*.apk
-      - name: Pose le tag sur le commit livré
+      - name: Crée la release, qui pose le tag sur le commit livré et porte l'APK
         env:
+          GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.nom }}
         run: |
-          git tag "$TAG"
-          git push origin "$TAG"
+          apk="luxtoncrane-$TAG.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "$apk"
+          gh release create "$TAG" "$apk" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
