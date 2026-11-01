@@ -2,7 +2,7 @@
 
 - **Agenda du sommeil** : ce qu'on note à la main : chaque matin l'endormissement, la continuité de la nuit et les heures du coucher et du lever ; chaque soir la fatigue de la journée.
 - **Continuité de la nuit** : le sommeil sans réveils ; notée chaque matin sur 4 niveaux définis par ce qui s'est passé (sans réveil, réveil bref, réveil long, nuit interrompue). Objectif : sans réveil ou réveil bref.
-- **Couverture** : la part d'une fenêtre de temps où l'on a une mesure valable ; une mesure vaut jusqu'à la suivante, pendant 10 min au plus.
+- **Couverture** : la part d'une fenêtre de temps où l'on a une mesure valable ; une mesure vaut jusqu'à la suivante, pendant 10 min au plus, sauf si elle a été prise téléphone couvert.
 - **Échec d'enregistrement** (`ÉchecDEnregistrement`) : le journal n'a pas pu garder une mesure ; il en donne la raison.
 - **Endormissement** : le passage de l'éveil au sommeil une fois couché ; noté chaque matin sur 4 niveaux définis par ce qui s'est passé (immédiat, calme, agité, abandonné). Objectif : immédiat ou calme.
 - **Fatigue de la journée** : notée chaque soir vers 21 h sur 4 niveaux définis par ce qui s'est passé (aucune, légère, gênante, somnolence). Objectif : aucune ou légère.

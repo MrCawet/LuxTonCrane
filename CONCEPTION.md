@@ -72,7 +72,7 @@ Le premier rapport. Il couvre une nuit et la journée qui suit.
 ### Règles de calcul
 
 - Une mesure vaut jusqu'à la suivante, pendant 10 min au plus. Au-delà, le temps compte comme non mesuré. 10 min couvrent l'écart entre deux réveils écran éteint (environ 9 min).
-- La couverture d'une fenêtre est la part de sa durée couverte par une mesure valable.
+- La couverture d'une fenêtre est la part de sa durée couverte par une mesure valable. Une mesure prise téléphone couvert n'est pas valable.
 - Pas de tolérance : une seule minute au-dessus du seuil suffit à ne pas tenir l'objectif du soir ou de la nuit, et une seule minute sous 250 lx suffit à ne pas tenir celui de la journée.
 
 ### Objectifs de lumière du matin et de la journée
@@ -80,9 +80,9 @@ Le premier rapport. Il couvre une nuit et la journée qui suit.
 - **Matin :** au moins 30 min à 10 000 lx ou plus, dans les 2 h après le lever. C'est la dose des essais et de la luminothérapie. Avec un retard de phase, une lumière vive reçue avant le point bas de l'horloge (environ 2 h avant le réveil naturel) peut retarder l'horloge : d'où la fenêtre après le lever.
 - **Journée :** tout le temps mesuré, du lever jusqu'à 3 h avant le coucher, à 250 lx ou plus. Le consensus (Brown et al., 2022) dit « tout au long de la journée », sans part minimale.
 
-### À décider
+### Téléphone couvert
 
-- Écarter les mesures prises téléphone couvert, dans une poche par exemple, à l'aide du capteur de proximité : sinon elles valent environ 0 lx et font manquer l'objectif de la journée.
+Le capteur de proximité est lu avec chaque mesure de lumière. Une mesure prise téléphone couvert (dans une poche, face contre la table) compte comme non mesurée : elle baisse la couverture au lieu de faire manquer un objectif.
 
 ## Mesure de la lumière
 
