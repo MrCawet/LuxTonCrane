@@ -4,7 +4,7 @@ Notes de conception provisoires, à confirmer par l'usage.
 
 ## Agenda du sommeil
 
-Chaque matin, l'application demande deux notes, en un clic chacune, et l'heure du coucher. Comme on ne peut pas mesurer le temps en s'endormant, chaque niveau est défini par ce qui s'est passé, dont on se souvient sans montre : c'est une échelle à ancrages comportementaux.
+Chaque matin, l'application demande deux notes, en un clic chacune, puis les heures du coucher et du lever. Comme on ne peut pas mesurer le temps en s'endormant, chaque niveau est défini par ce qui s'est passé, dont on se souvient sans montre : c'est une échelle à ancrages comportementaux.
 
 Les deux premiers niveaux correspondent à peu près aux objectifs de la National Sleep Foundation (Ohayon et al., 2017) : s'endormir en 30 min au plus, au plus 1 réveil court. C'est une correspondance approximative, pas une mesure.
 
@@ -32,13 +32,9 @@ Objectif : sans réveil ou réveil bref. Objectif de lumière lié : au plus 1 l
 
 Le niveau le plus bas de chaque échelle peut se recouper avec l'écran du téléphone, allumé après le coucher ou pendant la nuit.
 
-### Heure du coucher
+### Heures du coucher et du lever
 
-Une troisième question demande l'heure du coucher, avec une roue qui se déroule par pas de 15 min. Elle place la fenêtre de lumière du soir (les 3 h avant) et le début de la nuit.
-
-### À décider
-
-- L'heure du lever, qui marque la fin de la nuit.
+Deux questions demandent l'heure du coucher et l'heure du lever, chacune sur une roue qui se déroule par pas de 15 min. Le coucher place la fenêtre de lumière du soir (les 3 h avant) et le début de la nuit ; le lever marque la fin de la nuit.
 
 ## Mesure de la lumière
 
