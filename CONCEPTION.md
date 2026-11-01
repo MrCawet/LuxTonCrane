@@ -55,6 +55,24 @@ Demandée chaque soir vers 21 h, en un clic, avec des niveaux définis par ce qu
 
 Objectif : aucune ou légère. Comparée à la quantité de sommeil de la nuit précédente, elle dit si cette quantité suffit.
 
+## Relevé du jour
+
+Le premier rapport. Il couvre une nuit et la journée qui suit.
+
+| Bloc | Contenu |
+|---|---|
+| Sommeil | les notes d'endormissement et de continuité de la nuit, la quantité de sommeil, et pour chacune si l'objectif est tenu |
+| Lumière du soir, de coucher − 3 h au coucher | le temps passé au-dessus de 10 lx, la valeur la plus haute, et si l'objectif est tenu |
+| Lumière de la nuit, du coucher au lever | le temps passé au-dessus de 1 lx, la valeur la plus haute, et si l'objectif est tenu |
+| Couverture | pour chaque fenêtre, la part du temps réellement mesurée |
+| Fatigue, le soir suivant | la note, et si l'objectif est tenu |
+
+### Règles de calcul
+
+- Une mesure vaut jusqu'à la suivante, pendant 10 min au plus. Au-delà, le temps compte comme non mesuré. 10 min couvrent l'écart entre deux réveils écran éteint (environ 9 min).
+- La couverture d'une fenêtre est la part de sa durée couverte par une mesure valable.
+- Pas de tolérance : une seule minute au-dessus du seuil suffit à ne pas tenir l'objectif de lumière.
+
 ## Mesure de la lumière
 
 - La mesure tourne dans un service de premier plan, avec une notification permanente : sans lui, Android ne transmet aucune valeur du capteur à une application en arrière-plan.

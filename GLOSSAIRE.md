@@ -2,6 +2,7 @@
 
 - **Agenda du sommeil** : ce qu'on note à la main : chaque matin l'endormissement, la continuité de la nuit et les heures du coucher et du lever ; chaque soir la fatigue de la journée.
 - **Continuité de la nuit** : le sommeil sans réveils ; notée chaque matin sur 4 niveaux définis par ce qui s'est passé (sans réveil, réveil bref, réveil long, nuit interrompue). Objectif : sans réveil ou réveil bref.
+- **Couverture** : la part d'une fenêtre de temps où l'on a une mesure valable ; une mesure vaut jusqu'à la suivante, pendant 10 min au plus.
 - **Échec d'enregistrement** (`ÉchecDEnregistrement`) : le journal n'a pas pu garder une mesure ; il en donne la raison.
 - **Endormissement** : le passage de l'éveil au sommeil une fois couché ; noté chaque matin sur 4 niveaux définis par ce qui s'est passé (immédiat, calme, agité, abandonné). Objectif : immédiat ou calme.
 - **Fatigue de la journée** : notée chaque soir vers 21 h sur 4 niveaux définis par ce qui s'est passé (aucune, légère, gênante, somnolence). Objectif : aucune ou légère.
@@ -11,3 +12,4 @@
 - **Lux mélanopique** (« melanopic EDI », norme CIE S 026) : l'éclairement pondéré par la sensibilité de la mélanopsine, la cellule de l'œil qui règle l'horloge interne (maximum vers 490 nm). Il vaut les lux ordinaires sous la lumière du jour, et environ 40 à 50 % sous une lumière chaude. Les seuils du sommeil sont exprimés dans cette unité, à hauteur des yeux.
 - **Mesure** : la quantité de lumière, en lux, reçue par le capteur à un instant.
 - **Quantité de sommeil** : le temps au lit d'une nuit, de l'heure du coucher à l'heure du lever. Objectif de départ : plus de 7 h, à ajuster selon la fatigue de la journée.
+- **Relevé du jour** : le rapport d'une nuit et de la journée qui suit : les objectifs du sommeil, la lumière du soir et de la nuit, et leur couverture.
