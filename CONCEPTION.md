@@ -30,8 +30,19 @@ Notes de conception provisoires, à confirmer par l'usage.
 - L'instant d'une mesure vient de l'horodatage du capteur, converti en heure réelle.
 - Un échec d'enregistrement est écrit dans les journaux d'Android ; la mesure est perdue.
 
+### Le capteur du Fairphone 6
+
+Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
+
+- `stk_stk3bcx Ambient Light Sensor Non-wakeup`, fabricant Sensortek : le capteur standard de lumière (`TYPE_LIGHT`), sans canaux de couleur exposés.
+- **Plage maximale : 4 095,9 lx.** Au-delà, la valeur plafonne : la lumière du jour dehors et une lampe de luminothérapie à 10 000 lx ne sont pas mesurables telles quelles.
+- **Résolution : 0,54 lx.** Le seuil de nuit de 1 lx se distingue à peine de 0.
+- Consommation : 0,09 mA.
+- Non-réveil : il ne réveille pas le processeur, comme prévu.
+
 ### À vérifier sur un téléphone
 
 - Le type de service de premier plan exigé depuis Android 14 (`specialUse` ?).
 - Le comportement des surcouches des fabricants, qui peuvent arrêter le service.
 - Le coût réel des réveils en batterie.
+- Si le capteur plafonne vraiment à 4 096 lx dehors, ou si sa plage réelle est plus large que celle déclarée.
