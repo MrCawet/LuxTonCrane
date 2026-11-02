@@ -128,3 +128,30 @@ fn le_matin_compte_le_temps_à_10_000_lx_ou_plus() {
         5 * MINUTE_MS
     );
 }
+
+#[test]
+fn l_objectif_du_matin_est_tenu_avec_30_min_à_10_000_lx_ou_plus() {
+    let historique = vec![
+        mesure(10_000.0, LEVER_MS),
+        mesure(10_000.0, LEVER_MS + 10 * MINUTE_MS),
+        mesure(10_000.0, LEVER_MS + 20 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert!(relevé.lumière_du_matin.objectif_tenu);
+}
+
+#[test]
+fn l_objectif_du_matin_n_est_pas_tenu_avec_moins_de_30_min_à_10_000_lx_ou_plus() {
+    let historique = vec![
+        mesure(10_000.0, LEVER_MS),
+        mesure(10_000.0, LEVER_MS + 10 * MINUTE_MS),
+        mesure(10_000.0, LEVER_MS + 20 * MINUTE_MS),
+        mesure(500.0, LEVER_MS + 29 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert!(!relevé.lumière_du_matin.objectif_tenu);
+}
