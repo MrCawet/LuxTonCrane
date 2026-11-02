@@ -17,6 +17,7 @@ const SEUIL_DE_LA_NUIT_LX: f32 = 1.0;
 
 const SEUIL_DU_MATIN_LX: f32 = 10_000.0;
 const DURÉE_DU_MATIN_MS: i64 = 2 * HEURE_MS;
+const OBJECTIF_DU_MATIN_MS: i64 = 30 * MINUTE_MS;
 
 pub struct HeuresDuCoucherEtDuLever {
     pub coucher_ms: i64,
@@ -39,6 +40,8 @@ pub struct LumièreÀÉviter {
 /// La lumière vive reçue dans les 2 h après le lever.
 pub struct LumièreDuMatin {
     pub temps_à_10_000_lx_ou_plus_ms: i64,
+    /// Au moins 30 min à 10 000 lx ou plus.
+    pub objectif_tenu: bool,
 }
 
 pub struct RelevéDuJour {
@@ -123,8 +126,10 @@ fn lumière_du_matin(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDuMa
             temps_à_10_000_lx_ou_plus_ms += période.durée_ms;
         }
     }
+    let objectif_tenu = temps_à_10_000_lx_ou_plus_ms >= OBJECTIF_DU_MATIN_MS;
     LumièreDuMatin {
         temps_à_10_000_lx_ou_plus_ms,
+        objectif_tenu,
     }
 }
 
