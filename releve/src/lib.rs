@@ -27,6 +27,8 @@ pub struct LumièreÀÉviter {
     pub valeur_la_plus_haute_lux: Option<f32>,
     /// Sans tolérance : une seule minute au-dessus du seuil suffit à ne pas le tenir.
     pub objectif_tenu: bool,
+    /// La part de la fenêtre couverte par une mesure, de 0 à 1.
+    pub couverture: f64,
 }
 
 pub struct RelevéDuJour {
@@ -37,6 +39,15 @@ pub struct RelevéDuJour {
 struct Fenêtre {
     début_ms: i64,
     fin_ms: i64,
+}
+
+/// Ce qu'une fenêtre dit d'une durée.
+impl Fenêtre {
+    /// La part de la fenêtre que représente `durée_ms`, de 0 à 1.
+    fn part(&self, durée_ms: i64) -> f64 {
+        let durée_de_la_fenêtre_ms = self.fin_ms - self.début_ms;
+        durée_ms as f64 / durée_de_la_fenêtre_ms as f64
+    }
 }
 
 /// Le temps pendant lequel une mesure vaut, à l'intérieur d'une fenêtre.
@@ -72,11 +83,13 @@ fn lumière_à_éviter(
     historique: &[Mesure],
 ) -> LumièreÀÉviter {
     let mut temps_au_dessus_du_seuil_ms = 0;
+    let mut temps_mesuré_ms = 0;
     let mut valeur_la_plus_haute_lux: Option<f32> = None;
     for période in périodes_mesurées(fenêtre, historique) {
         if période.valeur_lux > seuil_lx {
             temps_au_dessus_du_seuil_ms += période.durée_ms;
         }
+        temps_mesuré_ms += période.durée_ms;
         valeur_la_plus_haute_lux = match valeur_la_plus_haute_lux {
             Some(valeur_lux) => Some(valeur_lux.max(période.valeur_lux)),
             None => Some(période.valeur_lux),
@@ -87,6 +100,7 @@ fn lumière_à_éviter(
         temps_au_dessus_du_seuil_ms,
         valeur_la_plus_haute_lux,
         objectif_tenu,
+        couverture: fenêtre.part(temps_mesuré_ms),
     }
 }
 
