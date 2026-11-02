@@ -167,3 +167,20 @@ fn la_couverture_du_matin_est_la_part_de_ses_2_h_couverte_par_une_mesure() {
 
     assert_eq!(relevé.lumière_du_matin.couverture, 0.25);
 }
+
+#[test]
+fn la_journée_donne_la_part_du_temps_mesuré_à_250_lx_ou_plus() {
+    let historique = vec![
+        mesure(250.0, LEVER_MS + 3 * HEURE_MS),
+        mesure(249.0, LEVER_MS + 3 * HEURE_MS + 10 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(
+        relevé
+            .lumière_de_la_journée
+            .part_du_temps_mesuré_à_250_lx_ou_plus,
+        0.5
+    );
+}
