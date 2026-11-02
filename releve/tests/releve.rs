@@ -65,3 +65,24 @@ fn le_soir_donne_la_valeur_la_plus_haute() {
 
     assert_eq!(relevé.lumière_du_soir.valeur_la_plus_haute_lux, Some(80.0));
 }
+
+#[test]
+fn l_objectif_du_soir_est_tenu_quand_la_lumière_reste_à_10_lx_ou_moins() {
+    let historique = vec![mesure(10.0, COUCHER_MS - 60 * MINUTE_MS)];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert!(relevé.lumière_du_soir.objectif_tenu);
+}
+
+#[test]
+fn une_seule_minute_au_dessus_de_10_lx_suffit_à_ne_pas_tenir_l_objectif_du_soir() {
+    let historique = vec![
+        mesure(11.0, COUCHER_MS - 60 * MINUTE_MS),
+        mesure(5.0, COUCHER_MS - 59 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert!(!relevé.lumière_du_soir.objectif_tenu);
+}
