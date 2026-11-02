@@ -25,6 +25,8 @@ pub struct LumièreÀÉviter {
     pub temps_au_dessus_du_seuil_ms: i64,
     /// Aucune si rien n'a été mesuré dans la fenêtre.
     pub valeur_la_plus_haute_lux: Option<f32>,
+    /// Sans tolérance : une seule minute au-dessus du seuil suffit à ne pas le tenir.
+    pub objectif_tenu: bool,
 }
 
 pub struct RelevéDuJour {
@@ -80,9 +82,11 @@ fn lumière_à_éviter(
             None => Some(période.valeur_lux),
         };
     }
+    let objectif_tenu = temps_au_dessus_du_seuil_ms == 0;
     LumièreÀÉviter {
         temps_au_dessus_du_seuil_ms,
         valeur_la_plus_haute_lux,
+        objectif_tenu,
     }
 }
 
