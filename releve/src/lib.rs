@@ -13,6 +13,8 @@ const DURÉE_DE_VALIDITÉ_MAXIMALE_MS: i64 = 10 * MINUTE_MS;
 const SEUIL_DU_SOIR_LX: f32 = 10.0;
 const DURÉE_DU_SOIR_MS: i64 = 3 * HEURE_MS;
 
+const SEUIL_DE_LA_NUIT_LX: f32 = 1.0;
+
 pub struct HeuresDuCoucherEtDuLever {
     pub coucher_ms: i64,
     pub lever_ms: i64,
@@ -33,6 +35,7 @@ pub struct LumièreÀÉviter {
 
 pub struct RelevéDuJour {
     pub lumière_du_soir: LumièreÀÉviter,
+    pub lumière_de_la_nuit: LumièreÀÉviter,
 }
 
 /// Une période de temps, du début inclus à la fin exclue.
@@ -110,7 +113,12 @@ pub fn relevé_du_jour(heures: &HeuresDuCoucherEtDuLever, historique: &[Mesure])
         début_ms: heures.coucher_ms - DURÉE_DU_SOIR_MS,
         fin_ms: heures.coucher_ms,
     };
+    let nuit = Fenêtre {
+        début_ms: heures.coucher_ms,
+        fin_ms: heures.lever_ms,
+    };
     RelevéDuJour {
         lumière_du_soir: lumière_à_éviter(&soir, SEUIL_DU_SOIR_LX, historique),
+        lumière_de_la_nuit: lumière_à_éviter(&nuit, SEUIL_DE_LA_NUIT_LX, historique),
     }
 }
