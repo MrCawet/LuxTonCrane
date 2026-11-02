@@ -15,6 +15,9 @@ const DURÉE_DU_SOIR_MS: i64 = 3 * HEURE_MS;
 
 const SEUIL_DE_LA_NUIT_LX: f32 = 1.0;
 
+const SEUIL_DU_MATIN_LX: f32 = 10_000.0;
+const DURÉE_DU_MATIN_MS: i64 = 2 * HEURE_MS;
+
 pub struct HeuresDuCoucherEtDuLever {
     pub coucher_ms: i64,
     pub lever_ms: i64,
@@ -33,9 +36,15 @@ pub struct LumièreÀÉviter {
     pub couverture: f64,
 }
 
+/// La lumière vive reçue dans les 2 h après le lever.
+pub struct LumièreDuMatin {
+    pub temps_à_10_000_lx_ou_plus_ms: i64,
+}
+
 pub struct RelevéDuJour {
     pub lumière_du_soir: LumièreÀÉviter,
     pub lumière_de_la_nuit: LumièreÀÉviter,
+    pub lumière_du_matin: LumièreDuMatin,
 }
 
 /// Une période de temps, du début inclus à la fin exclue.
@@ -107,6 +116,18 @@ fn lumière_à_éviter(
     }
 }
 
+fn lumière_du_matin(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDuMatin {
+    let mut temps_à_10_000_lx_ou_plus_ms = 0;
+    for période in périodes_mesurées(fenêtre, historique) {
+        if période.valeur_lux >= SEUIL_DU_MATIN_LX {
+            temps_à_10_000_lx_ou_plus_ms += période.durée_ms;
+        }
+    }
+    LumièreDuMatin {
+        temps_à_10_000_lx_ou_plus_ms,
+    }
+}
+
 /// `historique` : les mesures dans l'ordre chronologique.
 pub fn relevé_du_jour(heures: &HeuresDuCoucherEtDuLever, historique: &[Mesure]) -> RelevéDuJour {
     let soir = Fenêtre {
@@ -117,8 +138,13 @@ pub fn relevé_du_jour(heures: &HeuresDuCoucherEtDuLever, historique: &[Mesure])
         début_ms: heures.coucher_ms,
         fin_ms: heures.lever_ms,
     };
+    let matin = Fenêtre {
+        début_ms: heures.lever_ms,
+        fin_ms: heures.lever_ms + DURÉE_DU_MATIN_MS,
+    };
     RelevéDuJour {
         lumière_du_soir: lumière_à_éviter(&soir, SEUIL_DU_SOIR_LX, historique),
         lumière_de_la_nuit: lumière_à_éviter(&nuit, SEUIL_DE_LA_NUIT_LX, historique),
+        lumière_du_matin: lumière_du_matin(&matin, historique),
     }
 }
