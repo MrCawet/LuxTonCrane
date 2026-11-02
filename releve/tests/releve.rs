@@ -209,3 +209,14 @@ fn une_seule_minute_sous_250_lx_suffit_à_ne_pas_tenir_l_objectif_de_la_journée
 
     assert!(!relevé.lumière_de_la_journée.objectif_tenu);
 }
+
+#[test]
+fn la_couverture_de_la_journée_est_la_part_couverte_du_lever_à_3_h_avant_le_coucher_suivant() {
+    let historique = vec![mesure(300.0, LEVER_MS + HEURE_MS)];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    let durée_de_la_journée_ms = COUCHER_SUIVANT_MS - 3 * HEURE_MS - LEVER_MS;
+    let attendue = (10 * MINUTE_MS) as f64 / durée_de_la_journée_ms as f64;
+    assert_eq!(relevé.lumière_de_la_journée.couverture, attendue);
+}
