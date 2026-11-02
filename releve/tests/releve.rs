@@ -184,3 +184,28 @@ fn la_journée_donne_la_part_du_temps_mesuré_à_250_lx_ou_plus() {
         0.5
     );
 }
+
+#[test]
+fn l_objectif_de_la_journée_est_tenu_si_tout_son_temps_mesuré_est_à_250_lx_ou_plus() {
+    let historique = vec![
+        mesure(300.0, LEVER_MS + HEURE_MS),
+        mesure(5.0, COUCHER_SUIVANT_MS - 3 * HEURE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert!(relevé.lumière_de_la_journée.objectif_tenu);
+}
+
+#[test]
+fn une_seule_minute_sous_250_lx_suffit_à_ne_pas_tenir_l_objectif_de_la_journée() {
+    let historique = vec![
+        mesure(300.0, LEVER_MS + HEURE_MS),
+        mesure(249.0, LEVER_MS + HEURE_MS + 10 * MINUTE_MS),
+        mesure(300.0, LEVER_MS + HEURE_MS + 11 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert!(!relevé.lumière_de_la_journée.objectif_tenu);
+}
