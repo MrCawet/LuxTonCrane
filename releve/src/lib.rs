@@ -50,8 +50,8 @@ pub struct LumièreDuMatin {
 
 /// La lumière reçue du lever jusqu'à 3 h avant le coucher suivant.
 pub struct LumièreDeLaJournée {
-    /// De 0 à 1.
-    pub part_du_temps_mesuré_à_250_lx_ou_plus: f64,
+    /// De 0 à 1, aucune si rien n'a été mesuré dans la fenêtre.
+    pub part_du_temps_mesuré_à_250_lx_ou_plus: Option<f64>,
     /// Sans tolérance : une seule minute mesurée sous 250 lx suffit à ne pas le tenir.
     pub objectif_tenu: bool,
     /// La part de la fenêtre couverte par une mesure, de 0 à 1.
@@ -160,8 +160,11 @@ fn lumière_de_la_journée(fenêtre: &Fenêtre, historique: &[Mesure]) -> Lumiè
         }
         temps_mesuré_ms += période.durée_ms;
     }
-    let part_du_temps_mesuré_à_250_lx_ou_plus =
-        temps_à_250_lx_ou_plus_ms as f64 / temps_mesuré_ms as f64;
+    let part_du_temps_mesuré_à_250_lx_ou_plus = if temps_mesuré_ms == 0 {
+        None
+    } else {
+        Some(temps_à_250_lx_ou_plus_ms as f64 / temps_mesuré_ms as f64)
+    };
     let objectif_tenu = temps_à_250_lx_ou_plus_ms == temps_mesuré_ms;
     LumièreDeLaJournée {
         part_du_temps_mesuré_à_250_lx_ou_plus,
