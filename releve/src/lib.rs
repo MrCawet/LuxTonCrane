@@ -42,6 +42,8 @@ pub struct LumièreDuMatin {
     pub temps_à_10_000_lx_ou_plus_ms: i64,
     /// Au moins 30 min à 10 000 lx ou plus.
     pub objectif_tenu: bool,
+    /// La part de la fenêtre couverte par une mesure, de 0 à 1.
+    pub couverture: f64,
 }
 
 pub struct RelevéDuJour {
@@ -121,15 +123,18 @@ fn lumière_à_éviter(
 
 fn lumière_du_matin(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDuMatin {
     let mut temps_à_10_000_lx_ou_plus_ms = 0;
+    let mut temps_mesuré_ms = 0;
     for période in périodes_mesurées(fenêtre, historique) {
         if période.valeur_lux >= SEUIL_DU_MATIN_LX {
             temps_à_10_000_lx_ou_plus_ms += période.durée_ms;
         }
+        temps_mesuré_ms += période.durée_ms;
     }
     let objectif_tenu = temps_à_10_000_lx_ou_plus_ms >= OBJECTIF_DU_MATIN_MS;
     LumièreDuMatin {
         temps_à_10_000_lx_ou_plus_ms,
         objectif_tenu,
+        couverture: fenêtre.part(temps_mesuré_ms),
     }
 }
 
