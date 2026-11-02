@@ -113,3 +113,18 @@ fn la_nuit_compte_le_temps_au_dessus_de_1_lx_jusqu_au_lever() {
         5 * MINUTE_MS
     );
 }
+
+#[test]
+fn le_matin_compte_le_temps_à_10_000_lx_ou_plus() {
+    let historique = vec![
+        mesure(10_000.0, LEVER_MS + 30 * MINUTE_MS),
+        mesure(9_999.0, LEVER_MS + 35 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(
+        relevé.lumière_du_matin.temps_à_10_000_lx_ou_plus_ms,
+        5 * MINUTE_MS
+    );
+}
