@@ -86,3 +86,18 @@ fn une_seule_minute_au_dessus_de_10_lx_suffit_à_ne_pas_tenir_l_objectif_du_soir
 
     assert!(!relevé.lumière_du_soir.objectif_tenu);
 }
+
+#[test]
+fn la_couverture_du_soir_est_la_part_de_ses_3_h_couverte_par_une_mesure() {
+    let mut historique = Vec::new();
+    for minutes_avant_le_coucher in [90, 80, 70, 60, 50, 40, 30, 20, 10] {
+        historique.push(mesure(
+            5.0,
+            COUCHER_MS - minutes_avant_le_coucher * MINUTE_MS,
+        ));
+    }
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(relevé.lumière_du_soir.couverture, 0.5);
+}
