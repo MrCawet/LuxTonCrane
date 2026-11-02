@@ -52,3 +52,19 @@ fn une_mesure_vaut_10_min_au_plus() {
         10 * MINUTE_MS
     );
 }
+
+#[test]
+fn le_soir_donne_la_valeur_la_plus_haute() {
+    let historique = vec![
+        mesure(30.0, COUCHER_MS - 60 * MINUTE_MS),
+        mesure(80.0, COUCHER_MS - 55 * MINUTE_MS),
+        mesure(5.0, COUCHER_MS - 50 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(
+        relevé.lumière_du_soir.valeur_la_plus_haute_lux,
+        Some(80.0)
+    );
+}
