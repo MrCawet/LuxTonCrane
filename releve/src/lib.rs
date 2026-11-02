@@ -54,6 +54,8 @@ pub struct LumièreDeLaJournée {
     pub part_du_temps_mesuré_à_250_lx_ou_plus: f64,
     /// Sans tolérance : une seule minute mesurée sous 250 lx suffit à ne pas le tenir.
     pub objectif_tenu: bool,
+    /// La part de la fenêtre couverte par une mesure, de 0 à 1.
+    pub couverture: f64,
 }
 
 pub struct RelevéDuJour {
@@ -164,6 +166,7 @@ fn lumière_de_la_journée(fenêtre: &Fenêtre, historique: &[Mesure]) -> Lumiè
     LumièreDeLaJournée {
         part_du_temps_mesuré_à_250_lx_ou_plus,
         objectif_tenu,
+        couverture: fenêtre.part(temps_mesuré_ms),
     }
 }
 
