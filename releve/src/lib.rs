@@ -52,6 +52,8 @@ pub struct LumièreDuMatin {
 pub struct LumièreDeLaJournée {
     /// De 0 à 1.
     pub part_du_temps_mesuré_à_250_lx_ou_plus: f64,
+    /// Sans tolérance : une seule minute mesurée sous 250 lx suffit à ne pas le tenir.
+    pub objectif_tenu: bool,
 }
 
 pub struct RelevéDuJour {
@@ -158,8 +160,10 @@ fn lumière_de_la_journée(fenêtre: &Fenêtre, historique: &[Mesure]) -> Lumiè
     }
     let part_du_temps_mesuré_à_250_lx_ou_plus =
         temps_à_250_lx_ou_plus_ms as f64 / temps_mesuré_ms as f64;
+    let objectif_tenu = temps_à_250_lx_ou_plus_ms == temps_mesuré_ms;
     LumièreDeLaJournée {
         part_du_temps_mesuré_à_250_lx_ou_plus,
+        objectif_tenu,
     }
 }
 
