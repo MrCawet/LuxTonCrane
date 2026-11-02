@@ -155,3 +155,15 @@ fn l_objectif_du_matin_n_est_pas_tenu_avec_moins_de_30_min_à_10_000_lx_ou_plus(
 
     assert!(!relevé.lumière_du_matin.objectif_tenu);
 }
+
+#[test]
+fn la_couverture_du_matin_est_la_part_de_ses_2_h_couverte_par_une_mesure() {
+    let mut historique = Vec::new();
+    for minutes_après_le_lever in [0, 10, 20] {
+        historique.push(mesure(500.0, LEVER_MS + minutes_après_le_lever * MINUTE_MS));
+    }
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(relevé.lumière_du_matin.couverture, 0.25);
+}
