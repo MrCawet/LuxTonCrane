@@ -95,6 +95,54 @@ C'est le rôle du minimum de 250 lx le jour : il ne vise pas seulement l'éveil,
   - les seuils exacts, qui sont des moyennes alors que les sensibilités individuelles varient beaucoup ;
   - le lien direct entre ces effets sur l'horloge et la « qualité » ressentie du sommeil, qui vient surtout d'études d'observation.
 
+## Piste : un capteur maison sur les lunettes
+
+Le téléphone mesure la lumière sur le plan de son écran, en lux ordinaires. Les recommandations parlent de lux mélanopiques reçus **à hauteur des yeux, dans le sens du regard**. Un capteur fixé sur une branche de lunettes mesure presque exactement cela.
+
+### Ce que fait la recherche
+
+- **Un modèle à suivre :** un enregistreur de recherche présenté en 2025 se fixe sur des lunettes ordinaires, avec des branches imprimées en 3D. Il porte trois capteurs :
+  - une puce spectrale **AS7341** (10 bandes étroites, une mesure par seconde) ;
+  - une puce **TSL2591** pour les lux sur une grande plage ;
+  - un capteur de mouvement de la tête.
+
+  Je n'ai pas trouvé ses plans publiés.
+- **Le confort :** un essai sur 24 heures avec 18 étudiants (Balajadia et al., 2023) a montré une acceptation moyenne de ces capteurs sur lunettes. Les reproches portaient surtout sur la taille, le poids et la tenue.
+- **Le calcul des lux mélanopiques :** une étude de 2025 (*Sensors*) calcule les lux mélanopiques avec ce type de puce bon marché, à filtres étroits. Elle les étalonne par régression contre des sources de lumière connues, en en prenant plus que de canaux. En écartant certains canaux, l'erreur passe d'environ 18 % à environ 1,4 % sur des LED de test. Les auteurs recommandent d'étalonner chaque capteur séparément.
+- **Les outils d'analyse :** il existe des outils libres pour analyser ces données, comme LightLogR en R ou pyLight en Python.
+
+### Le montage envisagé
+
+| Pièce | Rôle |
+|---|---|
+| AS7341 | les canaux spectraux, pour estimer les lux mélanopiques |
+| TSL2591 (facultatif) | les lux ordinaires sur une grande plage, du noir au plein soleil |
+| Seeed XIAO nRF52840 | le microcontrôleur Bluetooth : 21 × 17,5 mm, environ 5 µA en veille profonde, gestion de la charge de la batterie intégrée |
+| Batterie LiPo de 100 à 150 mAh | l'autonomie : plusieurs semaines estimées à 50 µA en moyenne, à mesurer réellement |
+| Clip ou branche imprimée en 3D | le capteur tourné vers l'avant, au niveau de l'œil |
+
+**Fonctionnement :**
+1. Le capteur mesure à intervalle régulier, par exemple toutes les 10 à 60 s.
+2. Il garde les mesures en mémoire quand le téléphone est loin.
+3. Il les envoie par Bluetooth au service de LuxTonCrane, qui les ajoute au journal comme une deuxième source de mesures.
+
+### Le point difficile : l'étalonnage
+
+Pour passer des canaux de la puce aux lux mélanopiques, il faut des sources de lumière de référence. Plusieurs pistes, sans spectromètre :
+- **La lumière du jour**, où les lux mélanopiques valent à peu près les lux ordinaires ;
+- **des ampoules dont le spectre est publié** ;
+- **un luxmètre** pour les lux ordinaires.
+
+La précision obtenue serait moindre que celle d'un appareil de recherche, mais bien meilleure que celle du téléphone. Elle reste à mesurer.
+
+### Ce qui reste à vérifier
+
+- les prix et la disponibilité des pièces ;
+- la consommation réelle ;
+- la plage de l'AS7341 en plein soleil ;
+- le poids sur la branche ;
+- la méthode d'étalonnage exacte.
+
 ## Seuils qui font consensus, par aspect de la mission
 
 | Aspect | Seuil de consensus | Sur la lumière ? |
@@ -176,3 +224,8 @@ Ils sont classés dans l'ICSD-3-TR, la classification internationale des trouble
 - Sensibilité à la lumière du soir : [Phillips 2019 (PMC6575863)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6575863), [Monash](https://www.monash.edu/turner-institute/news-and-events/latest-news/2019-articles/light-the-night-monash-research-finds-that-some-of-us-are-hypersensitive-to-evening-illumination)
 - Sensibilité accrue dans le retard de phase : [Watson 2018 (PubMed)](https://pubmed.ncbi.nlm.nih.gov/30281150/), [PMC6292803](https://pmc.ncbi.nlm.nih.gov/articles/PMC6292803)
 - Lumière pendant le sommeil : [Mason 2022 (PMC8944904)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8944904), [Northwestern](https://news.northwestern.edu/stories/2022/03/close-the-blinds-during-sleep-to-protect-your-health)
+- Capteurs sur lunettes : [poster VSS 2025](https://www.visionsciences.org/presentation/?id=2409), [Balajadia 2023 (DOAJ)](https://doaj.org/article/1a12b356f34949109994e93a891b4ddc), [revue des enregistreurs portables (Monash)](https://research.monash.edu/en/publications/measuring-light-exposure-in-daily-life-a-review-of-wearable-light/)
+- Étalonnage des lux mélanopiques sur capteur bon marché : [Sensors 2025](https://www.mdpi.com/1424-8220/25/23/7269), [note d'application ams AS7341](https://ams.com/documents/20143/36005/AS7341_AN000633_1-00.pdf/fc552673-9800-8d60-372d-fc67cf075740)
+- Outils d'analyse : [LightLogR (JOSS)](https://joss.theoj.org/papers/10.21105/joss.07601), [pyLight](https://orbi.uliege.be/bitstream/2268/314025/1/Open-Source%20Python%20Module%20for%20the%20Analysis%20of%20Personalized%20Light%20Exposure%20Data%20from%20Wearable%20Light%20Loggers%20and%20Dosimeters.pdf)
+- Microcontrôleur : [Seeed XIAO nRF52840 (Kiwi Electronics)](https://www.kiwi-electronics.com/en/brand-seeed-studio/seeed-studio-xiao-nrf52840-11041), [estimation d'autonomie](https://www.youngju.dev/blog/ai/2026-03-03-xiao-nrf52840-iot-guide.en)
+
