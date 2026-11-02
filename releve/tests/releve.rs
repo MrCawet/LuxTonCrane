@@ -101,3 +101,15 @@ fn la_couverture_du_soir_est_la_part_de_ses_3_h_couverte_par_une_mesure() {
 
     assert_eq!(relevé.lumière_du_soir.couverture, 0.5);
 }
+
+#[test]
+fn la_nuit_compte_le_temps_au_dessus_de_1_lx_jusqu_au_lever() {
+    let historique = vec![mesure(2.0, LEVER_MS - 5 * MINUTE_MS)];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(
+        relevé.lumière_de_la_nuit.temps_au_dessus_du_seuil_ms,
+        5 * MINUTE_MS
+    );
+}
