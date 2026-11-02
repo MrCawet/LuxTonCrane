@@ -63,8 +63,5 @@ fn le_soir_donne_la_valeur_la_plus_haute() {
 
     let relevé = relevé_du_jour(&heures(), &historique);
 
-    assert_eq!(
-        relevé.lumière_du_soir.valeur_la_plus_haute_lux,
-        Some(80.0)
-    );
+    assert_eq!(relevé.lumière_du_soir.valeur_la_plus_haute_lux, Some(80.0));
 }

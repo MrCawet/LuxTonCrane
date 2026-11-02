@@ -23,6 +23,8 @@ pub struct HeuresDuCoucherEtDuLever {
 /// La lumière d'une fenêtre où l'objectif est de rester sous un seuil : le soir et la nuit.
 pub struct LumièreÀÉviter {
     pub temps_au_dessus_du_seuil_ms: i64,
+    /// Aucune si rien n'a été mesuré dans la fenêtre.
+    pub valeur_la_plus_haute_lux: Option<f32>,
 }
 
 pub struct RelevéDuJour {
@@ -68,13 +70,19 @@ fn lumière_à_éviter(
     historique: &[Mesure],
 ) -> LumièreÀÉviter {
     let mut temps_au_dessus_du_seuil_ms = 0;
+    let mut valeur_la_plus_haute_lux: Option<f32> = None;
     for période in périodes_mesurées(fenêtre, historique) {
         if période.valeur_lux > seuil_lx {
             temps_au_dessus_du_seuil_ms += période.durée_ms;
         }
+        valeur_la_plus_haute_lux = match valeur_la_plus_haute_lux {
+            Some(valeur_lux) => Some(valeur_lux.max(période.valeur_lux)),
+            None => Some(période.valeur_lux),
+        };
     }
     LumièreÀÉviter {
         temps_au_dessus_du_seuil_ms,
+        valeur_la_plus_haute_lux,
     }
 }
 
