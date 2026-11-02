@@ -37,3 +37,18 @@ fn le_soir_une_mesure_au_dessus_de_10_lx_compte_jusqu_à_la_suivante() {
         5 * MINUTE_MS
     );
 }
+
+#[test]
+fn une_mesure_vaut_10_min_au_plus() {
+    let historique = vec![
+        mesure(50.0, COUCHER_MS - 60 * MINUTE_MS),
+        mesure(5.0, COUCHER_MS - 30 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(
+        relevé.lumière_du_soir.temps_au_dessus_du_seuil_ms,
+        10 * MINUTE_MS
+    );
+}
