@@ -19,6 +19,8 @@ const SEUIL_DU_MATIN_LX: f32 = 10_000.0;
 const DURÉE_DU_MATIN_MS: i64 = 2 * HEURE_MS;
 const OBJECTIF_DU_MATIN_MS: i64 = 30 * MINUTE_MS;
 
+const SEUIL_DE_LA_JOURNÉE_LX: f32 = 250.0;
+
 pub struct HeuresDuCoucherEtDuLever {
     pub coucher_ms: i64,
     pub lever_ms: i64,
@@ -46,10 +48,17 @@ pub struct LumièreDuMatin {
     pub couverture: f64,
 }
 
+/// La lumière reçue du lever jusqu'à 3 h avant le coucher suivant.
+pub struct LumièreDeLaJournée {
+    /// De 0 à 1.
+    pub part_du_temps_mesuré_à_250_lx_ou_plus: f64,
+}
+
 pub struct RelevéDuJour {
     pub lumière_du_soir: LumièreÀÉviter,
     pub lumière_de_la_nuit: LumièreÀÉviter,
     pub lumière_du_matin: LumièreDuMatin,
+    pub lumière_de_la_journée: LumièreDeLaJournée,
 }
 
 /// Une période de temps, du début inclus à la fin exclue.
@@ -138,6 +147,22 @@ fn lumière_du_matin(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDuMa
     }
 }
 
+fn lumière_de_la_journée(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDeLaJournée {
+    let mut temps_à_250_lx_ou_plus_ms = 0;
+    let mut temps_mesuré_ms = 0;
+    for période in périodes_mesurées(fenêtre, historique) {
+        if période.valeur_lux >= SEUIL_DE_LA_JOURNÉE_LX {
+            temps_à_250_lx_ou_plus_ms += période.durée_ms;
+        }
+        temps_mesuré_ms += période.durée_ms;
+    }
+    let part_du_temps_mesuré_à_250_lx_ou_plus =
+        temps_à_250_lx_ou_plus_ms as f64 / temps_mesuré_ms as f64;
+    LumièreDeLaJournée {
+        part_du_temps_mesuré_à_250_lx_ou_plus,
+    }
+}
+
 /// `historique` : les mesures dans l'ordre chronologique.
 pub fn relevé_du_jour(heures: &HeuresDuCoucherEtDuLever, historique: &[Mesure]) -> RelevéDuJour {
     let soir = Fenêtre {
@@ -152,9 +177,14 @@ pub fn relevé_du_jour(heures: &HeuresDuCoucherEtDuLever, historique: &[Mesure])
         début_ms: heures.lever_ms,
         fin_ms: heures.lever_ms + DURÉE_DU_MATIN_MS,
     };
+    let journée = Fenêtre {
+        début_ms: heures.lever_ms,
+        fin_ms: heures.coucher_suivant_ms - DURÉE_DU_SOIR_MS,
+    };
     RelevéDuJour {
         lumière_du_soir: lumière_à_éviter(&soir, SEUIL_DU_SOIR_LX, historique),
         lumière_de_la_nuit: lumière_à_éviter(&nuit, SEUIL_DE_LA_NUIT_LX, historique),
         lumière_du_matin: lumière_du_matin(&matin, historique),
+        lumière_de_la_journée: lumière_de_la_journée(&journée, historique),
     }
 }
