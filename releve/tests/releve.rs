@@ -181,7 +181,7 @@ fn la_journée_donne_la_part_du_temps_mesuré_à_250_lx_ou_plus() {
         relevé
             .lumière_de_la_journée
             .part_du_temps_mesuré_à_250_lx_ou_plus,
-        0.5
+        Some(0.5)
     );
 }
 
@@ -219,4 +219,18 @@ fn la_couverture_de_la_journée_est_la_part_couverte_du_lever_à_3_h_avant_le_co
     let durée_de_la_journée_ms = COUCHER_SUIVANT_MS - 3 * HEURE_MS - LEVER_MS;
     let attendue = (10 * MINUTE_MS) as f64 / durée_de_la_journée_ms as f64;
     assert_eq!(relevé.lumière_de_la_journée.couverture, attendue);
+}
+
+#[test]
+fn la_journée_sans_mesure_ne_donne_aucune_part_à_250_lx_ou_plus() {
+    let historique = Vec::new();
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    assert_eq!(
+        relevé
+            .lumière_de_la_journée
+            .part_du_temps_mesuré_à_250_lx_ou_plus,
+        None
+    );
 }
