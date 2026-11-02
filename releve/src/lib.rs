@@ -4,7 +4,11 @@
 
 use mesure::Mesure;
 
-const HEURE_MS: i64 = 60 * 60 * 1000;
+const MINUTE_MS: i64 = 60 * 1000;
+const HEURE_MS: i64 = 60 * MINUTE_MS;
+
+/// Couvre l'écart entre deux réveils écran éteint, d'environ 9 min.
+const DURÉE_DE_VALIDITÉ_MAXIMALE_MS: i64 = 10 * MINUTE_MS;
 
 const SEUIL_DU_SOIR_LX: f32 = 10.0;
 const DURÉE_DU_SOIR_MS: i64 = 3 * HEURE_MS;
@@ -37,13 +41,14 @@ struct PériodeMesurée {
     durée_ms: i64,
 }
 
-/// Une mesure vaut jusqu'à la suivante.
+/// Une mesure vaut jusqu'à la suivante, pendant 10 min au plus.
 fn périodes_mesurées(fenêtre: &Fenêtre, historique: &[Mesure]) -> Vec<PériodeMesurée> {
     let mut périodes = Vec::new();
     for (position, mesure) in historique.iter().enumerate() {
+        let fin_maximale_ms = mesure.instant_ms + DURÉE_DE_VALIDITÉ_MAXIMALE_MS;
         let fin_de_validité_ms = match historique.get(position + 1) {
-            Some(suivante) => suivante.instant_ms,
-            None => fenêtre.fin_ms,
+            Some(suivante) => suivante.instant_ms.min(fin_maximale_ms),
+            None => fin_maximale_ms,
         };
         let début_ms = mesure.instant_ms.max(fenêtre.début_ms);
         let fin_ms = fin_de_validité_ms.min(fenêtre.fin_ms);
