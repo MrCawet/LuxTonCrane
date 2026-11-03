@@ -15,9 +15,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/preparer-android
-      - name: Compile l'application
+      # La clé est fixe pour qu'Android accepte chaque nouvel APK comme une mise à jour.
+      - name: Compile l'application, signée avec la clé de livraison
         working-directory: android
-        run: ./gradlew assembleDebug
+        env:
+          CLE_EN_BASE64: ${{ secrets.LIVRAISON_CLE }}
+          LIVRAISON_CLE_MOT_DE_PASSE: ${{ secrets.LIVRAISON_CLE_MOT_DE_PASSE }}
+        run: |
+          if [ -z "$CLE_EN_BASE64" ] || [ -z "$LIVRAISON_CLE_MOT_DE_PASSE" ]; then
+            echo "Les secrets LIVRAISON_CLE et LIVRAISON_CLE_MOT_DE_PASSE manquent."
+            exit 1
+          fi
+          export LIVRAISON_CLE_CHEMIN="$RUNNER_TEMP/luxtoncrane.p12"
+          echo "$CLE_EN_BASE64" | base64 --decode > "$LIVRAISON_CLE_CHEMIN"
+          ./gradlew assembleRelease
       - name: Date le tag, en heure UTC
         id: tag
         run: echo "nom=$(date -u +%Y-%m-%d-%H%M)" >> "$GITHUB_OUTPUT"
@@ -27,5 +38,5 @@ jobs:
           TAG: ${{ steps.tag.outputs.nom }}
         run: |
           apk="luxtoncrane-$TAG.apk"
-          cp android/app/build/outputs/apk/debug/app-debug.apk "$apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "$apk"
           gh release create "$TAG" "$apk" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
