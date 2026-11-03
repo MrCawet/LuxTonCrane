@@ -34,3 +34,33 @@ fn ajouter_une_mesure_l_écrit_dans_la_base() {
         .unwrap();
     assert_eq!(écrite, (320.5, 1_793_000_000_000));
 }
+
+#[test]
+fn l_historique_rend_les_mesures_dans_l_ordre_chronologique() {
+    let path = fresh_database_path("historique");
+    let mut journal = SqliteJournal::open(&path).unwrap();
+    let plus_récente = Mesure {
+        valeur_lux: 80.0,
+        instant_ms: 1_793_000_060_000,
+    };
+    let plus_ancienne = Mesure {
+        valeur_lux: 320.5,
+        instant_ms: 1_793_000_000_000,
+    };
+    ajouter(plus_récente, &mut journal).unwrap();
+    ajouter(plus_ancienne, &mut journal).unwrap();
+
+    let historique = journal.historique().unwrap();
+
+    let attendu = vec![
+        Mesure {
+            valeur_lux: 320.5,
+            instant_ms: 1_793_000_000_000,
+        },
+        Mesure {
+            valeur_lux: 80.0,
+            instant_ms: 1_793_000_060_000,
+        },
+    ];
+    assert_eq!(historique, attendu);
+}
