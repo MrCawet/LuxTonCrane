@@ -7,6 +7,7 @@
 - **Endormissement** : le passage de l'éveil au sommeil une fois couché ; noté chaque matin sur 4 niveaux définis par ce qui s'est passé (immédiat, calme, agité, abandonné). Objectif : immédiat ou calme.
 - **Fenêtre** : une période de temps du relevé du jour, tirée des heures du coucher et du lever : le soir, la nuit, le matin et la journée.
 - **Fatigue de la journée** : notée chaque soir vers 21 h sur 4 niveaux définis par ce qui s'est passé (aucune, légère, gênante, somnolence). Objectif : aucune ou légère.
+- **Heure du coucher souhaitée** : l'heure à laquelle on prévoit de se coucher le soir qui vient. Elle fixe la fin de la journée du relevé, jusqu'à ce que l'heure du coucher réelle la remplace, le lendemain matin.
 - **Instant** (`instant_ms`) : le moment où une mesure a été prise, en millisecondes depuis le 1er janvier 1970 à minuit (UTC).
 - **Journal** : reçoit les mesures pour les garder.
 - **Lumière de la journée** : la lumière reçue du lever jusqu'à 3 h avant le coucher. Objectif : tout le temps mesuré à 250 lx ou plus.

@@ -71,6 +71,10 @@ Pourquoi dans cet ordre : l'agenda se remplit le matin, sur la nuit qui vient de
 | Lumière du matin, dans les 2 h après le lever | le temps passé à 10 000 lx ou plus, et si l'objectif est tenu |
 | Lumière de la journée, du lever à coucher − 3 h | la part du temps mesuré à 250 lx ou plus, et si l'objectif est tenu |
 
+### Le coucher suivant
+
+La fin de la journée dépend du coucher suivant, qui n'a pas encore eu lieu quand on lit le relevé. On saisit donc l'**heure du coucher souhaitée** : le relevé se calcule avec elle. Le lendemain matin, l'heure du coucher réelle, saisie avec l'agenda, la remplace.
+
 ### Règles de calcul
 
 - Une mesure vaut jusqu'à la suivante, pendant 10 min au plus. Au-delà, le temps compte comme non mesuré. 10 min couvrent l'écart entre deux réveils écran éteint (environ 9 min).
