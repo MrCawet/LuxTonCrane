@@ -24,6 +24,22 @@ impl SqliteJournal {
     }
 }
 
+/// Lecture de toutes les mesures enregistrées.
+impl SqliteJournal {
+    pub fn historique(&self) -> rusqlite::Result<Vec<Mesure>> {
+        let mut statement = self
+            .connection
+            .prepare("SELECT valeur_lux, instant_ms FROM mesure ORDER BY instant_ms")?;
+        let rows = statement.query_map([], |row| {
+            Ok(Mesure {
+                valeur_lux: row.get(0)?,
+                instant_ms: row.get(1)?,
+            })
+        })?;
+        rows.collect()
+    }
+}
+
 /// Enregistrement d'une mesure, une ligne par mesure.
 impl Journal for SqliteJournal {
     fn enregistrer(&mut self, mesure: Mesure) -> Result<(), ÉchecDEnregistrement> {
