@@ -34,4 +34,30 @@ class HeuresDuReleveTest {
         )
         assertEquals(attendues, heures)
     }
+
+    @Test
+    fun `un coucher après minuit est le jour même du lever`() {
+        val heures = heuresDuRelevé(
+            coucher = LocalTime.of(0, 30),
+            lever = LocalTime.of(7, 0),
+            coucherSouhaité = LocalTime.of(22, 30),
+            aujourdhui = aujourdhui,
+            fuseau = fuseau,
+        )
+
+        assertEquals(instantMs(aujourdhui, LocalTime.of(0, 30)), heures.coucherMs)
+    }
+
+    @Test
+    fun `un coucher souhaité après minuit est le lendemain du lever`() {
+        val heures = heuresDuRelevé(
+            coucher = LocalTime.of(23, 0),
+            lever = LocalTime.of(7, 0),
+            coucherSouhaité = LocalTime.of(0, 15),
+            aujourdhui = aujourdhui,
+            fuseau = fuseau,
+        )
+
+        assertEquals(instantMs(aujourdhui.plusDays(1), LocalTime.of(0, 15)), heures.coucherSouhaitéMs)
+    }
 }
