@@ -18,7 +18,6 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
-import java.io.File
 import net.cawet.luxtoncrane.pont.EchecPont
 import net.cawet.luxtoncrane.pont.Journal
 
@@ -44,9 +43,8 @@ class ServiceDeMesure : Service(), SensorEventListener {
         super.onCreate()
         startForegroundWithNotification()
 
-        val cheminDuJournal = File(filesDir, JOURNAL_FILE_NAME).path
         try {
-            journal = Journal.ouvrir(cheminDuJournal)
+            journal = Journal.ouvrir(cheminDuJournal(this))
         } catch (échec: EchecPont) {
             Log.e(LOG_TAG, "Le journal n'a pas pu être ouvert, la mesure s'arrête.", échec)
             stopSelf()
@@ -131,7 +129,6 @@ class ServiceDeMesure : Service(), SensorEventListener {
 
     private companion object {
         const val LOG_TAG = "LuxTonCrane"
-        const val JOURNAL_FILE_NAME = "journal.sqlite"
         const val NOTIFICATION_CHANNEL_ID = "mesure"
         const val NOTIFICATION_ID = 1
     }

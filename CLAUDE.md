@@ -8,10 +8,10 @@
 - [GLOSSAIRE.md](GLOSSAIRE.md) : les termes du métier.
 - L'application est en Kotlin (capteur de lumière, tâche de fond, toutes les API Android) et en Rust (le métier : mesures, rapports).
 - [.claude/rules/rust.md](.claude/rules/rust.md) : règles propres au Rust, à lire avant d'écrire du Rust. Chargées automatiquement dès qu'un fichier `.rs` ou `Cargo.toml` est touché.
-- Le métier est un workspace Cargo à la racine, une crate par sujet (`mesure/`, `journal/`) : `cargo test` à la racine.
+- Le métier est un workspace Cargo à la racine, une crate par sujet (`mesure/`, `journal/`, `releve/` pour le relevé du jour) : `cargo test` à la racine.
 - `journal_sqlite/` enregistre le journal dans SQLite ; `pont/` expose le métier à Kotlin par UniFFI (noms sans accents).
 - L'application Android est dans `android/`. Sa compilation compile aussi le pont Rust et génère son code Kotlin ; il faut le NDK Android, `rustup target add aarch64-linux-android` et `cargo install cargo-ndk`.
-- Le SDK Android n'est pas joignable depuis les sessions dans le cloud : l'application ne s'y compile pas. Les tests Kotlin qui n'utilisent pas Android se lancent dans un projet JVM temporaire qui reprend `android/app/src`.
+- Le SDK Android n'est pas joignable depuis les sessions dans le cloud : l'application ne s'y compile pas. Les tests Kotlin qui n'utilisent pas Android se lancent dans un projet JVM temporaire qui reprend `android/app/src`. Lancer Gradle avec `LC_ALL=C.UTF-8` (les classes ont des noms accentués) et `--max-workers=1` (Maven Central répond parfois 429). Pour vérifier que le code Android compile, le même projet peut reprendre l'API Android de `org.robolectric:android-all` (en `compileOnly`) et le Kotlin du pont généré par `uniffi-bindgen` depuis `target/debug/libpont.so`.
 - CI (`.github/workflows/integration.yml`) : seulement sur les PR vers `main`, jamais sur un push ; un nouveau push annule l'exécution en cours. Les jobs Rust et Android ne tournent que si la PR touche leurs chemins. Seul le job `verdict` est à exiger dans la protection de `main`.
 - CD (`.github/workflows/livraison.yml`) : déclenchée à la main depuis `main`, elle compile l'application et crée une release GitHub, qui pose un tag daté (`AAAA-MM-JJ-HHMM`, UTC) sur le commit et porte l'APK.
 

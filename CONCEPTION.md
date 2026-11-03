@@ -59,6 +59,8 @@ Objectif : aucune ou légère. Comparée à la quantité de sommeil de la nuit p
 
 Le premier rapport. Il couvre une nuit et la journée qui suit.
 
+Pourquoi dans cet ordre : l'agenda se remplit le matin, sur la nuit qui vient de passer, et la fatigue du soir se compare à la nuit d'avant. L'inverse (la journée, puis la nuit qui suit) garderait ensemble la lumière de la journée et la nuit qu'elle prépare, mais séparerait la nuit de la fatigue qu'elle cause. Aucun découpage ne garde tout ensemble. En contrepartie, le relevé n'est complet qu'au coucher suivant : c'est lui qui fixe la fin de la journée, 3 h avant.
+
 | Bloc | Contenu |
 |---|---|
 | Sommeil | les notes d'endormissement et de continuité de la nuit, la quantité de sommeil, et pour chacune si l'objectif est tenu |
@@ -68,6 +70,10 @@ Le premier rapport. Il couvre une nuit et la journée qui suit.
 | Fatigue, le soir suivant | la note, et si l'objectif est tenu |
 | Lumière du matin, dans les 2 h après le lever | le temps passé à 10 000 lx ou plus, et si l'objectif est tenu |
 | Lumière de la journée, du lever à coucher − 3 h | la part du temps mesuré à 250 lx ou plus, et si l'objectif est tenu |
+
+### Le coucher suivant
+
+La fin de la journée dépend du coucher suivant, qui n'a pas encore eu lieu quand on lit le relevé. On saisit donc l'**heure du coucher souhaitée** : le relevé se calcule avec elle. Le lendemain matin, l'heure du coucher réelle, saisie avec l'agenda, la remplace.
 
 ### Règles de calcul
 
@@ -133,9 +139,9 @@ Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
 
 Dans cet ordre, chaque étape en TDD et sur sa propre branche :
 
-1. **Domaine Rust du relevé du jour** : les notes de l'agenda, les fenêtres (matin, journée, soir, nuit) tirées des heures du coucher et du lever, les règles de calcul (une mesure vaut 10 min au plus, mesures téléphone couvert écartées) et les objectifs tenus ou non.
+1. **Domaine Rust du relevé du jour** : fait pour la lumière (crate `releve/`) : les fenêtres tirées des heures du coucher et du lever, une mesure vaut 10 min au plus, les objectifs tenus ou non et la couverture. Restent les notes de l'agenda, et les mesures téléphone couvert écartées, qui attendent la proximité.
 2. **Proximité avec chaque mesure** : lire le capteur de proximité avec chaque mesure de lumière, et le garder dans le journal.
 3. **Agenda du sommeil dans l'application** : les deux notes et les deux roues le matin, la fatigue vers 21 h, avec leur enregistrement.
-4. **Affichage du relevé du jour** dans l'application.
+4. **Affichage du relevé du jour** dans l'application : fait pour la lumière, sur l'accueil, avec trois roues (coucher, lever, coucher souhaité) dont les heures ne sont pas encore gardées.
 5. **Mesure écran éteint** : les réveils environ toutes les 9 min, le court wake lock, la proximité, la position et le mouvement significatif décrits plus haut.
 

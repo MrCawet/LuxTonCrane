@@ -25,3 +25,25 @@ fn ajouter_une_mesure_depuis_kotlin_l_écrit_dans_la_base() {
         .unwrap();
     assert_eq!(écrite, (320.5, 1_793_000_000_000));
 }
+
+#[test]
+fn le_relevé_du_jour_se_calcule_avec_les_mesures_du_journal() {
+    let path = fresh_database_path("releve");
+    let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
+    let minute_ms = 60_000;
+    let heure_ms = 60 * minute_ms;
+    let coucher_ms = 1_793_000_000_000;
+    let lever_ms = coucher_ms + 8 * heure_ms;
+    let coucher_souhaite_ms = lever_ms + 16 * heure_ms;
+    journal.ajouter(50.0, coucher_ms - 60 * minute_ms).unwrap();
+    journal.ajouter(5.0, coucher_ms - 55 * minute_ms).unwrap();
+
+    let relevé = journal
+        .releve_du_jour(coucher_ms, lever_ms, coucher_souhaite_ms)
+        .unwrap();
+
+    assert_eq!(
+        relevé.lumiere_du_soir.temps_au_dessus_du_seuil_ms,
+        5 * minute_ms
+    );
+}
