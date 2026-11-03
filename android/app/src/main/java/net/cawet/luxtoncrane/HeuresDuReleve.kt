@@ -19,11 +19,12 @@ fun heuresDuRelevé(
     aujourdhui: LocalDate,
     fuseau: ZoneId,
 ): HeuresDuRelevé {
-    val veille = aujourdhui.minusDays(1)
+    val jourDuCoucher = if (coucher.isBefore(lever)) aujourdhui else aujourdhui.minusDays(1)
+    val jourDuCoucherSouhaité = if (coucherSouhaité.isAfter(lever)) aujourdhui else aujourdhui.plusDays(1)
     return HeuresDuRelevé(
-        coucherMs = instantMs(veille, coucher, fuseau),
+        coucherMs = instantMs(jourDuCoucher, coucher, fuseau),
         leverMs = instantMs(aujourdhui, lever, fuseau),
-        coucherSouhaitéMs = instantMs(aujourdhui, coucherSouhaité, fuseau),
+        coucherSouhaitéMs = instantMs(jourDuCoucherSouhaité, coucherSouhaité, fuseau),
     )
 }
 
