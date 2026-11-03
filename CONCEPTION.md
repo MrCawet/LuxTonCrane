@@ -59,6 +59,8 @@ Objectif : aucune ou légère. Comparée à la quantité de sommeil de la nuit p
 
 Le premier rapport. Il couvre une nuit et la journée qui suit.
 
+Pourquoi dans cet ordre : l'agenda se remplit le matin, sur la nuit qui vient de passer, et la fatigue du soir se compare à la nuit d'avant. L'inverse (la journée, puis la nuit qui suit) garderait ensemble la lumière de la journée et la nuit qu'elle prépare, mais séparerait la nuit de la fatigue qu'elle cause. Aucun découpage ne garde tout ensemble. En contrepartie, le relevé n'est complet qu'au coucher suivant : c'est lui qui fixe la fin de la journée, 3 h avant.
+
 | Bloc | Contenu |
 |---|---|
 | Sommeil | les notes d'endormissement et de continuité de la nuit, la quantité de sommeil, et pour chacune si l'objectif est tenu |
