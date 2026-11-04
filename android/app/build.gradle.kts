@@ -26,7 +26,7 @@ android {
             create("livraison") {
                 storeFile = file(signingKeyPath)
                 storePassword = System.getenv("LIVRAISON_CLE_MOT_DE_PASSE")
-                keyAlias = "luxtoncrane"
+                keyAlias = "corerecth"
                 keyPassword = System.getenv("LIVRAISON_CLE_MOT_DE_PASSE")
             }
         }
