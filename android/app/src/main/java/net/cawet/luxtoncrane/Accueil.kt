@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.NumberPicker
@@ -57,9 +59,14 @@ class Accueil : Activity() {
         message.text = "Mesure de la lumière en cours, écran allumé."
         column.addView(message)
 
-        roueDuCoucher = roue("Heure du coucher", LocalTime.of(23, 0), column)
-        roueDuLever = roue("Heure du lever", LocalTime.of(7, 0), column)
-        roueDuCoucherSouhaité = roue("Heure du coucher souhaitée", LocalTime.of(23, 0), column)
+        // Côte à côte, les roues tiennent sur l'écran : sinon elles captent le glissement du doigt
+        // et la page ne défile plus.
+        val roues = LinearLayout(this)
+        roues.orientation = LinearLayout.HORIZONTAL
+        roueDuCoucher = roue("Coucher", LocalTime.of(23, 0), roues)
+        roueDuLever = roue("Lever", LocalTime.of(7, 0), roues)
+        roueDuCoucherSouhaité = roue("Coucher souhaité", LocalTime.of(23, 0), roues)
+        column.addView(roues)
 
         val bouton = Button(this)
         bouton.text = "Voir le relevé du jour"
@@ -74,11 +81,15 @@ class Accueil : Activity() {
         return screen
     }
 
-    /** Une roue qui se déroule par pas de 15 min, sur toute la journée. */
-    private fun roue(titre: String, heureDeDépart: LocalTime, column: LinearLayout): NumberPicker {
+    /** Une roue qui se déroule par pas de 15 min, sur toute la journée, sous son titre. */
+    private fun roue(titre: String, heureDeDépart: LocalTime, roues: LinearLayout): NumberPicker {
+        val colonne = LinearLayout(this)
+        colonne.orientation = LinearLayout.VERTICAL
+        colonne.gravity = Gravity.CENTER_HORIZONTAL
+
         val étiquette = TextView(this)
         étiquette.text = titre
-        column.addView(étiquette)
+        colonne.addView(étiquette)
 
         val heures = Array(PAS_PAR_JOUR) { pas -> heureDuPas(pas).toString() }
         val roue = NumberPicker(this)
@@ -86,7 +97,12 @@ class Accueil : Activity() {
         roue.maxValue = PAS_PAR_JOUR - 1
         roue.displayedValues = heures
         roue.value = heureDeDépart.toSecondOfDay() / SECONDES_PAR_PAS
-        column.addView(roue)
+        // Sans cela, la roue prend le focus à l'ouverture et la page défile jusqu'à elle.
+        roue.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+        colonne.addView(roue)
+
+        val sameWidthForEachWheel = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        roues.addView(colonne, sameWidthForEachWheel)
         return roue
     }
 
