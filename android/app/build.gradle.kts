@@ -18,6 +18,25 @@ android {
         }
     }
 
+    // La clé fixe n'existe que dans la livraison : une mise à jour n'est acceptée par Android
+    // que si l'APK porte la même signature que l'application installée.
+    val signingKeyPath = System.getenv("LIVRAISON_CLE_CHEMIN")
+    if (signingKeyPath != null) {
+        signingConfigs {
+            create("livraison") {
+                storeFile = file(signingKeyPath)
+                storePassword = System.getenv("LIVRAISON_CLE_MOT_DE_PASSE")
+                keyAlias = "luxtoncrane"
+                keyPassword = System.getenv("LIVRAISON_CLE_MOT_DE_PASSE")
+            }
+        }
+        buildTypes {
+            getByName("release") {
+                signingConfig = signingConfigs.getByName("livraison")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
