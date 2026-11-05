@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowInsets
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.NumberPicker
@@ -71,7 +72,23 @@ class Accueil : Activity() {
 
         val screen = ScrollView(this)
         screen.addView(column)
+        keepAwayFromSystemBars(screen)
         return screen
+    }
+
+    /**
+     * Depuis Android 15, l'application dessine sous la barre d'état et la barre de navigation :
+     * sans cet écart, le haut de la page est caché et ne peut pas être atteint.
+     */
+    private fun keepAwayFromSystemBars(screen: ScrollView) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            return
+        }
+        screen.setOnApplyWindowInsetsListener { view, insets ->
+            val systemBars = insets.getInsets(WindowInsets.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
     }
 
     /** Une roue qui se déroule par pas de 15 min, sur toute la journée. */
