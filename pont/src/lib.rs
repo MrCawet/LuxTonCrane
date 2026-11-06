@@ -149,11 +149,17 @@ impl Journal {
         }
     }
 
-    pub fn ajouter(&self, valeur_lux: f32, instant_ms: i64) -> Result<(), EchecPont> {
+    /// `telephone_couvert` : aucun si le capteur de proximité n'a encore rien donné.
+    pub fn ajouter(
+        &self,
+        valeur_lux: f32,
+        instant_ms: i64,
+        telephone_couvert: Option<bool>,
+    ) -> Result<(), EchecPont> {
         let mesure = Mesure {
             valeur_lux,
             instant_ms,
-            téléphone_couvert: None,
+            téléphone_couvert: telephone_couvert,
         };
         let mut sqlite = match self.sqlite.lock() {
             Ok(sqlite) => sqlite,
