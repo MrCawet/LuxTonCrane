@@ -153,6 +153,7 @@ impl Journal {
         let mesure = Mesure {
             valeur_lux,
             instant_ms,
+            téléphone_couvert: None,
         };
         let mut sqlite = match self.sqlite.lock() {
             Ok(sqlite) => sqlite,

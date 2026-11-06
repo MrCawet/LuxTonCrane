@@ -108,6 +108,7 @@ impl Serveur {
             let mesure = Mesure {
                 valeur_lux: reçue.valeur_lux,
                 instant_ms: reçue.instant_ms,
+                téléphone_couvert: None,
             };
             let journal: &mut dyn Journal = &mut self.journal;
             if ajouter(mesure, journal).is_err() {
