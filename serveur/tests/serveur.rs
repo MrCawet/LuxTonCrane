@@ -79,3 +79,22 @@ fn les_mesures_reçues_sont_gardées_et_résumées() {
         json!({"nombre": 2, "derniere": {"valeur_lux": 80.0, "instant_ms": 1793000060000_i64}})
     );
 }
+
+#[test]
+fn une_mesure_déjà_reçue_n_est_pas_gardée_deux_fois() {
+    let mut serveur = serveur_vide("doublon");
+    let autorisation = format!("Bearer {JETON}");
+    let premier_envoi = r#"[{"valeur_lux": 320.5, "instant_ms": 1793000000000}]"#;
+    let second_envoi = r#"[
+        {"valeur_lux": 320.5, "instant_ms": 1793000000000},
+        {"valeur_lux": 80.0, "instant_ms": 1793000060000}
+    ]"#;
+
+    serveur.répondre(envoi(Some(&autorisation), premier_envoi));
+    serveur.répondre(envoi(Some(&autorisation), second_envoi));
+
+    assert_eq!(
+        résumé_de(&mut serveur),
+        json!({"nombre": 2, "derniere": {"valeur_lux": 80.0, "instant_ms": 1793000060000_i64}})
+    );
+}
