@@ -2,6 +2,8 @@
 
 //! Reçoit les mesures du téléphone et les rend à la page web. Toute requête exige le jeton.
 
+use std::collections::HashSet;
+
 use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
@@ -93,7 +95,16 @@ impl Serveur {
             Ok(reçues) => reçues,
             Err(_) => return Réponse::vide(400),
         };
+        // Le téléphone renvoie un lot dont il n'a pas eu la réponse : une mesure se reconnaît à son instant.
+        let mut instants_déjà_reçus: HashSet<i64> = match self.journal.historique() {
+            Ok(historique) => historique.iter().map(|mesure| mesure.instant_ms).collect(),
+            Err(_) => return Réponse::vide(500),
+        };
         for reçue in reçues {
+            let nouvelle = instants_déjà_reçus.insert(reçue.instant_ms);
+            if !nouvelle {
+                continue;
+            }
             let mesure = Mesure {
                 valeur_lux: reçue.valeur_lux,
                 instant_ms: reçue.instant_ms,
