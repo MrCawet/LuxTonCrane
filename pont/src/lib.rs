@@ -207,7 +207,35 @@ impl Journal {
         &self,
         dernier_instant_recu_ms: Option<i64>,
     ) -> Result<Vec<MesureDuJournal>, EchecPont> {
-        let _ = dernier_instant_recu_ms;
-        Ok(Vec::new())
+        let sqlite = match self.sqlite.lock() {
+            Ok(sqlite) => sqlite,
+            Err(error) => {
+                return Err(EchecPont::Lecture {
+                    raison: error.to_string(),
+                });
+            }
+        };
+        let historique = match sqlite.historique() {
+            Ok(historique) => historique,
+            Err(error) => {
+                return Err(EchecPont::Lecture {
+                    raison: error.to_string(),
+                });
+            }
+        };
+        let mut à_envoyer = Vec::new();
+        for mesure in historique {
+            let déjà_reçue = match dernier_instant_recu_ms {
+                Some(dernier_instant_reçu_ms) => mesure.instant_ms <= dernier_instant_reçu_ms,
+                None => false,
+            };
+            if !déjà_reçue {
+                à_envoyer.push(MesureDuJournal {
+                    valeur_lux: mesure.valeur_lux,
+                    instant_ms: mesure.instant_ms,
+                });
+            }
+        }
+        Ok(à_envoyer)
     }
 }
