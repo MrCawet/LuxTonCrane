@@ -119,6 +119,13 @@ impl From<RelevéDuJour> for ReleveDuJour {
     }
 }
 
+/// Une mesure du journal, vue de Kotlin.
+#[derive(uniffi::Record)]
+pub struct MesureDuJournal {
+    pub valeur_lux: f32,
+    pub instant_ms: i64,
+}
+
 /// Le journal SQLite, vu de Kotlin.
 #[derive(uniffi::Object)]
 pub struct Journal {
@@ -193,5 +200,14 @@ impl Journal {
         };
         let relevé = relevé_du_jour(&heures, &historique);
         Ok(ReleveDuJour::from(relevé))
+    }
+
+    /// `dernier_instant_recu_ms` : l'instant de la dernière mesure que le serveur a reçue, s'il en a une.
+    pub fn mesures_apres(
+        &self,
+        dernier_instant_recu_ms: Option<i64>,
+    ) -> Result<Vec<MesureDuJournal>, EchecPont> {
+        let _ = dernier_instant_recu_ms;
+        Ok(Vec::new())
     }
 }

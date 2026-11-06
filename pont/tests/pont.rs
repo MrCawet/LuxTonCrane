@@ -47,3 +47,25 @@ fn le_relevé_du_jour_se_calcule_avec_les_mesures_du_journal() {
         5 * minute_ms
     );
 }
+
+#[test]
+fn les_mesures_à_envoyer_sont_celles_d_après_la_dernière_reçue_par_le_serveur() {
+    let path = fresh_database_path("a_envoyer");
+    let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
+    journal.ajouter(320.5, 1_793_000_000_000).unwrap();
+    journal.ajouter(80.0, 1_793_000_060_000).unwrap();
+    journal.ajouter(5.0, 1_793_000_120_000).unwrap();
+
+    let après_la_première = journal.mesures_apres(Some(1_793_000_000_000)).unwrap();
+    let sans_mesure_reçue = journal.mesures_apres(None).unwrap();
+
+    let instants_après_la_première: Vec<i64> = après_la_première
+        .iter()
+        .map(|mesure| mesure.instant_ms)
+        .collect();
+    assert_eq!(
+        instants_après_la_première,
+        vec![1_793_000_060_000, 1_793_000_120_000]
+    );
+    assert_eq!(sans_mesure_reçue.len(), 3);
+}
