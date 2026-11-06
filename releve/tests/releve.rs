@@ -235,3 +235,22 @@ fn la_journée_sans_mesure_ne_donne_aucune_part_à_250_lx_ou_plus() {
         None
     );
 }
+
+#[test]
+fn une_mesure_prise_téléphone_couvert_compte_comme_non_mesurée() {
+    let historique = vec![
+        Mesure {
+            valeur_lux: 50.0,
+            instant_ms: COUCHER_MS - 60 * MINUTE_MS,
+            téléphone_couvert: Some(true),
+        },
+        mesure(5.0, COUCHER_MS - 55 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    let durée_du_soir_ms = 3 * HEURE_MS;
+    let couverture_attendue = (10 * MINUTE_MS) as f64 / durée_du_soir_ms as f64;
+    assert_eq!(relevé.lumière_du_soir.temps_au_dessus_du_seuil_ms, 0);
+    assert_eq!(relevé.lumière_du_soir.couverture, couverture_attendue);
+}
