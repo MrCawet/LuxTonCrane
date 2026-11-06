@@ -87,9 +87,13 @@ struct PériodeMesurée {
 }
 
 /// Une mesure vaut jusqu'à la suivante, pendant 10 min au plus.
+/// Une mesure prise téléphone couvert ne vaut rien, mais termine quand même la précédente.
 fn périodes_mesurées(fenêtre: &Fenêtre, historique: &[Mesure]) -> Vec<PériodeMesurée> {
     let mut périodes = Vec::new();
     for (position, mesure) in historique.iter().enumerate() {
+        if mesure.téléphone_couvert == Some(true) {
+            continue;
+        }
         let fin_maximale_ms = mesure.instant_ms + DURÉE_DE_VALIDITÉ_MAXIMALE_MS;
         let fin_de_validité_ms = match historique.get(position + 1) {
             Some(suivante) => suivante.instant_ms.min(fin_maximale_ms),
