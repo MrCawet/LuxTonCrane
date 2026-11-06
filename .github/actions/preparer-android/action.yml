@@ -9,8 +9,19 @@ runs:
         distribution: temurin
         java-version: "17"
     - uses: gradle/actions/setup-gradle@v6
-    - name: Cible Rust Android et cargo-ndk
+    - name: Cible Rust Android
       shell: bash
-      run: |
-        rustup target add aarch64-linux-android
-        cargo install cargo-ndk --locked
+      run: rustup target add aarch64-linux-android
+    # Téléchargé déjà compilé : le compiler depuis les sources prend 40 secondes à chaque exécution.
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-ndk
+    # Le pont est compilé pour Android, puis uniffi-bindgen pour la machine de CI : sans cache, tout le Rust est recompilé deux fois.
+    - uses: actions/cache@v6
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: rust-android-${{ hashFiles('rust-toolchain.toml', 'Cargo.lock') }}
+        restore-keys: rust-android-
