@@ -143,5 +143,5 @@ Dans cet ordre, chaque étape en TDD et sur sa propre branche :
 2. **Proximité avec chaque mesure** : lire le capteur de proximité avec chaque mesure de lumière, et le garder dans le journal.
 3. **Agenda du sommeil dans l'application** : les deux notes et les deux roues le matin, la fatigue vers 21 h, avec leur enregistrement.
 4. **Affichage du relevé du jour** dans l'application : fait pour la lumière, sur l'accueil, avec trois roues (coucher, lever, coucher souhaité) dont les heures ne sont pas encore gardées.
-5. **Mesure écran éteint** : les réveils environ toutes les 9 min, le court wake lock, la proximité, la position et le mouvement significatif décrits plus haut.
+5. **Mesure écran éteint** : faite pour la lumière, avec l'alarme environ toutes les 9 min et le court wake lock. Restent la proximité, la position et le mouvement significatif décrits plus haut.
 
