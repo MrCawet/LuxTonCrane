@@ -20,6 +20,7 @@ fn mesure(valeur_lux: f32, instant_ms: i64) -> Mesure {
     Mesure {
         valeur_lux,
         instant_ms,
+        téléphone_couvert: None,
     }
 }
 
