@@ -2,7 +2,7 @@
 id: US-0001
 type: us
 titre: Les mesures arrivent sur le serveur
-statut: pret
+statut: en_cours
 priorite: essentiel
 cree_le: 2026-11-06
 maj_le: 2026-11-06

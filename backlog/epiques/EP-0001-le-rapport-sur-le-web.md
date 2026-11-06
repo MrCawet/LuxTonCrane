@@ -2,7 +2,7 @@
 id: EP-0001
 type: epique
 titre: Le rapport sur le web
-statut: nouveau
+statut: en_cours
 cree_le: 2026-11-06
 maj_le: 2026-11-06
 source: REQ-0001
