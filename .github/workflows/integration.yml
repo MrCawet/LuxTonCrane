@@ -20,6 +20,7 @@ jobs:
     outputs:
       rust: ${{ steps.chemins.outputs.rust }}
       android: ${{ steps.chemins.outputs.android }}
+      web: ${{ steps.chemins.outputs.web }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -32,7 +33,7 @@ jobs:
         run: |
           fichiers=$(git diff --name-only "$BASE...$HEAD")
           echo "$fichiers"
-          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|releve/|\.github/)'; then
+          if echo "$fichiers" | grep -qE '^(Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|pont/|releve/|serveur/|\.github/)'; then
             echo "rust=true" >> "$GITHUB_OUTPUT"
           else
             echo "rust=false" >> "$GITHUB_OUTPUT"
@@ -42,6 +43,11 @@ jobs:
             echo "android=true" >> "$GITHUB_OUTPUT"
           else
             echo "android=false" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$fichiers" | grep -qE '^(web/|\.github/)'; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "web=false" >> "$GITHUB_OUTPUT"
           fi
 
   rust:
@@ -67,9 +73,28 @@ jobs:
       - uses: ./.github/actions/preparer-android
       - run: ./gradlew test assembleDebug
 
+  web:
+    needs: changements
+    if: needs.changements.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
+      # vue-tsc vérifie aussi les types.
+      - run: npm run build
+
   # Seule vérification à exiger dans la protection de main : un job sauté compte comme réussi.
   verdict:
-    needs: [changements, rust, android]
+    needs: [changements, rust, android, web]
     if: always()
     runs-on: ubuntu-latest
     steps:
