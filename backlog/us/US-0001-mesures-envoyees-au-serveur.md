@@ -2,7 +2,7 @@
 id: US-0001
 type: us
 titre: Les mesures arrivent sur le serveur
-statut: en_cours
+statut: a_valider
 priorite: essentiel
 cree_le: 2026-11-06
 maj_le: 2026-11-06
@@ -59,8 +59,8 @@ Hypothèses :
 ## Critères d'acceptation
 
 - [ ] Le téléphone envoie au serveur les mesures pas encore envoyées, environ toutes les 15 min, quand il a du réseau.
-- [ ] Le serveur garde chaque mesure reçue dans sa base SQLite ; une mesure déjà reçue n'est pas gardée deux fois.
-- [ ] Une requête sans le bon jeton est refusée, à l'envoi comme à la lecture.
-- [ ] La page web affiche le nombre de mesures reçues et la dernière (son heure locale et sa valeur en lx).
-- [ ] `serveur/` et `web/` sont dans les chemins surveillés par `integration.yml`.
-- [ ] CLAUDE.md dit comment compiler et lancer le serveur et la page.
+- [x] Le serveur garde chaque mesure reçue dans sa base SQLite ; une mesure déjà reçue n'est pas gardée deux fois.
+- [x] Une requête sans le bon jeton est refusée, à l'envoi comme à la lecture.
+- [x] La page web affiche le nombre de mesures reçues et la dernière (son heure locale et sa valeur en lx).
+- [x] `serveur/` et `web/` sont dans les chemins surveillés par `integration.yml`.
+- [x] CLAUDE.md dit comment compiler et lancer le serveur et la page.
