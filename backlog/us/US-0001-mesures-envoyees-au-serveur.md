@@ -38,8 +38,9 @@ Hypothèses :
 - L'envoi a lieu environ toutes les 15 min, l'intervalle minimal d'Android pour une tâche périodique, quand le
   téléphone a du réseau.
 - Une mesure se reconnaît à son instant : reçue deux fois, elle n'est gardée qu'une fois.
-- Le jeton et l'adresse du serveur sont donnés à l'application à la compilation, par des secrets GitHub, comme la clé
-  de signature ; le serveur lit le jeton dans sa configuration, hors du dépôt.
+- Le jeton se saisit une fois sur l'accueil de l'application, qui le garde dans ses données privées : l'APK est
+  publié dans les releases d'un dépôt public, un jeton compilé dedans serait public. L'adresse du serveur, qui n'est
+  pas secrète, est écrite dans le code. Le serveur lit le jeton dans son environnement, hors du dépôt.
 - La page demande le jeton une fois et le garde dans le navigateur.
 - L'opérateur déploie le serveur et la page sur mcProd, derrière nginx ; l'agent ne déploie pas.
 
