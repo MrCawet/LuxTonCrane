@@ -41,10 +41,10 @@ class ServiceDeMesure : Service(), SensorEventListener {
             when (intent.action) {
                 Intent.ACTION_SCREEN_ON -> {
                     annulerLAlarme()
-                    ouvrirLeCapteur()
+                    ouvrirLesCapteurs()
                 }
                 Intent.ACTION_SCREEN_OFF -> {
-                    fermerLeCapteur()
+                    fermerLesCapteurs()
                     programmerLAlarme()
                 }
                 ALARM_ACTION -> {
@@ -55,12 +55,29 @@ class ServiceDeMesure : Service(), SensorEventListener {
         }
     }
 
-    /** Écran éteint : note la première valeur du capteur, puis le referme et laisse le processeur se rendormir. */
+    /** Si le téléphone est couvert, d'après la dernière valeur du capteur de proximité ; inconnu avant la première. */
+    private var proximité: Boolean? = null
+
+    /** Écran éteint, la première valeur de lumière attend celle de la proximité pour être notée avec elle. */
+    private var lumièreEnAttente: ValeurDeLumière? = null
+
+    /**
+     * Écran éteint : note la première valeur de lumière avec la proximité,
+     * puis referme les capteurs et laisse le processeur se rendormir.
+     */
     private val mesureÉcranÉteint = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
-            enregistrer(event)
-            sensorManager.unregisterListener(this)
-            relâcherLeProcesseur()
+            when (event.sensor.type) {
+                Sensor.TYPE_PROXIMITY -> noterLaProximité(event)
+                Sensor.TYPE_LIGHT -> lumièreEnAttente = valeurDeLumière(event)
+            }
+            val lumière = lumièreEnAttente ?: return
+            val proximitéAttendue = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) != null
+            if (proximitéAttendue && proximité == null) {
+                return
+            }
+            enregistrer(lumière)
+            terminerLaMesureÉcranÉteint()
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
@@ -98,7 +115,7 @@ class ServiceDeMesure : Service(), SensorEventListener {
         }
 
         if (powerManager.isInteractive) {
-            ouvrirLeCapteur()
+            ouvrirLesCapteurs()
         } else {
             programmerLAlarme()
         }
@@ -110,9 +127,8 @@ class ServiceDeMesure : Service(), SensorEventListener {
         if (::journal.isInitialized) {
             unregisterReceiver(screenAndAlarmReceiver)
             annulerLAlarme()
-            fermerLeCapteur()
-            sensorManager.unregisterListener(mesureÉcranÉteint)
-            relâcherLeProcesseur()
+            fermerLesCapteurs()
+            terminerLaMesureÉcranÉteint()
             journal.close()
         }
         super.onDestroy()
@@ -120,31 +136,51 @@ class ServiceDeMesure : Service(), SensorEventListener {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    override fun onSensorChanged(event: SensorEvent) = enregistrer(event)
+    /** Écran allumé : chaque valeur de lumière est notée avec la dernière proximité connue. */
+    override fun onSensorChanged(event: SensorEvent) {
+        when (event.sensor.type) {
+            Sensor.TYPE_PROXIMITY -> noterLaProximité(event)
+            Sensor.TYPE_LIGHT -> enregistrer(valeurDeLumière(event))
+        }
+    }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
 
-    private fun enregistrer(event: SensorEvent) {
-        val valeurLux = event.values[0]
+    private fun noterLaProximité(event: SensorEvent) {
+        val distanceCm = event.values[0]
+        proximité = téléphoneCouvert(distanceCm, portéeMaximaleCm = event.sensor.maximumRange)
+    }
+
+    /** Android réutilise l'objet `SensorEvent` : sa valeur et son instant sont copiés. */
+    private fun valeurDeLumière(event: SensorEvent): ValeurDeLumière {
         val instantMs = instantMsDuCapteur(
             horodatageCapteurNs = event.timestamp,
             depuisDémarrageNs = SystemClock.elapsedRealtimeNanos(),
             maintenantMs = System.currentTimeMillis(),
         )
+        return ValeurDeLumière(valeurLux = event.values[0], instantMs = instantMs)
+    }
+
+    private fun enregistrer(lumière: ValeurDeLumière) {
         try {
-            journal.ajouter(valeurLux, instantMs)
+            journal.ajouter(lumière.valeurLux, lumière.instantMs, proximité)
         } catch (échec: EchecPont) {
             Log.e(LOG_TAG, "Une mesure n'a pas pu être enregistrée.", échec)
         }
     }
 
-    private fun ouvrirLeCapteur() {
+    private fun ouvrirLesCapteurs() {
         val capteurDeLumière = capteurDeLumière() ?: return
+        val capteurDeProximité = capteurDeProximité()
+        if (capteurDeProximité != null) {
+            sensorManager.registerListener(this, capteurDeProximité, SensorManager.SENSOR_DELAY_NORMAL)
+        }
         sensorManager.registerListener(this, capteurDeLumière, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    private fun fermerLeCapteur() {
+    private fun fermerLesCapteurs() {
         sensorManager.unregisterListener(this)
+        proximité = null
     }
 
     /**
@@ -154,7 +190,18 @@ class ServiceDeMesure : Service(), SensorEventListener {
     private fun prendreUneMesure() {
         val capteurDeLumière = capteurDeLumière() ?: return
         wakeLock.acquire(DURÉE_MAXIMALE_D_UNE_MESURE_MS)
+        val capteurDeProximité = capteurDeProximité()
+        if (capteurDeProximité != null) {
+            sensorManager.registerListener(mesureÉcranÉteint, capteurDeProximité, SensorManager.SENSOR_DELAY_NORMAL)
+        }
         sensorManager.registerListener(mesureÉcranÉteint, capteurDeLumière, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    private fun terminerLaMesureÉcranÉteint() {
+        sensorManager.unregisterListener(mesureÉcranÉteint)
+        lumièreEnAttente = null
+        proximité = null
+        relâcherLeProcesseur()
     }
 
     private fun relâcherLeProcesseur() {
@@ -169,6 +216,14 @@ class ServiceDeMesure : Service(), SensorEventListener {
             Log.e(LOG_TAG, "Ce téléphone n'a pas de capteur de lumière.")
         }
         return capteurDeLumière
+    }
+
+    private fun capteurDeProximité(): Sensor? {
+        val capteurDeProximité = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+        if (capteurDeProximité == null) {
+            Log.w(LOG_TAG, "Ce téléphone n'a pas de capteur de proximité : les mesures sont notées sans elle.")
+        }
+        return capteurDeProximité
     }
 
     /**
@@ -205,6 +260,8 @@ class ServiceDeMesure : Service(), SensorEventListener {
             startForeground(NOTIFICATION_ID, notification)
         }
     }
+
+    private class ValeurDeLumière(val valeurLux: Float, val instantMs: Long)
 
     private companion object {
         const val LOG_TAG = "LuxTonCrane"
