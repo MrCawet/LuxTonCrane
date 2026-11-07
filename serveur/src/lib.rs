@@ -77,7 +77,7 @@ struct LumièreDeLaJournéeJson {
     couverture: f64,
 }
 
-/// Le relevé du jour, tel que la page web le reçoit : les noms des champs sont ceux du pont.
+/// Le relevé du jour, tel que la page web le reçoit : les noms des champs sont sans accents.
 #[derive(Serialize)]
 struct RelevéDuJourJson {
     lumiere_du_soir: LumièreÀÉviterJson,

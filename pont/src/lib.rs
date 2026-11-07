@@ -9,10 +9,6 @@ use std::sync::{Arc, Mutex};
 use journal::ajouter;
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
-use releve::{
-    HeuresDuCoucherEtDuLever, LumièreDeLaJournée, LumièreDuMatin, LumièreÀÉviter, RelevéDuJour,
-    relevé_du_jour,
-};
 
 uniffi::setup_scaffolding!();
 
@@ -43,82 +39,6 @@ impl fmt::Display for EchecPont {
 /// Fait de l'échec une erreur Rust standard, exigée elle aussi par UniFFI.
 impl std::error::Error for EchecPont {}
 
-/// La lumière du soir ou de la nuit, vue de Kotlin.
-#[derive(uniffi::Record)]
-pub struct LumiereAEviter {
-    pub temps_au_dessus_du_seuil_ms: i64,
-    pub valeur_la_plus_haute_lux: Option<f32>,
-    pub objectif_tenu: bool,
-    pub couverture: f64,
-}
-
-impl From<LumièreÀÉviter> for LumiereAEviter {
-    fn from(lumière: LumièreÀÉviter) -> LumiereAEviter {
-        LumiereAEviter {
-            temps_au_dessus_du_seuil_ms: lumière.temps_au_dessus_du_seuil_ms,
-            valeur_la_plus_haute_lux: lumière.valeur_la_plus_haute_lux,
-            objectif_tenu: lumière.objectif_tenu,
-            couverture: lumière.couverture,
-        }
-    }
-}
-
-/// La lumière du matin, vue de Kotlin.
-#[derive(uniffi::Record)]
-pub struct LumiereDuMatin {
-    pub temps_a_10_000_lx_ou_plus_ms: i64,
-    pub objectif_tenu: bool,
-    pub couverture: f64,
-}
-
-impl From<LumièreDuMatin> for LumiereDuMatin {
-    fn from(lumière: LumièreDuMatin) -> LumiereDuMatin {
-        LumiereDuMatin {
-            temps_a_10_000_lx_ou_plus_ms: lumière.temps_à_10_000_lx_ou_plus_ms,
-            objectif_tenu: lumière.objectif_tenu,
-            couverture: lumière.couverture,
-        }
-    }
-}
-
-/// La lumière de la journée, vue de Kotlin.
-#[derive(uniffi::Record)]
-pub struct LumiereDeLaJournee {
-    pub part_du_temps_mesure_a_250_lx_ou_plus: Option<f64>,
-    pub objectif_tenu: bool,
-    pub couverture: f64,
-}
-
-impl From<LumièreDeLaJournée> for LumiereDeLaJournee {
-    fn from(lumière: LumièreDeLaJournée) -> LumiereDeLaJournee {
-        LumiereDeLaJournee {
-            part_du_temps_mesure_a_250_lx_ou_plus: lumière.part_du_temps_mesuré_à_250_lx_ou_plus,
-            objectif_tenu: lumière.objectif_tenu,
-            couverture: lumière.couverture,
-        }
-    }
-}
-
-/// Le relevé du jour, vu de Kotlin.
-#[derive(uniffi::Record)]
-pub struct ReleveDuJour {
-    pub lumiere_du_soir: LumiereAEviter,
-    pub lumiere_de_la_nuit: LumiereAEviter,
-    pub lumiere_du_matin: LumiereDuMatin,
-    pub lumiere_de_la_journee: LumiereDeLaJournee,
-}
-
-impl From<RelevéDuJour> for ReleveDuJour {
-    fn from(relevé: RelevéDuJour) -> ReleveDuJour {
-        ReleveDuJour {
-            lumiere_du_soir: LumiereAEviter::from(relevé.lumière_du_soir),
-            lumiere_de_la_nuit: LumiereAEviter::from(relevé.lumière_de_la_nuit),
-            lumiere_du_matin: LumiereDuMatin::from(relevé.lumière_du_matin),
-            lumiere_de_la_journee: LumiereDeLaJournee::from(relevé.lumière_de_la_journée),
-        }
-    }
-}
-
 /// Une mesure du journal, vue de Kotlin.
 #[derive(uniffi::Record)]
 pub struct MesureDuJournal {
@@ -134,7 +54,7 @@ pub struct Journal {
     sqlite: Mutex<SqliteJournal>,
 }
 
-/// Ouverture du journal, ajout des mesures et relevé du jour.
+/// Ouverture du journal, ajout des mesures et lecture de celles à envoyer au serveur.
 #[uniffi::export]
 impl Journal {
     #[uniffi::constructor]
@@ -176,38 +96,6 @@ impl Journal {
                 raison: échec.raison,
             }),
         }
-    }
-
-    /// `coucher_souhaite_ms` : l'heure du coucher souhaitée, qui fixe la fin de la journée.
-    pub fn releve_du_jour(
-        &self,
-        coucher_ms: i64,
-        lever_ms: i64,
-        coucher_souhaite_ms: i64,
-    ) -> Result<ReleveDuJour, EchecPont> {
-        let sqlite = match self.sqlite.lock() {
-            Ok(sqlite) => sqlite,
-            Err(error) => {
-                return Err(EchecPont::Lecture {
-                    raison: error.to_string(),
-                });
-            }
-        };
-        let historique = match sqlite.historique() {
-            Ok(historique) => historique,
-            Err(error) => {
-                return Err(EchecPont::Lecture {
-                    raison: error.to_string(),
-                });
-            }
-        };
-        let heures = HeuresDuCoucherEtDuLever {
-            coucher_ms,
-            lever_ms,
-            coucher_suivant_ms: coucher_souhaite_ms,
-        };
-        let relevé = relevé_du_jour(&heures, &historique);
-        Ok(ReleveDuJour::from(relevé))
     }
 
     /// `dernier_instant_recu_ms` : l'instant de la dernière mesure que le serveur a reçue, s'il en a une.
