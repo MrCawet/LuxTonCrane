@@ -147,7 +147,10 @@ fn le_serveur_calcule_le_relevé_du_jour_sur_les_mesures_reçues() {
     let mut serveur = serveur_vide("releve");
     let autorisation = format!("Bearer {JETON}");
     // Une lampe à 50 lx une heure avant le coucher : le soir n'est pas tenu, la nuit n'a rien de mesuré.
-    let corps = format!(r#"[{{"valeur_lux": 50.0, "instant_ms": {}}}]"#, COUCHER_MS - HEURE_MS);
+    let corps = format!(
+        r#"[{{"valeur_lux": 50.0, "instant_ms": {}}}]"#,
+        COUCHER_MS - HEURE_MS
+    );
     serveur.répondre(envoi(Some(&autorisation), &corps));
 
     let chemin = chemin_du_relevé();
@@ -155,11 +158,23 @@ fn le_serveur_calcule_le_relevé_du_jour_sur_les_mesures_reçues() {
 
     assert_eq!(réponse.statut, 200);
     let relevé: Value = serde_json::from_str(&réponse.corps).unwrap();
-    assert_eq!(relevé["lumiere_du_soir"]["valeur_la_plus_haute_lux"], json!(50.0));
+    assert_eq!(
+        relevé["lumiere_du_soir"]["valeur_la_plus_haute_lux"],
+        json!(50.0)
+    );
     assert_eq!(relevé["lumiere_du_soir"]["objectif_tenu"], json!(false));
-    assert_eq!(relevé["lumiere_de_la_nuit"]["valeur_la_plus_haute_lux"], Value::Null);
-    assert_eq!(relevé["lumiere_du_matin"]["temps_a_10_000_lx_ou_plus_ms"], json!(0));
-    assert_eq!(relevé["lumiere_de_la_journee"]["part_du_temps_mesure_a_250_lx_ou_plus"], Value::Null);
+    assert_eq!(
+        relevé["lumiere_de_la_nuit"]["valeur_la_plus_haute_lux"],
+        Value::Null
+    );
+    assert_eq!(
+        relevé["lumiere_du_matin"]["temps_a_10_000_lx_ou_plus_ms"],
+        json!(0)
+    );
+    assert_eq!(
+        relevé["lumiere_de_la_journee"]["part_du_temps_mesure_a_250_lx_ou_plus"],
+        Value::Null
+    );
 }
 
 #[test]

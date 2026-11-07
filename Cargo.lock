@@ -595,6 +595,7 @@ dependencies = [
  "journal",
  "journal_sqlite",
  "mesure",
+ "releve",
  "serde",
  "serde_json",
  "tiny_http",
