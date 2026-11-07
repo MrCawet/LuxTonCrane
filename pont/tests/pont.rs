@@ -87,3 +87,19 @@ fn ajouter_une_mesure_depuis_kotlin_écrit_si_le_téléphone_était_couvert() {
         .unwrap();
     assert_eq!(écrit, Some(true));
 }
+
+#[test]
+fn les_mesures_à_envoyer_disent_si_le_téléphone_était_couvert() {
+    let path = fresh_database_path("a_envoyer_couvert");
+    let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
+    journal.ajouter(0.0, 1_793_000_000_000, Some(true)).unwrap();
+    journal.ajouter(320.5, 1_793_000_060_000, None).unwrap();
+
+    let à_envoyer = journal.mesures_apres(None).unwrap();
+
+    let proximités: Vec<Option<bool>> = à_envoyer
+        .iter()
+        .map(|mesure| mesure.telephone_couvert)
+        .collect();
+    assert_eq!(proximités, vec![Some(true), None]);
+}
