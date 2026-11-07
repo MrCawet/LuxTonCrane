@@ -7,7 +7,9 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.graphics.Color
 import android.text.InputType
+import android.view.View
 import android.view.WindowInsets
 import android.widget.Button
 import android.widget.EditText
@@ -24,10 +26,11 @@ import java.time.ZoneId
 class Accueil : Activity() {
 
     private lateinit var affichageDeLaSynchronisation: TextView
+    private lateinit var affichageDuDernierÉchec: TextView
 
     // Gardé dans un champ : les préférences ne retiennent ce qui les écoute que par une référence faible.
     private val suiviDeLaSynchronisation = SharedPreferences.OnSharedPreferenceChangeListener { _, clé ->
-        if (clé == LAST_SUCCESS_KEY) {
+        if (clé == LAST_SUCCESS_KEY || clé == LAST_FAILURE_TIME_KEY) {
             afficherLaDernièreSynchronisation()
         }
     }
@@ -72,6 +75,10 @@ class Accueil : Activity() {
         affichageDeLaSynchronisation = TextView(this)
         column.addView(affichageDeLaSynchronisation)
 
+        affichageDuDernierÉchec = TextView(this)
+        affichageDuDernierÉchec.setTextColor(Color.rgb(176, 0, 32))
+        column.addView(affichageDuDernierÉchec)
+
         val bouton = Button(this)
         bouton.text = "Synchroniser maintenant"
         bouton.setOnClickListener { demanderLaSynchronisation() }
@@ -103,6 +110,9 @@ class Accueil : Activity() {
     private fun afficherLaDernièreSynchronisation() {
         val instantMs = dernièreSynchronisationRéussieMs(this)
         affichageDeLaSynchronisation.text = texteDeLaDernièreSynchronisation(instantMs, ZoneId.systemDefault())
+        val texteDeLÉchec = texteDuDernierÉchec(dernierÉchecDeSynchronisation(this), ZoneId.systemDefault())
+        affichageDuDernierÉchec.text = texteDeLÉchec ?: ""
+        affichageDuDernierÉchec.visibility = if (texteDeLÉchec == null) View.GONE else View.VISIBLE
     }
 
     private fun demanderLaSynchronisation() {
@@ -138,19 +148,22 @@ class Accueil : Activity() {
 
         étiquette.text = étatDuJeton()
         bouton.setOnClickListener {
-            val jeton = champ.text.toString().trim()
-            if (jeton.isNotEmpty()) {
-                garderLeJetonDuServeur(this, jeton)
-                champ.text.clear()
-                étiquette.text = étatDuJeton()
+            val jeton = jetonSaisi(champ.text.toString())
+            if (jeton == null) {
+                étiquette.text = "Ce n'est pas un jeton : il ne contient ni espace, ni accent. Il n'est pas gardé."
+                return@setOnClickListener
             }
+            garderLeJetonDuServeur(this, jeton)
+            champ.text.clear()
+            étiquette.text = "Nouveau jeton gardé."
+            demanderLaSynchronisation()
         }
     }
 
     private fun étatDuJeton(): String {
         val jetonGardé = jetonDuServeur(this) != null
         if (jetonGardé) {
-            return "Jeton du serveur gardé : les mesures sont envoyées."
+            return "Jeton du serveur gardé."
         }
         return "Aucun jeton du serveur : les mesures ne sont pas envoyées."
     }

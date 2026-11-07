@@ -2,7 +2,7 @@
 id: ANO-0001
 type: anomalie
 titre: Le jeton est refusé sans que l'accueil le dise
-statut: en_cours
+statut: a_valider
 priorite: essentiel
 cree_le: 2026-11-07
 maj_le: 2026-11-07
@@ -45,7 +45,7 @@ sont envoyées. » alors que le serveur le refuse.
 
 ## Critères d'acceptation
 
-- [ ] Un jeton vide ou avec des caractères hors ASCII visible n'est pas gardé, et l'accueil le dit.
-- [ ] Un jeton gardé est confirmé, et une synchronisation part aussitôt.
-- [ ] L'accueil affiche le dernier échec (jeton refusé, ou serveur injoignable) jusqu'à la synchronisation réussie
+- [x] Un jeton vide ou avec des caractères hors ASCII visible n'est pas gardé, et l'accueil le dit.
+- [x] Un jeton gardé est confirmé, et une synchronisation part aussitôt.
+- [x] L'accueil affiche le dernier échec (jeton refusé, ou serveur injoignable) jusqu'à la synchronisation réussie
   suivante.
