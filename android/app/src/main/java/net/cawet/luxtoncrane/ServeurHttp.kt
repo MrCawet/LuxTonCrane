@@ -9,6 +9,9 @@ import org.json.JSONObject
 // L'adresse n'est pas secrète : seul le jeton protège les mesures. Le jeton n'est donc pas dans l'APK, qui est public.
 private const val MEASURES_URL = "https://lux-ton-crane.cawet.net/api/mesures"
 
+/** Le serveur a répondu 401 : le jeton gardé n'est pas le sien. */
+class JetonRefusé : IOException("le serveur refuse le jeton")
+
 /** Le serveur de mcProd, joint en HTTPS avec le jeton. Lève une `IOException` s'il ne répond pas comme prévu. */
 class ServeurHttp(private val jeton: String) : ServeurDesMesures {
 
@@ -23,6 +26,9 @@ class ServeurHttp(private val jeton: String) : ServeurDesMesures {
 
     private fun requireStatus(connection: HttpURLConnection, expected: Int) {
         val status = connection.responseCode
+        if (status == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            throw JetonRefusé()
+        }
         if (status != expected) {
             throw IOException("le serveur a répondu $status au lieu de $expected")
         }
