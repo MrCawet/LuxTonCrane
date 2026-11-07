@@ -1,16 +1,125 @@
-# Déclenchée seulement à la main, depuis l'onglet Actions de GitHub.
+# À chaque fusion dans main, ne livre que les parties modifiées : le serveur, la page web, l'application.
+# Lancée à la main, depuis l'onglet Actions de GitHub, elle livre les trois.
 name: Livraison
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
+
+# Deux livraisons ne se croisent jamais sur mcProd : la suivante attend la fin de la précédente.
+concurrency:
+  group: livraison
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  livraison:
+  changements:
     # On ne livre que ce qui est dans main, donc déjà passé par l'intégration.
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      serveur: ${{ steps.chemins.outputs.serveur }}
+      web: ${{ steps.chemins.outputs.web }}
+      application: ${{ steps.chemins.outputs.application }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: chemins
+        name: Repère les parties à livrer
+        env:
+          EVENEMENT: ${{ github.event_name }}
+          AVANT: ${{ github.event.before }}
+          APRES: ${{ github.sha }}
+        run: |
+          if [ "$EVENEMENT" = "workflow_dispatch" ]; then
+            echo "serveur=true" >> "$GITHUB_OUTPUT"
+            echo "web=true" >> "$GITHUB_OUTPUT"
+            echo "application=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          fichiers=$(git diff --name-only "$AVANT" "$APRES")
+          echo "$fichiers"
+          # Une partie est livrée quand elle change, ou quand change ce dont elle dépend, livraison comprise.
+          communs='Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|\.github/workflows/livraison\.yml'
+          if echo "$fichiers" | grep -qE "^($communs|serveur/|\.github/actions/joindre-mcprod/)"; then
+            echo "serveur=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "serveur=false" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$fichiers" | grep -qE '^(web/|\.github/workflows/livraison\.yml|\.github/actions/joindre-mcprod/)'; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "web=false" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$fichiers" | grep -qE "^($communs|releve/|pont/|android/|\.github/actions/preparer-android/)"; then
+            echo "application=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "application=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  serveur:
+    needs: changements
+    if: needs.changements.outputs.serveur == 'true'
+    # Pas ubuntu-latest : le binaire doit tourner sur Debian 13 (glibc 2.41), une Ubuntu plus récente le lierait à une glibc plus récente.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: cargo build --release --package serveur
+      - uses: ./.github/actions/joindre-mcprod
+        with:
+          cle: ${{ secrets.DEPLOIEMENT_CLE }}
+          hote-connu: ${{ secrets.DEPLOIEMENT_HOTE_CONNU }}
+      # Le binaire est remplacé d'un coup, puis le processus est arrêté : systemd (luxtoncrane.service) le relance en 5 s.
+      - name: Remplace le serveur sur mcProd
+        run: |
+          scp target/release/serveur mcprod:bin/serveur.nouveau
+          ssh mcprod 'mv bin/serveur.nouveau bin/serveur && pkill -u lux-ton-crane -x serveur'
+      - name: Vérifie que le serveur répond
+        run: |
+          for essai in 1 2 3 4 5 6; do
+            sleep 5
+            statut=$(curl -s -o /dev/null -w '%{http_code}' https://lux-ton-crane.cawet.net/api/mesures)
+            echo "essai $essai : $statut"
+            # Sans jeton, un serveur qui tourne répond 401.
+            if [ "$statut" = "401" ]; then
+              exit 0
+            fi
+          done
+          exit 1
+
+  web:
+    needs: changements
+    if: needs.changements.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - uses: ./.github/actions/joindre-mcprod
+        with:
+          cle: ${{ secrets.DEPLOIEMENT_CLE }}
+          hote-connu: ${{ secrets.DEPLOIEMENT_HOTE_CONNU }}
+      # Les anciens fichiers de la page sont retirés ; le reste de public_html (statistiques de Virtualmin) n'est pas touché.
+      - name: Copie la page sur mcProd
+        run: |
+          rsync --recursive --delete dist/assets/ mcprod:public_html/assets/
+          rsync dist/index.html mcprod:public_html/index.html
+
+  application:
+    needs: changements
+    if: needs.changements.outputs.application == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

@@ -1,0 +1,36 @@
+name: Joindre mcProd
+description: Prépare la connexion SSH au compte lux-ton-crane de mcProd, avec la clé de livraison.
+
+inputs:
+  cle:
+    description: La clé privée de livraison (secret DEPLOIEMENT_CLE).
+    required: true
+  hote-connu:
+    description: La clé publique de mcProd, pour reconnaître le serveur (secret DEPLOIEMENT_HOTE_CONNU).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Clé de livraison et serveur connu
+      shell: bash
+      env:
+        CLE: ${{ inputs.cle }}
+        HOTE_CONNU: ${{ inputs.hote-connu }}
+      run: |
+        if [ -z "$CLE" ] || [ -z "$HOTE_CONNU" ]; then
+          echo "Les secrets DEPLOIEMENT_CLE et DEPLOIEMENT_HOTE_CONNU manquent."
+          exit 1
+        fi
+        mkdir -p ~/.ssh
+        echo "$CLE" > ~/.ssh/livraison
+        chmod 600 ~/.ssh/livraison
+        echo "$HOTE_CONNU" > ~/.ssh/known_hosts
+        cat > ~/.ssh/config <<'CONFIG'
+        Host mcprod
+          HostName lux-ton-crane.cawet.net
+          User lux-ton-crane
+          IdentityFile ~/.ssh/livraison
+          IdentitiesOnly yes
+          BatchMode yes
+        CONFIG
