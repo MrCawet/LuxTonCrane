@@ -119,6 +119,13 @@ impl From<RelevéDuJour> for ReleveDuJour {
     }
 }
 
+/// Une mesure du journal, vue de Kotlin.
+#[derive(uniffi::Record)]
+pub struct MesureDuJournal {
+    pub valeur_lux: f32,
+    pub instant_ms: i64,
+}
+
 /// Le journal SQLite, vu de Kotlin.
 #[derive(uniffi::Object)]
 pub struct Journal {
@@ -193,5 +200,42 @@ impl Journal {
         };
         let relevé = relevé_du_jour(&heures, &historique);
         Ok(ReleveDuJour::from(relevé))
+    }
+
+    /// `dernier_instant_recu_ms` : l'instant de la dernière mesure que le serveur a reçue, s'il en a une.
+    pub fn mesures_apres(
+        &self,
+        dernier_instant_recu_ms: Option<i64>,
+    ) -> Result<Vec<MesureDuJournal>, EchecPont> {
+        let sqlite = match self.sqlite.lock() {
+            Ok(sqlite) => sqlite,
+            Err(error) => {
+                return Err(EchecPont::Lecture {
+                    raison: error.to_string(),
+                });
+            }
+        };
+        let historique = match sqlite.historique() {
+            Ok(historique) => historique,
+            Err(error) => {
+                return Err(EchecPont::Lecture {
+                    raison: error.to_string(),
+                });
+            }
+        };
+        let mut à_envoyer = Vec::new();
+        for mesure in historique {
+            let déjà_reçue = match dernier_instant_recu_ms {
+                Some(dernier_instant_reçu_ms) => mesure.instant_ms <= dernier_instant_reçu_ms,
+                None => false,
+            };
+            if !déjà_reçue {
+                à_envoyer.push(MesureDuJournal {
+                    valeur_lux: mesure.valeur_lux,
+                    instant_ms: mesure.instant_ms,
+                });
+            }
+        }
+        Ok(à_envoyer)
     }
 }

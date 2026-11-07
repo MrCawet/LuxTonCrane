@@ -6,8 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.text.InputType
 import android.view.WindowInsets
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.ScrollView
@@ -69,6 +71,8 @@ class Accueil : Activity() {
 
         affichageDuRelevé = TextView(this)
         column.addView(affichageDuRelevé)
+
+        champDuJeton(column)
 
         val screen = ScrollView(this)
         screen.addView(column)
@@ -176,9 +180,43 @@ class Accueil : Activity() {
         return permission != PackageManager.PERMISSION_GRANTED
     }
 
+    /** Le jeton du serveur se saisit une fois ; le champ reste vide ensuite pour ne pas l'afficher. */
+    private fun champDuJeton(column: LinearLayout) {
+        val étiquette = TextView(this)
+        column.addView(étiquette)
+
+        val champ = EditText(this)
+        champ.hint = "Jeton du serveur"
+        champ.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        column.addView(champ)
+
+        val bouton = Button(this)
+        bouton.text = "Garder le jeton"
+        column.addView(bouton)
+
+        étiquette.text = étatDuJeton()
+        bouton.setOnClickListener {
+            val jeton = champ.text.toString().trim()
+            if (jeton.isNotEmpty()) {
+                garderLeJetonDuServeur(this, jeton)
+                champ.text.clear()
+                étiquette.text = étatDuJeton()
+            }
+        }
+    }
+
+    private fun étatDuJeton(): String {
+        val jetonGardé = jetonDuServeur(this) != null
+        if (jetonGardé) {
+            return "Jeton du serveur gardé : les mesures sont envoyées."
+        }
+        return "Aucun jeton du serveur : les mesures ne sont pas envoyées."
+    }
+
     private fun démarrerLaMesure() {
         val service = Intent(this, ServiceDeMesure::class.java)
         startForegroundService(service)
+        planifierLaSynchronisation(this)
     }
 
     private companion object {

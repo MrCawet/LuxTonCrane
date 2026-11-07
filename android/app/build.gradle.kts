@@ -53,6 +53,8 @@ kotlin {
 dependencies {
     // Le code Kotlin généré par UniFFI charge la bibliothèque Rust avec JNA.
     implementation("net.java.dev.jna:jna:5.19.1@aar")
+    // La seule façon fiable de lancer une tâche périodique en arrière-plan, Doze et redémarrages compris.
+    implementation("androidx.work:work-runtime:2.12.0")
     testImplementation(kotlin("test"))
 }
 

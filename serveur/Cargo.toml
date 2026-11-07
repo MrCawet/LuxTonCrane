@@ -1,0 +1,14 @@
+[package]
+name = "serveur"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+journal = { path = "../journal" }
+journal_sqlite = { path = "../journal_sqlite" }
+mesure = { path = "../mesure" }
+# Lit et écrit le JSON échangé avec le téléphone et la page web.
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+# Serveur HTTP synchrone et minimal : le cœur reste sans async. Il écoute en local, derrière nginx.
+tiny_http = "0.12.0"
