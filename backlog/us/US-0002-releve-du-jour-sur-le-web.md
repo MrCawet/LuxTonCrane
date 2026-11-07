@@ -2,7 +2,7 @@
 id: US-0002
 type: us
 titre: Le relevé du jour se lit sur la page web
-statut: en_cours
+statut: a_valider
 priorite: essentiel
 cree_le: 2026-11-07
 maj_le: 2026-11-07
@@ -55,7 +55,7 @@ Hypothèses :
 
 ## Critères d'acceptation
 
-- [ ] Le serveur répond au relevé du jour pour trois instants donnés, et refuse une demande sans le bon jeton ou à
+- [x] Le serveur répond au relevé du jour pour trois instants donnés, et refuse une demande sans le bon jeton ou à
   laquelle il manque un instant.
-- [ ] La page place les trois heures dans le temps comme le téléphone.
-- [ ] La page affiche les quatre fenêtres du relevé, avec les textes de l'accueil Android.
+- [x] La page place les trois heures dans le temps comme le téléphone.
+- [x] La page affiche les quatre fenêtres du relevé, avec les textes de l'accueil Android.
