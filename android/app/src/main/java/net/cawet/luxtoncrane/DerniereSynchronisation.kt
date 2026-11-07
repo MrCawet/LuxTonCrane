@@ -15,3 +15,10 @@ fun texteDeLaDernièreSynchronisation(instantMs: Long?, fuseau: ZoneId): String 
     val moment = Instant.ofEpochMilli(instantMs).atZone(fuseau)
     return "Dernière synchronisation réussie : le ${FORMAT_DE_L_INSTANT.format(moment)}"
 }
+
+enum class RaisonDeLÉchec { JETON_REFUSÉ, SERVEUR_INJOIGNABLE }
+
+/** Le dernier échec de synchronisation depuis la dernière réussite. */
+data class ÉchecDeSynchronisation(val instantMs: Long, val raison: RaisonDeLÉchec)
+
+fun texteDuDernierÉchec(échec: ÉchecDeSynchronisation?, fuseau: ZoneId): String? = ""
