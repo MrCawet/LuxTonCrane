@@ -2,10 +2,10 @@
 id: US-0002
 type: us
 titre: Le relevé du jour se lit sur la page web
-statut: a_valider
+statut: termine
 priorite: essentiel
 cree_le: 2026-11-07
-maj_le: 2026-11-07
+maj_le: 2026-11-08
 source: REQ-0001
 emetteur: Opérateur
 composants: [releve, serveur, web]
@@ -59,3 +59,7 @@ Hypothèses :
   laquelle il manque un instant.
 - [x] La page place les trois heures dans le temps comme le téléphone.
 - [x] La page affiche les quatre fenêtres du relevé, avec les textes de l'accueil Android.
+
+## Validation
+
+Le 2026-11-08, l'opérateur valide la page web : « Sa me semble ok ». Il y a lu le relevé dès le 2026-11-07 à 16 h 15 (journal nginx).

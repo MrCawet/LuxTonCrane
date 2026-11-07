@@ -4,13 +4,13 @@ type: epique
 titre: Le rapport sur le web
 statut: en_cours
 cree_le: 2026-11-06
-maj_le: 2026-11-07
+maj_le: 2026-11-08
 source: REQ-0001
 emetteur: Opérateur
 composants: [android, pont, releve, serveur, web]
 tickets_lies: [REQ-0001]
 objectif: aucun
-tickets: [US-0001, US-0002, US-0003]
+tickets: [US-0001, US-0002, US-0003, ANO-0001]
 ---
 
 ## Provenance
@@ -27,11 +27,13 @@ capteurs et l'enregistrement des données, synchronisées régulièrement sur le
 ## Tickets
 
 - [US-0001](../us/US-0001-mesures-envoyees-au-serveur.md) : les mesures arrivent sur le serveur. Terminée.
-- [US-0002](../us/US-0002-releve-du-jour-sur-le-web.md) : le relevé du jour se lit sur la page web.
+- [US-0002](../us/US-0002-releve-du-jour-sur-le-web.md) : le relevé du jour se lit sur la page web. Terminée.
 - [US-0003](../us/US-0003-accueil-android-sans-releve.md) : l'accueil Android montre la synchronisation à la place du
-  relevé.
+  relevé. Terminée.
+- [ANO-0001](../anomalies/ANO-0001-jeton-refuse-sans-que-l-accueil-le-dise.md) : le jeton est refusé sans que
+  l'accueil le dise. Terminée.
 
 ## À découper
 
 - **Où saisir l'agenda du sommeil** (téléphone ou web) : change l'étape 3 des prochaines étapes de CONCEPTION.md.
-  Attend US-0002.
+  Prête à instruire : US-0002 est terminée.
