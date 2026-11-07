@@ -2,7 +2,7 @@
 id: US-0004
 type: us
 titre: L'agenda du matin se remplit sur la page web, et le relevé prend ses heures
-statut: en_cours
+statut: a_valider
 priorite: essentiel
 cree_le: 2026-11-08
 maj_le: 2026-11-08
@@ -59,5 +59,5 @@ Hypothèses :
 - [x] Le serveur garde une nuit par jour du lever, la rend, et la remplace ; il refuse un niveau inconnu.
 - [x] Le serveur garde l'heure du coucher souhaitée, 23:00 tant qu'elle n'a pas été réglée.
 - [x] La page note l'agenda du matin, et le retrouve prérempli.
-- [ ] Le relevé du jour prend les heures de l'agenda et le coucher souhaité du réglage, et demande l'agenda s'il manque.
+- [x] Le relevé du jour prend les heures de l'agenda et le coucher souhaité du réglage, et demande l'agenda s'il manque.
 - [x] `agenda/` est dans les chemins surveillés par l'intégration et la livraison du serveur.
