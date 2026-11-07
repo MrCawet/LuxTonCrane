@@ -427,7 +427,6 @@ dependencies = [
  "journal",
  "journal_sqlite",
  "mesure",
- "releve",
  "rusqlite",
  "uniffi",
 ]

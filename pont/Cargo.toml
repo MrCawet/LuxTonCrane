@@ -19,7 +19,6 @@ bindgen = ["uniffi/cli"]
 journal = { path = "../journal" }
 journal_sqlite = { path = "../journal_sqlite" }
 mesure = { path = "../mesure" }
-releve = { path = "../releve" }
 # Génère le code Kotlin qui appelle ce pont.
 uniffi = "0.32.2"
 
