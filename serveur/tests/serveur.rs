@@ -98,3 +98,25 @@ fn une_mesure_déjà_reçue_n_est_pas_gardée_deux_fois() {
         json!({"nombre": 2, "derniere": {"valeur_lux": 80.0, "instant_ms": 1793000060000_i64}})
     );
 }
+
+#[test]
+fn le_serveur_garde_si_le_téléphone_était_couvert() {
+    let path = fresh_database_path("couvert");
+    let mut serveur = Serveur::new(JETON.to_string(), SqliteJournal::open(&path).unwrap());
+    let autorisation = format!("Bearer {JETON}");
+    let corps = r#"[
+        {"valeur_lux": 0.0, "instant_ms": 1793000000000, "telephone_couvert": true},
+        {"valeur_lux": 320.5, "instant_ms": 1793000060000}
+    ]"#;
+
+    serveur.répondre(envoi(Some(&autorisation), corps));
+
+    let journal = SqliteJournal::open(&path).unwrap();
+    let proximités: Vec<Option<bool>> = journal
+        .historique()
+        .unwrap()
+        .iter()
+        .map(|mesure| mesure.téléphone_couvert)
+        .collect();
+    assert_eq!(proximités, vec![Some(true), None]);
+}
