@@ -45,7 +45,7 @@ jobs:
           echo "$fichiers"
           # Une partie est livrée quand elle change, ou quand change ce dont elle dépend, livraison comprise.
           communs='Cargo\.(toml|lock)|rust-toolchain\.toml|mesure/|journal/|journal_sqlite/|\.github/workflows/livraison\.yml'
-          if echo "$fichiers" | grep -qE "^($communs|releve/|serveur/|\.github/actions/joindre-mcprod/)"; then
+          if echo "$fichiers" | grep -qE "^($communs|releve/|agenda/|serveur/|\.github/actions/joindre-mcprod/)"; then
             echo "serveur=true" >> "$GITHUB_OUTPUT"
           else
             echo "serveur=false" >> "$GITHUB_OUTPUT"

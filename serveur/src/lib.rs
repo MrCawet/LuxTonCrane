@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use agenda::AgendaSqlite;
+use agenda::{AgendaSqlite, Continuité, Endormissement, Nuit};
 use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
@@ -149,6 +149,61 @@ fn heures_demandées(paramètres: &str) -> Option<HeuresDuCoucherEtDuLever> {
     })
 }
 
+/// Une nuit de l'agenda, telle que la page web l'envoie ; le jour est dans le chemin.
+#[derive(Deserialize)]
+struct NuitReçueJson {
+    endormissement: String,
+    continuite: String,
+    coucher_ms: i64,
+    lever_ms: i64,
+}
+
+/// Une nuit de l'agenda, telle que la page web la reçoit.
+#[derive(Serialize)]
+struct NuitJson<'a> {
+    jour: &'a str,
+    endormissement: &'static str,
+    continuite: &'static str,
+    coucher_ms: i64,
+    lever_ms: i64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct RéglagesJson {
+    coucher_souhaite: String,
+}
+
+/// Un jour `AAAA-MM-JJ` : quatre chiffres, deux, deux, séparés par des tirets.
+fn jour_lisible(jour: &str) -> bool {
+    let parties: Vec<&str> = jour.split('-').collect();
+    let longueurs: Vec<usize> = parties.iter().map(|partie| partie.len()).collect();
+    let chiffres = parties
+        .iter()
+        .all(|partie| partie.chars().all(|caractère| caractère.is_ascii_digit()));
+    longueurs == [4, 2, 2] && chiffres
+}
+
+/// Une heure `HH:MM`, de 00:00 à 23:59.
+fn heure_lisible(heure: &str) -> bool {
+    let Some((heures, minutes)) = heure.split_once(':') else {
+        return false;
+    };
+    if heures.len() != 2 || minutes.len() != 2 {
+        return false;
+    }
+    match (heures.parse::<u8>(), minutes.parse::<u8>()) {
+        (Ok(heures), Ok(minutes)) => heures < 24 && minutes < 60,
+        _ => false,
+    }
+}
+
+fn en_json<T: Serialize>(valeur: &T) -> Réponse {
+    match serde_json::to_string(valeur) {
+        Ok(corps) => Réponse { statut: 200, corps },
+        Err(_) => Réponse::vide(500),
+    }
+}
+
 pub struct Serveur {
     jeton: String,
     journal: SqliteJournal,
@@ -217,6 +272,65 @@ impl Serveur {
         }
     }
 
+    fn nuit(&self, jour: &str) -> Réponse {
+        match self.agenda.nuit(jour) {
+            Ok(Some(nuit)) => en_json(&NuitJson {
+                jour: &nuit.jour,
+                endormissement: nuit.endormissement.nom(),
+                continuite: nuit.continuité.nom(),
+                coucher_ms: nuit.coucher_ms,
+                lever_ms: nuit.lever_ms,
+            }),
+            Ok(None) => Réponse::vide(404),
+            Err(_) => Réponse::vide(500),
+        }
+    }
+
+    fn noter_la_nuit(&self, jour: &str, corps: &str) -> Réponse {
+        let Ok(reçue) = serde_json::from_str::<NuitReçueJson>(corps) else {
+            return Réponse::vide(400);
+        };
+        let endormissement = Endormissement::depuis_le_nom(&reçue.endormissement);
+        let continuité = Continuité::depuis_le_nom(&reçue.continuite);
+        let (Some(endormissement), Some(continuité)) = (endormissement, continuité) else {
+            return Réponse::vide(400);
+        };
+        let nuit = Nuit {
+            jour: jour.to_string(),
+            endormissement,
+            continuité,
+            coucher_ms: reçue.coucher_ms,
+            lever_ms: reçue.lever_ms,
+        };
+        match self.agenda.garder(&nuit) {
+            Ok(()) => Réponse::vide(204),
+            Err(_) => Réponse::vide(500),
+        }
+    }
+
+    fn réglages(&self) -> Réponse {
+        match self.agenda.coucher_souhaité() {
+            Ok(coucher_souhaite) => en_json(&RéglagesJson { coucher_souhaite }),
+            Err(_) => Réponse::vide(500),
+        }
+    }
+
+    fn régler(&self, corps: &str) -> Réponse {
+        let Ok(réglages) = serde_json::from_str::<RéglagesJson>(corps) else {
+            return Réponse::vide(400);
+        };
+        if !heure_lisible(&réglages.coucher_souhaite) {
+            return Réponse::vide(400);
+        }
+        match self
+            .agenda
+            .régler_le_coucher_souhaité(&réglages.coucher_souhaite)
+        {
+            Ok(()) => Réponse::vide(204),
+            Err(_) => Réponse::vide(500),
+        }
+    }
+
     fn réception(&mut self, corps: &str) -> Réponse {
         let reçues: Vec<MesureReçueJson> = match serde_json::from_str(corps) {
             Ok(reçues) => reçues,
@@ -256,10 +370,22 @@ impl Serveur {
             .chemin
             .split_once('?')
             .unwrap_or((requête.chemin, ""));
+        if let Some(jour) = chemin.strip_prefix("/api/nuits/") {
+            if !jour_lisible(jour) {
+                return Réponse::vide(400);
+            }
+            return match requête.méthode {
+                Méthode::Get => self.nuit(jour),
+                Méthode::Post => self.noter_la_nuit(jour, requête.corps),
+                Méthode::Autre => Réponse::vide(404),
+            };
+        }
         match (requête.méthode, chemin) {
             (Méthode::Get, "/api/mesures") => self.résumé(),
             (Méthode::Post, "/api/mesures") => self.réception(requête.corps),
             (Méthode::Get, "/api/releve") => self.relevé(paramètres),
+            (Méthode::Get, "/api/reglages") => self.réglages(),
+            (Méthode::Post, "/api/reglages") => self.régler(requête.corps),
             _ => Réponse::vide(404),
         }
     }

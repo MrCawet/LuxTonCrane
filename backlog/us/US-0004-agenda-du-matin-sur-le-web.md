@@ -56,8 +56,8 @@ Hypothèses :
 
 ## Critères d'acceptation
 
-- [ ] Le serveur garde une nuit par jour du lever, la rend, et la remplace ; il refuse un niveau inconnu.
-- [ ] Le serveur garde l'heure du coucher souhaitée, 23:00 tant qu'elle n'a pas été réglée.
+- [x] Le serveur garde une nuit par jour du lever, la rend, et la remplace ; il refuse un niveau inconnu.
+- [x] Le serveur garde l'heure du coucher souhaitée, 23:00 tant qu'elle n'a pas été réglée.
 - [ ] La page note l'agenda du matin, et le retrouve prérempli.
 - [ ] Le relevé du jour prend les heures de l'agenda et le coucher souhaité du réglage, et demande l'agenda s'il manque.
-- [ ] `agenda/` est dans les chemins surveillés par l'intégration et la livraison du serveur.
+- [x] `agenda/` est dans les chemins surveillés par l'intégration et la livraison du serveur.
