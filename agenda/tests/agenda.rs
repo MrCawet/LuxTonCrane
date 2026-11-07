@@ -1,0 +1,99 @@
+use std::path::PathBuf;
+
+use agenda::{AgendaSqlite, Continuité, Endormissement, Nuit};
+
+fn fresh_database_path(test_name: &str) -> PathBuf {
+    let file_name = format!("agenda_{}_{}.db", test_name, std::process::id());
+    let path = std::env::temp_dir().join(file_name);
+    let _ = std::fs::remove_file(&path);
+    path
+}
+
+fn nuit_du(jour: &str, endormissement: Endormissement) -> Nuit {
+    Nuit {
+        jour: jour.to_string(),
+        endormissement,
+        continuité: Continuité::RéveilBref,
+        coucher_ms: 1793000000000,
+        lever_ms: 1793028800000,
+    }
+}
+
+#[test]
+fn une_nuit_gardée_se_retrouve_à_la_date_de_son_lever() {
+    let path = fresh_database_path("garder");
+    let agenda = AgendaSqlite::open(&path).unwrap();
+    let nuit = nuit_du("2026-11-08", Endormissement::Calme);
+
+    agenda.garder(&nuit).unwrap();
+
+    let relue = AgendaSqlite::open(&path)
+        .unwrap()
+        .nuit("2026-11-08")
+        .unwrap();
+    assert_eq!(relue, Some(nuit));
+}
+
+#[test]
+fn une_nuit_pas_encore_notée_n_existe_pas() {
+    let agenda = AgendaSqlite::open(&fresh_database_path("absente")).unwrap();
+
+    assert_eq!(agenda.nuit("2026-11-08").unwrap(), None);
+}
+
+#[test]
+fn une_nuit_notée_à_nouveau_remplace_l_ancienne() {
+    let agenda = AgendaSqlite::open(&fresh_database_path("remplacer")).unwrap();
+    agenda
+        .garder(&nuit_du("2026-11-08", Endormissement::Agité))
+        .unwrap();
+    let corrigée = nuit_du("2026-11-08", Endormissement::Immédiat);
+
+    agenda.garder(&corrigée).unwrap();
+
+    assert_eq!(agenda.nuit("2026-11-08").unwrap(), Some(corrigée));
+}
+
+#[test]
+fn le_coucher_souhaité_est_23_h_tant_qu_il_n_est_pas_réglé() {
+    let path = fresh_database_path("coucher_souhaite");
+    let agenda = AgendaSqlite::open(&path).unwrap();
+    assert_eq!(agenda.coucher_souhaité().unwrap(), "23:00");
+
+    agenda.régler_le_coucher_souhaité("22:30").unwrap();
+
+    let relu = AgendaSqlite::open(&path)
+        .unwrap()
+        .coucher_souhaité()
+        .unwrap();
+    assert_eq!(relu, "22:30");
+}
+
+#[test]
+fn chaque_niveau_se_retrouve_par_son_nom() {
+    for endormissement in [
+        Endormissement::Immédiat,
+        Endormissement::Calme,
+        Endormissement::Agité,
+        Endormissement::Abandonné,
+    ] {
+        assert_eq!(
+            Endormissement::depuis_le_nom(endormissement.nom()),
+            Some(endormissement)
+        );
+    }
+    for continuité in [
+        Continuité::SansRéveil,
+        Continuité::RéveilBref,
+        Continuité::RéveilLong,
+        Continuité::NuitInterrompue,
+    ] {
+        assert_eq!(
+            Continuité::depuis_le_nom(continuité.nom()),
+            Some(continuité)
+        );
+    }
+    assert_eq!(Endormissement::nom(&Endormissement::Agité), "agite");
+    assert_eq!(Continuité::nom(&Continuité::SansRéveil), "sans_reveil");
+    assert_eq!(Endormissement::depuis_le_nom("inconnu"), None);
+}

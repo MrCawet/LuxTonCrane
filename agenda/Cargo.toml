@@ -1,0 +1,8 @@
+[package]
+name = "agenda"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# L'agenda est gardé dans la base SQLite du serveur, à côté des mesures.
+rusqlite = { version = "0.41.1", features = ["bundled"] }
