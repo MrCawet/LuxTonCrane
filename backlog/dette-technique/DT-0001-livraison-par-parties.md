@@ -52,6 +52,14 @@ Décisions de l'opérateur, le 2026-11-07 :
 ## Critères d'acceptation
 
 - [ ] Une fusion qui ne touche que `web/` déploie la page, et rien d'autre.
-- [ ] Une fusion qui touche `serveur/` déploie le serveur, qui répond ensuite.
-- [ ] Une fusion qui touche `android/` ou le pont crée une release avec l'APK.
+- [x] Une fusion qui touche `serveur/` déploie le serveur, qui répond ensuite.
+- [x] Une fusion qui touche `android/` ou le pont crée une release avec l'APK.
 - [ ] Lancée à la main, la livraison livre les trois.
+
+## Suivi
+
+- 2026-11-07, fusion de la PR #11 (livraison, donc tout) : serveur, page et application livrés, release
+  `2026-11-07-1238`.
+- 2026-11-07, fusion de la PR #12 (`serveur/`, `android/`, pont, sans `web/`) : serveur et application livrés,
+  release `2026-11-07-1335`, page non livrée. Reste à voir une fusion qui ne touche que `web/`, et un lancement à la
+  main.

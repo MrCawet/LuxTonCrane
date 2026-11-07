@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import ReleveDuJour from './ReleveDuJour.vue'
 
 // Le jeton reste dans ce navigateur : on ne le saisit qu'une fois.
 const TOKEN_STORAGE_KEY = 'jeton'
@@ -81,5 +82,7 @@ onMounted(chargerLeRésumé)
         Dernière : {{ résumé.derniere.valeur_lux }} lx, le {{ heureDe(résumé.derniere) }}
       </p>
     </section>
+
+    <ReleveDuJour v-if="jeton !== null && erreur === null" :jeton="jeton" class="mt-8" />
   </main>
 </template>
