@@ -2,10 +2,10 @@
 id: US-0003
 type: us
 titre: L'accueil Android montre la synchronisation à la place du relevé
-statut: en_cours
+statut: termine
 priorite: essentiel
 cree_le: 2026-11-07
-maj_le: 2026-11-07
+maj_le: 2026-11-08
 source: REQ-0001
 emetteur: Opérateur
 composants: [android, pont, ci]
@@ -49,7 +49,11 @@ Hypothèses :
 
 ## Critères d'acceptation
 
-- [ ] L'accueil n'affiche plus le relevé du jour, et le pont ne le calcule plus.
-- [ ] L'accueil affiche la dernière synchronisation réussie, ou « aucune pour l'instant ».
-- [ ] Le bouton « Synchroniser maintenant » envoie les mesures, et l'affichage suit.
-- [ ] La livraison redéploie le serveur quand `releve/` change, et ne sort plus d'APK pour `releve/` seul.
+- [x] L'accueil n'affiche plus le relevé du jour, et le pont ne le calcule plus.
+- [x] L'accueil affiche la dernière synchronisation réussie, ou « aucune pour l'instant ».
+- [x] Le bouton « Synchroniser maintenant » envoie les mesures, et l'affichage suit.
+- [x] La livraison redéploie le serveur quand `releve/` change, et ne sort plus d'APK pour `releve/` seul.
+
+## Validation
+
+Le 2026-11-08, l'opérateur valide l'accueil de l'APK `2026-11-07-1913` : « Sa me semble ok ».

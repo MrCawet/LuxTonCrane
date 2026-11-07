@@ -2,10 +2,10 @@
 id: ANO-0001
 type: anomalie
 titre: Le jeton est refusé sans que l'accueil le dise
-statut: a_valider
+statut: termine
 priorite: essentiel
 cree_le: 2026-11-07
-maj_le: 2026-11-07
+maj_le: 2026-11-08
 source: interne
 emetteur: Opérateur
 composants: [android]
@@ -49,3 +49,7 @@ sont envoyées. » alors que le serveur le refuse.
 - [x] Un jeton gardé est confirmé, et une synchronisation part aussitôt.
 - [x] L'accueil affiche le dernier échec (jeton refusé, ou serveur injoignable) jusqu'à la synchronisation réussie
   suivante.
+
+## Validation
+
+Le 2026-11-08, l'opérateur valide l'APK `2026-11-07-1913` : « Sa me semble ok ». Le journal nginx de mcProd montre de nouveau des envois acceptés (`POST /api/mesures` en 204) depuis le 2026-11-07 au soir.
