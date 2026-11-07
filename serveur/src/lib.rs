@@ -4,6 +4,7 @@
 
 use std::collections::HashSet;
 
+use agenda::AgendaSqlite;
 use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
@@ -151,6 +152,7 @@ fn heures_demandées(paramètres: &str) -> Option<HeuresDuCoucherEtDuLever> {
 pub struct Serveur {
     jeton: String,
     journal: SqliteJournal,
+    agenda: AgendaSqlite,
 }
 
 /// Réponses sans contenu ou en échec.
@@ -165,8 +167,12 @@ impl Réponse {
 
 /// Création du serveur, avec le jeton attendu et le journal où garder les mesures.
 impl Serveur {
-    pub fn new(jeton: String, journal: SqliteJournal) -> Serveur {
-        Serveur { jeton, journal }
+    pub fn new(jeton: String, journal: SqliteJournal, agenda: AgendaSqlite) -> Serveur {
+        Serveur {
+            jeton,
+            journal,
+            agenda,
+        }
     }
 }
 

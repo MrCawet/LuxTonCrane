@@ -598,6 +598,7 @@ dependencies = [
 name = "serveur"
 version = "0.1.0"
 dependencies = [
+ "agenda",
  "journal",
  "journal_sqlite",
  "mesure",

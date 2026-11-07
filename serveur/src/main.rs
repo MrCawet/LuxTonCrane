@@ -6,6 +6,7 @@
 use std::path::Path;
 use std::process::ExitCode;
 
+use agenda::AgendaSqlite;
 use journal_sqlite::SqliteJournal;
 use serveur::{Méthode, Requête, Serveur};
 use tiny_http::{Header, Method, Response, Server};
@@ -76,6 +77,13 @@ fn main() -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
+    let agenda = match AgendaSqlite::open(Path::new(&database)) {
+        Ok(agenda) => agenda,
+        Err(error) => {
+            eprintln!("ouverture de l'agenda dans {database} impossible : {error}");
+            return ExitCode::FAILURE;
+        }
+    };
     let server = match Server::http(&address) {
         Ok(server) => server,
         Err(error) => {
@@ -83,7 +91,7 @@ fn main() -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
-    let mut serveur = Serveur::new(jeton, journal);
+    let mut serveur = Serveur::new(jeton, journal, agenda);
     println!("LuxTonCrane écoute sur {address}, base {database}");
     serve(&server, &mut serveur);
     ExitCode::SUCCESS
