@@ -57,7 +57,7 @@ class SynchronisationPériodique(context: Context, parameters: WorkerParameters)
                 synchroniser(
                     mesuresAprès = { dernierInstantReçuMs ->
                         val àEnvoyer = journal.mesuresApres(dernierInstantReçuMs)
-                        àEnvoyer.map { mesure -> MesureÀEnvoyer(mesure.valeurLux, mesure.instantMs) }
+                        àEnvoyer.map { mesure -> MesureÀEnvoyer(mesure.valeurLux, mesure.instantMs, mesure.telephoneCouvert) }
                     },
                     serveur = ServeurHttp(jeton),
                 )

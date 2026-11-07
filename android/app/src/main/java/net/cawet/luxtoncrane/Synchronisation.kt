@@ -3,8 +3,8 @@ package net.cawet.luxtoncrane
 // Un lot de 1000 mesures fait environ 50 ko de JSON : il reste sous la taille de requête qu'accepte nginx par défaut (1 Mo).
 private const val TAILLE_D_UN_LOT = 1_000
 
-/** Une mesure du journal, telle qu'elle part au serveur. */
-data class MesureÀEnvoyer(val valeurLux: Float, val instantMs: Long)
+/** Une mesure du journal, telle qu'elle part au serveur. `téléphoneCouvert` est `null` si la proximité est inconnue. */
+data class MesureÀEnvoyer(val valeurLux: Float, val instantMs: Long, val téléphoneCouvert: Boolean?)
 
 /** Le serveur qui reçoit les mesures du téléphone. */
 interface ServeurDesMesures {
