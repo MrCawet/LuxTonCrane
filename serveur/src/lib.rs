@@ -29,11 +29,19 @@ pub struct Réponse {
     pub corps: String,
 }
 
-/// Une mesure telle qu'elle passe en JSON.
-#[derive(Deserialize, Serialize)]
+/// Une mesure telle que la page web la reçoit.
+#[derive(Serialize)]
 struct MesureJson {
     valeur_lux: f32,
     instant_ms: i64,
+}
+
+/// Une mesure telle que le téléphone l'envoie. Sans `telephone_couvert`, la proximité est inconnue.
+#[derive(Deserialize)]
+struct MesureReçueJson {
+    valeur_lux: f32,
+    instant_ms: i64,
+    telephone_couvert: Option<bool>,
 }
 
 #[derive(Serialize)]
@@ -91,7 +99,7 @@ impl Serveur {
     }
 
     fn réception(&mut self, corps: &str) -> Réponse {
-        let reçues: Vec<MesureJson> = match serde_json::from_str(corps) {
+        let reçues: Vec<MesureReçueJson> = match serde_json::from_str(corps) {
             Ok(reçues) => reçues,
             Err(_) => return Réponse::vide(400),
         };
@@ -108,6 +116,7 @@ impl Serveur {
             let mesure = Mesure {
                 valeur_lux: reçue.valeur_lux,
                 instant_ms: reçue.instant_ms,
+                téléphone_couvert: reçue.telephone_couvert,
             };
             let journal: &mut dyn Journal = &mut self.journal;
             if ajouter(mesure, journal).is_err() {

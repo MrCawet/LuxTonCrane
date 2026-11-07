@@ -139,9 +139,9 @@ Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
 
 Dans cet ordre, chaque étape en TDD et sur sa propre branche :
 
-1. **Domaine Rust du relevé du jour** : fait pour la lumière (crate `releve/`) : les fenêtres tirées des heures du coucher et du lever, une mesure vaut 10 min au plus, les objectifs tenus ou non et la couverture. Restent les notes de l'agenda, et les mesures téléphone couvert écartées, qui attendent la proximité.
-2. **Proximité avec chaque mesure** : lire le capteur de proximité avec chaque mesure de lumière, et le garder dans le journal.
+1. **Domaine Rust du relevé du jour** : fait pour la lumière (crate `releve/`) : les fenêtres tirées des heures du coucher et du lever, une mesure vaut 10 min au plus, les objectifs tenus ou non et la couverture. Restent les notes de l'agenda.
+2. **Proximité avec chaque mesure** : faite. Chaque mesure est notée avec la dernière proximité connue ; écran éteint, la mesure attend la première valeur de proximité. Une mesure sans proximité connue (avant la première valeur, ou d'avant la proximité) reste valable.
 3. **Agenda du sommeil dans l'application** : les deux notes et les deux roues le matin, la fatigue vers 21 h, avec leur enregistrement.
 4. **Affichage du relevé du jour** dans l'application : fait pour la lumière, sur l'accueil, avec trois roues (coucher, lever, coucher souhaité) dont les heures ne sont pas encore gardées.
-5. **Mesure écran éteint** : les réveils environ toutes les 9 min, le court wake lock, la proximité, la position et le mouvement significatif décrits plus haut.
+5. **Mesure écran éteint** : faite pour la lumière et la proximité, avec l'alarme environ toutes les 9 min et le court wake lock. Restent la position et le mouvement significatif décrits plus haut.
 

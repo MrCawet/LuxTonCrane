@@ -124,6 +124,7 @@ impl From<RelevéDuJour> for ReleveDuJour {
 pub struct MesureDuJournal {
     pub valeur_lux: f32,
     pub instant_ms: i64,
+    pub telephone_couvert: Option<bool>,
 }
 
 /// Le journal SQLite, vu de Kotlin.
@@ -149,10 +150,17 @@ impl Journal {
         }
     }
 
-    pub fn ajouter(&self, valeur_lux: f32, instant_ms: i64) -> Result<(), EchecPont> {
+    /// `telephone_couvert` : aucun si le capteur de proximité n'a encore rien donné.
+    pub fn ajouter(
+        &self,
+        valeur_lux: f32,
+        instant_ms: i64,
+        telephone_couvert: Option<bool>,
+    ) -> Result<(), EchecPont> {
         let mesure = Mesure {
             valeur_lux,
             instant_ms,
+            téléphone_couvert: telephone_couvert,
         };
         let mut sqlite = match self.sqlite.lock() {
             Ok(sqlite) => sqlite,
@@ -233,6 +241,7 @@ impl Journal {
                 à_envoyer.push(MesureDuJournal {
                     valeur_lux: mesure.valeur_lux,
                     instant_ms: mesure.instant_ms,
+                    telephone_couvert: mesure.téléphone_couvert,
                 });
             }
         }

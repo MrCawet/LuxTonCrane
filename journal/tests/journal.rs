@@ -32,12 +32,14 @@ fn le_journal_garde_la_mesure_enregistrée() {
         .enregistrer(Mesure {
             valeur_lux: 320.5,
             instant_ms: 1_793_000_000_000,
+            téléphone_couvert: None,
         })
         .unwrap();
 
     let attendue = Mesure {
         valeur_lux: 320.5,
         instant_ms: 1_793_000_000_000,
+        téléphone_couvert: None,
     };
     assert_eq!(journal.enregistrées, vec![attendue]);
 }
@@ -52,6 +54,7 @@ fn ajouter_une_mesure_l_enregistre_dans_le_journal() {
         Mesure {
             valeur_lux: 120.0,
             instant_ms: 1_793_000_060_000,
+            téléphone_couvert: None,
         },
         &mut journal,
     )
@@ -60,6 +63,7 @@ fn ajouter_une_mesure_l_enregistre_dans_le_journal() {
     let attendue = Mesure {
         valeur_lux: 120.0,
         instant_ms: 1_793_000_060_000,
+        téléphone_couvert: None,
     };
     assert_eq!(journal.enregistrées, vec![attendue]);
 }
@@ -72,6 +76,7 @@ fn ajouter_une_mesure_renvoie_l_échec_du_journal() {
         Mesure {
             valeur_lux: 120.0,
             instant_ms: 1_793_000_060_000,
+            téléphone_couvert: None,
         },
         &mut journal,
     );

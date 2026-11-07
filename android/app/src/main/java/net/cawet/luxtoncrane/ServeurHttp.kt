@@ -50,6 +50,9 @@ class ServeurHttp(private val jeton: String) : ServeurDesMesures {
             val json = JSONObject()
             json.put("valeur_lux", mesure.valeurLux.toDouble())
             json.put("instant_ms", mesure.instantMs)
+            if (mesure.téléphoneCouvert != null) {
+                json.put("telephone_couvert", mesure.téléphoneCouvert)
+            }
             body.put(json)
         }
         val connection = open("POST")

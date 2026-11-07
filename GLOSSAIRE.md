@@ -19,3 +19,4 @@
 - **Mesure** : la quantité de lumière, en lux, reçue par le capteur à un instant.
 - **Quantité de sommeil** : le temps au lit d'une nuit, de l'heure du coucher à l'heure du lever. Objectif de départ : plus de 7 h, à ajuster selon la fatigue de la journée.
 - **Relevé du jour** : le rapport d'une nuit et de la journée qui suit : les objectifs du sommeil, la lumière du soir, de la nuit, du matin et de la journée, et leur couverture.
+- **Téléphone couvert** (`téléphone_couvert`) : quelque chose est contre le capteur de proximité, comme dans une poche ou face contre la table ; noté avec chaque mesure, inconnu si le capteur n'a encore rien donné. Une mesure prise téléphone couvert compte comme non mesurée.

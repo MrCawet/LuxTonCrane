@@ -19,7 +19,7 @@ class SynchronisationTest {
     private val premierInstantMs = 1_793_000_000_000
 
     private fun mesures(nombre: Int): List<MesureÀEnvoyer> =
-        (1..nombre).map { rang -> MesureÀEnvoyer(valeurLux = 100f, instantMs = premierInstantMs + rang * 1_000L) }
+        (1..nombre).map { rang -> MesureÀEnvoyer(valeurLux = 100f, instantMs = premierInstantMs + rang * 1_000L, téléphoneCouvert = null) }
 
     @Test
     fun `les mesures d'après la dernière reçue partent au serveur par lots de 1000`() {

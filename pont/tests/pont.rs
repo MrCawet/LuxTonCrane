@@ -15,7 +15,7 @@ fn ajouter_une_mesure_depuis_kotlin_l_écrit_dans_la_base() {
     let path = fresh_database_path("ajouter");
     let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
 
-    journal.ajouter(320.5, 1_793_000_000_000).unwrap();
+    journal.ajouter(320.5, 1_793_000_000_000, None).unwrap();
 
     let database = Connection::open(&path).unwrap();
     let écrite: (f32, i64) = database
@@ -35,8 +35,12 @@ fn le_relevé_du_jour_se_calcule_avec_les_mesures_du_journal() {
     let coucher_ms = 1_793_000_000_000;
     let lever_ms = coucher_ms + 8 * heure_ms;
     let coucher_souhaite_ms = lever_ms + 16 * heure_ms;
-    journal.ajouter(50.0, coucher_ms - 60 * minute_ms).unwrap();
-    journal.ajouter(5.0, coucher_ms - 55 * minute_ms).unwrap();
+    journal
+        .ajouter(50.0, coucher_ms - 60 * minute_ms, None)
+        .unwrap();
+    journal
+        .ajouter(5.0, coucher_ms - 55 * minute_ms, None)
+        .unwrap();
 
     let relevé = journal
         .releve_du_jour(coucher_ms, lever_ms, coucher_souhaite_ms)
@@ -52,9 +56,9 @@ fn le_relevé_du_jour_se_calcule_avec_les_mesures_du_journal() {
 fn les_mesures_à_envoyer_sont_celles_d_après_la_dernière_reçue_par_le_serveur() {
     let path = fresh_database_path("a_envoyer");
     let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
-    journal.ajouter(320.5, 1_793_000_000_000).unwrap();
-    journal.ajouter(80.0, 1_793_000_060_000).unwrap();
-    journal.ajouter(5.0, 1_793_000_120_000).unwrap();
+    journal.ajouter(320.5, 1_793_000_000_000, None).unwrap();
+    journal.ajouter(80.0, 1_793_000_060_000, None).unwrap();
+    journal.ajouter(5.0, 1_793_000_120_000, None).unwrap();
 
     let après_la_première = journal.mesures_apres(Some(1_793_000_000_000)).unwrap();
     let sans_mesure_reçue = journal.mesures_apres(None).unwrap();
@@ -68,4 +72,34 @@ fn les_mesures_à_envoyer_sont_celles_d_après_la_dernière_reçue_par_le_serveu
         vec![1_793_000_060_000, 1_793_000_120_000]
     );
     assert_eq!(sans_mesure_reçue.len(), 3);
+}
+
+#[test]
+fn ajouter_une_mesure_depuis_kotlin_écrit_si_le_téléphone_était_couvert() {
+    let path = fresh_database_path("couvert");
+    let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
+
+    journal.ajouter(0.0, 1_793_000_000_000, Some(true)).unwrap();
+
+    let database = Connection::open(&path).unwrap();
+    let écrit: Option<bool> = database
+        .query_row("SELECT telephone_couvert FROM mesure", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(écrit, Some(true));
+}
+
+#[test]
+fn les_mesures_à_envoyer_disent_si_le_téléphone_était_couvert() {
+    let path = fresh_database_path("a_envoyer_couvert");
+    let journal = Journal::ouvrir(path.to_string_lossy().into_owned()).unwrap();
+    journal.ajouter(0.0, 1_793_000_000_000, Some(true)).unwrap();
+    journal.ajouter(320.5, 1_793_000_060_000, None).unwrap();
+
+    let à_envoyer = journal.mesures_apres(None).unwrap();
+
+    let proximités: Vec<Option<bool>> = à_envoyer
+        .iter()
+        .map(|mesure| mesure.telephone_couvert)
+        .collect();
+    assert_eq!(proximités, vec![Some(true), None]);
 }
