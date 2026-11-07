@@ -4,13 +4,13 @@ type: epique
 titre: Le rapport sur le web
 statut: en_cours
 cree_le: 2026-11-06
-maj_le: 2026-11-06
+maj_le: 2026-11-07
 source: REQ-0001
 emetteur: Opérateur
 composants: [android, pont, releve, serveur, web]
 tickets_lies: [REQ-0001]
 objectif: aucun
-tickets: [US-0001]
+tickets: [US-0001, US-0002]
 ---
 
 ## Provenance
@@ -26,12 +26,11 @@ capteurs et l'enregistrement des données, synchronisées régulièrement sur le
 
 ## Tickets
 
-- [US-0001](../us/US-0001-mesures-envoyees-au-serveur.md) : les mesures arrivent sur le serveur.
+- [US-0001](../us/US-0001-mesures-envoyees-au-serveur.md) : les mesures arrivent sur le serveur. Terminée.
+- [US-0002](../us/US-0002-releve-du-jour-sur-le-web.md) : le relevé du jour se lit sur la page web.
 
 ## À découper
 
-- **Le relevé du jour sur le web** : le backend le calcule avec `releve/`, la page l'affiche avec les heures du
-  coucher, du lever et du coucher souhaité. Attend US-0001.
 - **Où saisir l'agenda du sommeil** (téléphone ou web) : change l'étape 3 des prochaines étapes de CONCEPTION.md.
-  Attend le relevé du jour sur le web.
-- **Retirer l'affichage du relevé de l'accueil Android** : attend le relevé du jour sur le web.
+  Attend US-0002.
+- **Retirer l'affichage du relevé de l'accueil Android** : attend US-0002.
