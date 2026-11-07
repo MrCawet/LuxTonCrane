@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { heuresDuRelevé } from './heuresDuReleve'
+import { computed, onMounted, ref } from 'vue'
+import { coucherSouhaitéMs, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
 
@@ -36,19 +36,56 @@ interface Fenêtre {
   lignes: string[]
 }
 
-// Les heures par défaut sont celles des roues de l'accueil Android.
-const coucher = ref('23:00')
-const lever = ref('07:00')
+interface NuitJson {
+  coucher_ms: number
+  lever_ms: number
+}
+
 const coucherSouhaité = ref('23:00')
 const relevé = ref<RelevéDuJour | null>(null)
 const erreur = ref<string | null>(null)
+const messageDuRéglage = ref<string | null>(null)
 
-async function voirLeRelevé() {
-  const heures = heuresDuRelevé(coucher.value, lever.value, coucherSouhaité.value, new Date())
-  const paramètres = `coucher_ms=${heures.coucherMs}&lever_ms=${heures.leverMs}&coucher_souhaite_ms=${heures.coucherSouhaitéMs}`
-  const réponse = await fetch(`/api/releve?${paramètres}`, {
-    headers: { Authorization: `Bearer ${props.jeton}` },
+function entêtes(): HeadersInit {
+  return { Authorization: `Bearer ${props.jeton}` }
+}
+
+async function chargerLeRéglage() {
+  const réponse = await fetch('/api/reglages', { headers: entêtes() })
+  if (réponse.ok) {
+    const réglages: { coucher_souhaite: string } = await réponse.json()
+    coucherSouhaité.value = réglages.coucher_souhaite
+  }
+}
+
+async function réglerLeCoucherSouhaité() {
+  const réponse = await fetch('/api/reglages', {
+    method: 'POST',
+    headers: entêtes(),
+    body: JSON.stringify({ coucher_souhaite: coucherSouhaité.value }),
   })
+  messageDuRéglage.value = réponse.ok
+    ? 'Coucher souhaité gardé.'
+    : `Le coucher souhaité n'a pas pu être gardé : le serveur a répondu ${réponse.status}.`
+}
+
+/** Le relevé de la nuit qui a fini ce matin, avec les heures de l'agenda et le coucher souhaité. */
+async function voirLeRelevé() {
+  const réponseDeLaNuit = await fetch(`/api/nuits/${jourLocal(new Date())}`, { headers: entêtes() })
+  if (réponseDeLaNuit.status === 404) {
+    erreur.value = "Remplis d'abord l'agenda du matin."
+    relevé.value = null
+    return
+  }
+  if (!réponseDeLaNuit.ok) {
+    erreur.value = `L'agenda n'a pas pu être lu : le serveur a répondu ${réponseDeLaNuit.status}.`
+    relevé.value = null
+    return
+  }
+  const nuit: NuitJson = await réponseDeLaNuit.json()
+  const finDeLaJournéeMs = coucherSouhaitéMs(coucherSouhaité.value, nuit.lever_ms)
+  const paramètres = `coucher_ms=${nuit.coucher_ms}&lever_ms=${nuit.lever_ms}&coucher_souhaite_ms=${finDeLaJournéeMs}`
+  const réponse = await fetch(`/api/releve?${paramètres}`, { headers: entêtes() })
   if (!réponse.ok) {
     erreur.value = `Le relevé n'a pas pu être lu : le serveur a répondu ${réponse.status}.`
     relevé.value = null
@@ -80,7 +117,9 @@ function lignesDeLaLumièreÀÉviter(lumière: LumièreÀÉviter, seuil: string)
   ]
 }
 
-// Les textes sont ceux de l'accueil Android.
+onMounted(chargerLeRéglage)
+
+// Les textes sont ceux qu'avait l'accueil Android.
 const fenêtres = computed<Fenêtre[]>(() => {
   if (relevé.value === null) {
     return []
@@ -120,21 +159,23 @@ const fenêtres = computed<Fenêtre[]>(() => {
 <template>
   <section class="flex flex-col gap-4">
     <h2 class="text-xl font-semibold">Relevé du jour</h2>
-    <div class="grid grid-cols-3 gap-3">
-      <label class="flex flex-col gap-1">
-        Coucher
-        <input v-model="coucher" type="time" step="900" class="rounded border border-gray-400 p-2" />
-      </label>
-      <label class="flex flex-col gap-1">
-        Lever
-        <input v-model="lever" type="time" step="900" class="rounded border border-gray-400 p-2" />
-      </label>
+    <div class="flex items-end gap-3">
       <label class="flex flex-col gap-1">
         Coucher souhaité
-        <input v-model="coucherSouhaité" type="time" step="900" class="rounded border border-gray-400 p-2" />
+        <input
+          v-model="coucherSouhaité"
+          name="coucher_souhaite"
+          type="time"
+          step="900"
+          class="rounded border border-gray-400 p-2"
+        />
       </label>
+      <button type="button" name="regler" class="rounded border border-gray-900 p-2" @click="réglerLeCoucherSouhaité">
+        Garder
+      </button>
     </div>
-    <button type="button" class="rounded bg-gray-900 p-2 text-white" @click="voirLeRelevé">
+    <p v-if="messageDuRéglage !== null">{{ messageDuRéglage }}</p>
+    <button type="button" name="voir" class="rounded bg-gray-900 p-2 text-white" @click="voirLeRelevé">
       Voir le relevé du jour
     </button>
 

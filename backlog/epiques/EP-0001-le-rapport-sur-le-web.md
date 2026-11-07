@@ -10,7 +10,7 @@ emetteur: Opérateur
 composants: [android, pont, releve, serveur, web]
 tickets_lies: [REQ-0001]
 objectif: aucun
-tickets: [US-0001, US-0002, US-0003, ANO-0001]
+tickets: [US-0001, US-0002, US-0003, ANO-0001, US-0004, US-0005, US-0006, US-0007]
 ---
 
 ## Provenance
@@ -32,8 +32,13 @@ capteurs et l'enregistrement des données, synchronisées régulièrement sur le
   relevé. Terminée.
 - [ANO-0001](../anomalies/ANO-0001-jeton-refuse-sans-que-l-accueil-le-dise.md) : le jeton est refusé sans que
   l'accueil le dise. Terminée.
+- [US-0004](../us/US-0004-agenda-du-matin-sur-le-web.md) : l'agenda du matin se remplit sur la page web, et le
+  relevé prend ses heures.
+- [US-0005](../us/US-0005-fatigue-du-soir-sur-le-web.md) : la fatigue de la journée se note le soir sur la page web.
+- [US-0006](../us/US-0006-rappels-de-l-agenda.md) : le téléphone rappelle l'agenda le matin et vers 21 h.
+- [US-0007](../us/US-0007-agenda-dans-le-releve.md) : le relevé du jour montre les notes de l'agenda et la quantité
+  de sommeil.
 
 ## À découper
 
-- **Où saisir l'agenda du sommeil** (téléphone ou web) : change l'étape 3 des prochaines étapes de CONCEPTION.md.
-  Prête à instruire : US-0002 est terminée.
+Rien pour l'instant. Décision du 2026-11-08 : l'agenda du sommeil se saisit sur la page web, le téléphone le rappelle.

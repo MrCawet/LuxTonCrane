@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import AgendaDuMatin from './AgendaDuMatin.vue'
 import ReleveDuJour from './ReleveDuJour.vue'
 
 // Le jeton reste dans ce navigateur : on ne le saisit qu'une fois.
@@ -83,6 +84,9 @@ onMounted(chargerLeRésumé)
       </p>
     </section>
 
-    <ReleveDuJour v-if="jeton !== null && erreur === null" :jeton="jeton" class="mt-8" />
+    <template v-if="jeton !== null && erreur === null">
+      <AgendaDuMatin :jeton="jeton" class="mt-8" />
+      <ReleveDuJour :jeton="jeton" class="mt-8" />
+    </template>
   </main>
 </template>

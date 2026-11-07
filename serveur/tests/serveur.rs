@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use agenda::AgendaSqlite;
 use journal_sqlite::SqliteJournal;
 use serde_json::{Value, json};
 use serveur::{Méthode, Requête, Serveur};
@@ -16,7 +17,11 @@ fn fresh_database_path(test_name: &str) -> PathBuf {
 fn serveur_vide(test_name: &str) -> Serveur {
     let path = fresh_database_path(test_name);
     let journal = SqliteJournal::open(&path).unwrap();
-    Serveur::new(JETON.to_string(), journal)
+    Serveur::new(
+        JETON.to_string(),
+        journal,
+        AgendaSqlite::open(&path).unwrap(),
+    )
 }
 
 fn envoi<'a>(autorisation: Option<&'a str>, corps: &'a str) -> Requête<'a> {
@@ -102,7 +107,11 @@ fn une_mesure_déjà_reçue_n_est_pas_gardée_deux_fois() {
 #[test]
 fn le_serveur_garde_si_le_téléphone_était_couvert() {
     let path = fresh_database_path("couvert");
-    let mut serveur = Serveur::new(JETON.to_string(), SqliteJournal::open(&path).unwrap());
+    let mut serveur = Serveur::new(
+        JETON.to_string(),
+        SqliteJournal::open(&path).unwrap(),
+        AgendaSqlite::open(&path).unwrap(),
+    );
     let autorisation = format!("Bearer {JETON}");
     let corps = r#"[
         {"valeur_lux": 0.0, "instant_ms": 1793000000000, "telephone_couvert": true},
@@ -189,4 +198,84 @@ fn le_relevé_est_refusé_sans_le_bon_jeton_ou_s_il_manque_un_instant() {
 
     assert_eq!(sans_jeton.statut, 401);
     assert_eq!(incomplet.statut, 400);
+}
+
+fn requête<'a>(méthode: Méthode, chemin: &'a str, corps: &'a str) -> Requête<'a> {
+    Requête {
+        méthode,
+        chemin,
+        autorisation: Some("Bearer jeton-de-test"),
+        corps,
+    }
+}
+
+const NUIT: &str = r#"{"endormissement": "calme", "continuite": "reveil_bref", "coucher_ms": 1793000000000, "lever_ms": 1793028800000}"#;
+
+#[test]
+fn une_nuit_notée_se_relit_à_la_date_de_son_lever() {
+    let mut serveur = serveur_vide("nuit");
+
+    let envoi = serveur.répondre(requête(Méthode::Post, "/api/nuits/2026-11-08", NUIT));
+    let lecture = serveur.répondre(requête(Méthode::Get, "/api/nuits/2026-11-08", ""));
+    let absente = serveur.répondre(requête(Méthode::Get, "/api/nuits/2026-11-07", ""));
+
+    assert_eq!(envoi.statut, 204);
+    assert_eq!(lecture.statut, 200);
+    let nuit: Value = serde_json::from_str(&lecture.corps).unwrap();
+    assert_eq!(
+        nuit,
+        json!({
+            "jour": "2026-11-08",
+            "endormissement": "calme",
+            "continuite": "reveil_bref",
+            "coucher_ms": 1793000000000_i64,
+            "lever_ms": 1793028800000_i64
+        })
+    );
+    assert_eq!(absente.statut, 404);
+}
+
+#[test]
+fn une_nuit_avec_un_niveau_inconnu_ou_un_jour_illisible_est_refusée() {
+    let mut serveur = serveur_vide("nuit_refus");
+    let niveau_inconnu = NUIT.replace("calme", "serein");
+
+    let mauvais_niveau = serveur.répondre(requête(
+        Méthode::Post,
+        "/api/nuits/2026-11-08",
+        &niveau_inconnu,
+    ));
+    let mauvais_jour = serveur.répondre(requête(Méthode::Post, "/api/nuits/demain", NUIT));
+
+    assert_eq!(mauvais_niveau.statut, 400);
+    assert_eq!(mauvais_jour.statut, 400);
+}
+
+#[test]
+fn le_coucher_souhaité_se_règle_et_vaut_23_h_par_défaut() {
+    let mut serveur = serveur_vide("reglages");
+
+    let par_défaut = serveur.répondre(requête(Méthode::Get, "/api/reglages", ""));
+    let réglage = serveur.répondre(requête(
+        Méthode::Post,
+        "/api/reglages",
+        r#"{"coucher_souhaite": "22:30"}"#,
+    ));
+    let illisible = serveur.répondre(requête(
+        Méthode::Post,
+        "/api/reglages",
+        r#"{"coucher_souhaite": "25:99"}"#,
+    ));
+    let relu = serveur.répondre(requête(Méthode::Get, "/api/reglages", ""));
+
+    assert_eq!(
+        serde_json::from_str::<Value>(&par_défaut.corps).unwrap(),
+        json!({"coucher_souhaite": "23:00"})
+    );
+    assert_eq!(réglage.statut, 204);
+    assert_eq!(illisible.statut, 400);
+    assert_eq!(
+        serde_json::from_str::<Value>(&relu.corps).unwrap(),
+        json!({"coucher_souhaite": "22:30"})
+    );
 }

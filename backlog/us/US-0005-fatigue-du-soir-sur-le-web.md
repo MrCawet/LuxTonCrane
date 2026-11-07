@@ -1,0 +1,32 @@
+---
+id: US-0005
+type: us
+titre: La fatigue de la journée se note le soir sur la page web
+statut: nouveau
+priorite: essentiel
+cree_le: 2026-11-08
+maj_le: 2026-11-08
+source: REQ-0001
+emetteur: Opérateur
+composants: [serveur, web]
+tickets_lies: [REQ-0001, US-0004]
+objectif: aucun
+niveau: 1
+epique: EP-0001
+valeur: Pour l'opérateur, savoir si la quantité de sommeil de la nuit précédente suffit.
+---
+
+## Provenance
+
+Découpage de l'agenda du sommeil validé par l'opérateur le 2026-11-08 (voir [US-0004](US-0004-agenda-du-matin-sur-le-web.md)).
+Contenu : CONCEPTION.md, section « Fatigue de la journée ». Attend US-0004.
+
+## Besoin
+
+**En tant que** opérateur, **je veux** noter vers 21 h, en un clic, la fatigue de ma journée sur la page web, **afin
+de** la comparer à la nuit qui l'a précédée.
+
+## Critères d'acceptation
+
+- [ ] La page note la fatigue du jour, sur les quatre niveaux de CONCEPTION.md, et la retrouve préremplie.
+- [ ] Le serveur la garde avec la nuit du même matin.

@@ -1,8 +1,7 @@
-import { afterEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import ReleveDuJour from './ReleveDuJour.vue'
-
-const JETON = 'jeton-de-test'
+import { JETON, doublureDuServeur } from './doublureDuServeur'
 
 const RELEVÉ = {
   lumiere_du_soir: {
@@ -21,47 +20,82 @@ const RELEVÉ = {
   lumiere_de_la_journee: { part_du_temps_mesure_a_250_lx_ou_plus: 0.25, objectif_tenu: false, couverture: 0.8 },
 }
 
-/** Doublure du serveur : note les adresses demandées, et répond au jeton attendu avec le relevé. */
-function serveurQuiRépond(): string[] {
-  const adresses: string[] = []
-  vi.stubGlobal('fetch', async (adresse: string, options: RequestInit) => {
-    adresses.push(adresse)
-    const entêtes = new Headers(options.headers)
-    if (entêtes.get('Authorization') !== `Bearer ${JETON}`) {
-      return new Response('', { status: 401 })
-    }
-    return new Response(JSON.stringify(RELEVÉ), { status: 200 })
+const COUCHER_MS = new Date(2026, 10, 7, 23, 15).getTime()
+const LEVER_MS = new Date(2026, 10, 8, 7, 0).getTime()
+
+/** Un serveur où la nuit de ce matin est notée. */
+function serveurAvecLaNuitDeCeMatin() {
+  const serveur = doublureDuServeur(RELEVÉ)
+  serveur.nuits.set('2026-11-08', {
+    jour: '2026-11-08',
+    endormissement: 'calme',
+    continuite: 'reveil_bref',
+    coucher_ms: COUCHER_MS,
+    lever_ms: LEVER_MS,
   })
-  return adresses
+  return serveur
 }
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(2026, 10, 8, 20, 0))
+})
 
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.useRealTimers()
 })
 
-test('la page demande le relevé pour les heures par défaut, placées autour du lever d\'aujourd\'hui', async () => {
-  vi.useFakeTimers({ toFake: ['Date'] })
-  vi.setSystemTime(new Date(2026, 10, 3, 12, 0))
-  const adresses = serveurQuiRépond()
+test("le relevé prend les heures de l'agenda du matin et le coucher souhaité réglé", async () => {
+  const serveur = serveurAvecLaNuitDeCeMatin()
+  serveur.réglages.coucher_souhaite = '22:30'
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
-  await page.find('button').trigger('click')
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
   await flushPromises()
 
-  const coucher = new Date(2026, 10, 2, 23, 0).getTime()
-  const lever = new Date(2026, 10, 3, 7, 0).getTime()
-  const coucherSouhaité = new Date(2026, 10, 3, 23, 0).getTime()
-  expect(adresses).toEqual([
-    `/api/releve?coucher_ms=${coucher}&lever_ms=${lever}&coucher_souhaite_ms=${coucherSouhaité}`,
-  ])
+  const coucherSouhaité = new Date(2026, 10, 8, 22, 30).getTime()
+  const demandeDuRelevé = serveur.demandes.find((demande) => demande.adresse.startsWith('/api/releve'))
+  expect(demandeDuRelevé?.adresse).toBe(
+    `/api/releve?coucher_ms=${COUCHER_MS}&lever_ms=${LEVER_MS}&coucher_souhaite_ms=${coucherSouhaité}`,
+  )
+})
+
+test("sans agenda ce matin, le relevé demande de le remplir d'abord", async () => {
+  const serveur = doublureDuServeur(RELEVÉ)
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
+  await flushPromises()
+
+  expect(page.text()).toContain("Remplis d'abord l'agenda du matin.")
+  expect(serveur.demandes.some((demande) => demande.adresse.startsWith('/api/releve'))).toBe(false)
+})
+
+test('le coucher souhaité se retrouve et se règle', async () => {
+  const serveur = doublureDuServeur(RELEVÉ)
+  serveur.réglages.coucher_souhaite = '22:30'
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  const champ = page.find('input[name="coucher_souhaite"]')
+  expect((champ.element as HTMLInputElement).value).toBe('22:30')
+
+  await champ.setValue('23:45')
+  await page.find('button[name="regler"]').trigger('click')
+  await flushPromises()
+
+  expect(serveur.réglages.coucher_souhaite).toBe('23:45')
 })
 
 test('la page affiche les quatre fenêtres du relevé, avec les textes du téléphone', async () => {
-  serveurQuiRépond()
+  serveurAvecLaNuitDeCeMatin()
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
-  await page.find('button').trigger('click')
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
   await flushPromises()
 
   const texte = page.text()
