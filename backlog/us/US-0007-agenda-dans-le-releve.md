@@ -2,7 +2,7 @@
 id: US-0007
 type: us
 titre: Le relevé du jour montre les notes de l'agenda et la quantité de sommeil
-statut: nouveau
+statut: en_cours
 priorite: essentiel
 cree_le: 2026-11-08
 maj_le: 2026-11-08
