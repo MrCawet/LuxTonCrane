@@ -2,7 +2,7 @@
 id: US-0005
 type: us
 titre: La fatigue de la journée se note le soir sur la page web
-statut: en_cours
+statut: a_valider
 priorite: essentiel
 cree_le: 2026-11-08
 maj_le: 2026-11-08
@@ -35,5 +35,5 @@ de** la comparer à la nuit qui l'a précédée.
 
 ## Critères d'acceptation
 
-- [ ] La page note la fatigue du jour, sur les quatre niveaux de CONCEPTION.md, et la retrouve préremplie.
+- [x] La page note la fatigue du jour, sur les quatre niveaux de CONCEPTION.md, et la retrouve préremplie.
 - [x] Le serveur la garde par jour, le même que celui de la nuit qui l'a précédée, même si cette nuit n'est pas notée.
