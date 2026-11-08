@@ -24,6 +24,14 @@ pub enum Continuité {
     NuitInterrompue,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Fatigue {
+    Aucune,
+    Légère,
+    Gênante,
+    Somnolence,
+}
+
 /// Une nuit de l'agenda, reconnue à la date de son lever.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Nuit {
@@ -83,6 +91,17 @@ impl Continuité {
         ]
         .into_iter()
         .find(|niveau| niveau.nom() == nom)
+    }
+}
+
+/// Le nom d'un niveau, tel que la page web et la base l'écrivent.
+impl Fatigue {
+    pub fn nom(&self) -> &'static str {
+        ""
+    }
+
+    pub fn depuis_le_nom(_nom: &str) -> Option<Fatigue> {
+        None
     }
 }
 
@@ -180,5 +199,16 @@ impl AgendaSqlite {
             params![heure],
         )?;
         Ok(())
+    }
+}
+
+/// La fatigue de la journée, notée le soir, par jour : celui de la nuit qui l'a précédée.
+impl AgendaSqlite {
+    pub fn garder_la_fatigue(&self, _jour: &str, _fatigue: Fatigue) -> rusqlite::Result<()> {
+        Ok(())
+    }
+
+    pub fn fatigue(&self, _jour: &str) -> rusqlite::Result<Option<Fatigue>> {
+        Ok(None)
     }
 }
