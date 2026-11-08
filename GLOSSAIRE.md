@@ -18,5 +18,6 @@
 - **Lux mélanopique** (« melanopic EDI », norme CIE S 026) : l'éclairement pondéré par la sensibilité de la mélanopsine, la cellule de l'œil qui règle l'horloge interne (maximum vers 490 nm). Il vaut les lux ordinaires sous la lumière du jour, et environ 40 à 50 % sous une lumière chaude. Les seuils du sommeil sont exprimés dans cette unité, à hauteur des yeux.
 - **Mesure** : la quantité de lumière, en lux, reçue par le capteur à un instant.
 - **Quantité de sommeil** : le temps au lit d'une nuit, de l'heure du coucher à l'heure du lever. Objectif de départ : plus de 7 h, à ajuster selon la fatigue de la journée.
+- **Rappel de l'agenda** (`RappelDeLAgenda`) : la notification du téléphone qui invite à remplir l'agenda du sommeil et ouvre la page web ; le matin à 8 h, le soir à 21 h.
 - **Relevé du jour** : le rapport d'une nuit et de la journée qui suit : les objectifs du sommeil, la lumière du soir, de la nuit, du matin et de la journée, et leur couverture.
 - **Téléphone couvert** (`téléphone_couvert`) : quelque chose est contre le capteur de proximité, comme dans une poche ou face contre la table ; noté avec chaque mesure, inconnu si le capteur n'a encore rien donné. Une mesure prise téléphone couvert compte comme non mesurée.

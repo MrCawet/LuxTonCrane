@@ -55,6 +55,10 @@ Demandée chaque soir vers 21 h, en un clic, avec des niveaux définis par ce qu
 
 Objectif : aucune ou légère. Comparée à la quantité de sommeil de la nuit précédente, elle dit si cette quantité suffit.
 
+### Rappels de l'agenda
+
+L'agenda se remplit sur la page web, qui ne peut pas rappeler seule : le téléphone notifie à 8 h et à 21 h, à heure fixe, et la notification ouvre la page. Heure fixe plutôt que premier déverrouillage après le lever : depuis Android 8, le déverrouillage n'est plus annoncé à une application qui ne tourne pas. Les rappels sont planifiés par WorkManager, qui survit au redémarrage sans permission d'alarme exacte, au prix de quelques minutes de retard possibles.
+
 ## Relevé du jour
 
 Le premier rapport. Il couvre une nuit et la journée qui suit.
@@ -141,7 +145,7 @@ Dans cet ordre, chaque étape en TDD et sur sa propre branche :
 
 1. **Domaine Rust du relevé du jour** : fait pour la lumière (crate `releve/`) : les fenêtres tirées des heures du coucher et du lever, une mesure vaut 10 min au plus, les objectifs tenus ou non et la couverture. Restent les notes de l'agenda.
 2. **Proximité avec chaque mesure** : faite. Chaque mesure est notée avec la dernière proximité connue ; écran éteint, la mesure attend la première valeur de proximité. Une mesure sans proximité connue (avant la première valeur, ou d'avant la proximité) reste valable.
-3. **Agenda du sommeil sur la page web** (décidé le 2026-11-08) : les deux notes et les deux heures le matin, la fatigue vers 21 h, gardées sur le serveur. Le téléphone ne fait que les rappeler, par une notification qui ouvre la page.
+3. **Agenda du sommeil sur la page web** (décidé le 2026-11-08) : les deux notes et les deux heures le matin, la fatigue vers 21 h, gardées sur le serveur. Le téléphone ne fait que les rappeler, par une notification qui ouvre la page (faite, à 8 h et à 21 h).
 4. **Affichage du relevé du jour** : fait pour la lumière, sur la page web, avec trois champs d'heure (coucher, lever, coucher souhaité) dont les heures ne sont pas encore gardées. L'accueil Android ne l'affiche plus : il montre la dernière synchronisation réussie et permet de synchroniser tout de suite.
 5. **Mesure écran éteint** : faite pour la lumière et la proximité, avec l'alarme environ toutes les 9 min et le court wake lock. Restent la position et le mouvement significatif décrits plus haut.
 
