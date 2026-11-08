@@ -130,3 +130,42 @@ fn chaque_niveau_de_fatigue_se_retrouve_par_son_nom() {
     }
     assert_eq!(Fatigue::Gênante.nom(), "genante");
 }
+
+#[test]
+fn l_objectif_de_chaque_note_est_tenu_par_ses_deux_premiers_niveaux() {
+    assert!(Endormissement::Immédiat.objectif_tenu());
+    assert!(Endormissement::Calme.objectif_tenu());
+    assert!(!Endormissement::Agité.objectif_tenu());
+    assert!(!Endormissement::Abandonné.objectif_tenu());
+    assert!(Continuité::SansRéveil.objectif_tenu());
+    assert!(Continuité::RéveilBref.objectif_tenu());
+    assert!(!Continuité::RéveilLong.objectif_tenu());
+    assert!(!Continuité::NuitInterrompue.objectif_tenu());
+    assert!(Fatigue::Aucune.objectif_tenu());
+    assert!(Fatigue::Légère.objectif_tenu());
+    assert!(!Fatigue::Gênante.objectif_tenu());
+    assert!(!Fatigue::Somnolence.objectif_tenu());
+}
+
+const MINUTE_MS: i64 = 60 * 1000;
+const HEURE_MS: i64 = 60 * MINUTE_MS;
+
+fn nuit_au_lit_pendant(durée_ms: i64) -> Nuit {
+    let coucher_ms = 1793000000000;
+    Nuit {
+        coucher_ms,
+        lever_ms: coucher_ms + durée_ms,
+        ..nuit_du("2026-11-08", Endormissement::Calme)
+    }
+}
+
+#[test]
+fn la_quantité_de_sommeil_est_le_temps_au_lit_et_doit_dépasser_7_h() {
+    let longue = nuit_au_lit_pendant(7 * HEURE_MS + 15 * MINUTE_MS).quantité_de_sommeil();
+    let tout_juste_7_h = nuit_au_lit_pendant(7 * HEURE_MS).quantité_de_sommeil();
+
+    assert_eq!(longue.durée_ms, 7 * HEURE_MS + 15 * MINUTE_MS);
+    assert!(longue.objectif_tenu);
+    assert_eq!(tout_juste_7_h.durée_ms, 7 * HEURE_MS);
+    assert!(!tout_juste_7_h.objectif_tenu);
+}

@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { CONTINUITÉ, ENDORMISSEMENT } from './echellesDuSommeil'
 import { heureLocale, heuresDeLaNuit, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
-
-interface Niveau {
-  nom: string
-  titre: string
-  cequiSestPassé: string
-}
 
 interface NuitJson {
   jour: string
@@ -17,46 +12,6 @@ interface NuitJson {
   coucher_ms: number
   lever_ms: number
 }
-
-// Les échelles de CONCEPTION.md, section « Agenda du sommeil ».
-const ENDORMISSEMENT: Niveau[] = [
-  { nom: 'immediat', titre: 'Immédiat', cequiSestPassé: "je ne me souviens pas d'avoir attendu" },
-  {
-    nom: 'calme',
-    titre: 'Calme',
-    cequiSestPassé: "j'ai attendu un peu, sans m'agiter ni me dire « je n'arrive pas à dormir »",
-  },
-  {
-    nom: 'agite',
-    titre: 'Agité',
-    cequiSestPassé: "je me suis retourné plusieurs fois, ou je me suis dit « je n'arrive pas à dormir »",
-  },
-  {
-    nom: 'abandonne',
-    titre: 'Abandonné',
-    cequiSestPassé:
-      "j'ai renoncé un moment : je me suis levé, j'ai repris le téléphone ou j'ai rallumé la lumière",
-  },
-]
-
-const CONTINUITÉ: Niveau[] = [
-  { nom: 'sans_reveil', titre: 'Sans réveil', cequiSestPassé: 'je ne me souviens d\'aucun réveil' },
-  {
-    nom: 'reveil_bref',
-    titre: 'Réveil bref',
-    cequiSestPassé: 'réveillé, puis rendormi aussitôt, sans avoir le temps de penser',
-  },
-  {
-    nom: 'reveil_long',
-    titre: 'Réveil long',
-    cequiSestPassé: "réveillé, et j'ai mis du temps à me rendormir : j'ai pensé, je me suis retourné",
-  },
-  {
-    nom: 'nuit_interrompue',
-    titre: 'Nuit interrompue',
-    cequiSestPassé: "je me suis levé, j'ai pris le téléphone, ou je suis resté éveillé longtemps",
-  },
-]
 
 const ÉCHELLES = [
   { champ: 'endormissement' as const, titre: 'Endormissement', niveaux: ENDORMISSEMENT },

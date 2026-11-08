@@ -139,9 +139,9 @@ Ce qu'Android déclare, relevé avec l'application « Sensor Test » :
 
 Dans cet ordre, chaque étape en TDD et sur sa propre branche :
 
-1. **Domaine Rust du relevé du jour** : fait pour la lumière (crate `releve/`) : les fenêtres tirées des heures du coucher et du lever, une mesure vaut 10 min au plus, les objectifs tenus ou non et la couverture. Restent les notes de l'agenda.
+1. **Domaine Rust du relevé du jour** : fait pour la lumière (crate `releve/`) : les fenêtres tirées des heures du coucher et du lever, une mesure vaut 10 min au plus, les objectifs tenus ou non et la couverture. Les objectifs des notes de l'agenda et de la quantité de sommeil sont dans la crate `agenda/` ; le serveur les joint au relevé.
 2. **Proximité avec chaque mesure** : faite. Chaque mesure est notée avec la dernière proximité connue ; écran éteint, la mesure attend la première valeur de proximité. Une mesure sans proximité connue (avant la première valeur, ou d'avant la proximité) reste valable.
 3. **Agenda du sommeil sur la page web** (décidé le 2026-11-08) : les deux notes et les deux heures le matin, la fatigue vers 21 h, gardées sur le serveur. Le téléphone ne fait que les rappeler, par une notification qui ouvre la page.
-4. **Affichage du relevé du jour** : fait pour la lumière, sur la page web, avec trois champs d'heure (coucher, lever, coucher souhaité) dont les heures ne sont pas encore gardées. L'accueil Android ne l'affiche plus : il montre la dernière synchronisation réussie et permet de synchroniser tout de suite.
+4. **Affichage du relevé du jour** : fait sur la page web : les notes de l'agenda et la quantité de sommeil, la lumière et la fatigue, chacune avec son objectif ; les heures viennent de l'agenda du matin et du coucher souhaité. L'accueil Android ne l'affiche plus : il montre la dernière synchronisation réussie et permet de synchroniser tout de suite.
 5. **Mesure écran éteint** : faite pour la lumière et la proximité, avec l'alarme environ toutes les 9 min et le court wake lock. Restent la position et le mouvement significatif décrits plus haut.
 

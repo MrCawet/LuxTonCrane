@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, type Niveau } from './echellesDuSommeil'
 import { coucherSouhaitéMs, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
@@ -24,11 +25,27 @@ interface LumièreDeLaJournée {
   couverture: number
 }
 
+/** Une note de l'agenda : `niveau` est le nom d'un niveau de son échelle. */
+interface Note {
+  niveau: string
+  objectif_tenu: boolean
+}
+
+interface QuantitéDeSommeil {
+  duree_ms: number
+  objectif_tenu: boolean
+}
+
 interface RelevéDuJour {
+  endormissement: Note
+  continuite: Note
+  quantite_de_sommeil: QuantitéDeSommeil
   lumiere_du_soir: LumièreÀÉviter
   lumiere_de_la_nuit: LumièreÀÉviter
   lumiere_du_matin: LumièreDuMatin
   lumiere_de_la_journee: LumièreDeLaJournée
+  /** `null` tant qu'elle n'est pas notée, le soir. */
+  fatigue: Note | null
 }
 
 interface Fenêtre {
@@ -71,7 +88,8 @@ async function réglerLeCoucherSouhaité() {
 
 /** Le relevé de la nuit qui a fini ce matin, avec les heures de l'agenda et le coucher souhaité. */
 async function voirLeRelevé() {
-  const réponseDeLaNuit = await fetch(`/api/nuits/${jourLocal(new Date())}`, { headers: entêtes() })
+  const jour = jourLocal(new Date())
+  const réponseDeLaNuit = await fetch(`/api/nuits/${jour}`, { headers: entêtes() })
   if (réponseDeLaNuit.status === 404) {
     erreur.value = "Remplis d'abord l'agenda du matin."
     relevé.value = null
@@ -84,7 +102,7 @@ async function voirLeRelevé() {
   }
   const nuit: NuitJson = await réponseDeLaNuit.json()
   const finDeLaJournéeMs = coucherSouhaitéMs(coucherSouhaité.value, nuit.lever_ms)
-  const paramètres = `coucher_ms=${nuit.coucher_ms}&lever_ms=${nuit.lever_ms}&coucher_souhaite_ms=${finDeLaJournéeMs}`
+  const paramètres = `jour=${jour}&coucher_souhaite_ms=${finDeLaJournéeMs}`
   const réponse = await fetch(`/api/releve?${paramètres}`, { headers: entêtes() })
   if (!réponse.ok) {
     erreur.value = `Le relevé n'a pas pu être lu : le serveur a répondu ${réponse.status}.`
@@ -99,12 +117,28 @@ function minutes(duréeMs: number): string {
   return `${Math.floor(duréeMs / 60_000)} min`
 }
 
+function heuresEtMinutes(duréeMs: number): string {
+  const minutesEnTout = Math.floor(duréeMs / 60_000)
+  const heures = Math.floor(minutesEnTout / 60)
+  return `${heures} h ${minutesEnTout % 60} min`
+}
+
 function pourcentage(part: number): string {
   return `${Math.round(part * 100)} %`
 }
 
 function ouiOuNon(tenu: boolean): string {
   return tenu ? 'oui' : 'non'
+}
+
+/** Le titre du niveau noté, tel que l'échelle l'écrit. */
+function titreDuNiveau(échelle: Niveau[], nom: string): string {
+  const niveau = échelle.find((candidat) => candidat.nom === nom)
+  return niveau === undefined ? nom : niveau.titre
+}
+
+function ligneDeLaNote(titre: string, échelle: Niveau[], note: Note): string {
+  return `${titre} : ${titreDuNiveau(échelle, note.niveau)}, objectif tenu : ${ouiOuNon(note.objectif_tenu)}`
 }
 
 function lignesDeLaLumièreÀÉviter(lumière: LumièreÀÉviter, seuil: string): string[] {
@@ -127,7 +161,18 @@ const fenêtres = computed<Fenêtre[]>(() => {
   const matin = relevé.value.lumiere_du_matin
   const journée = relevé.value.lumiere_de_la_journee
   const partÀ250Lx = journée.part_du_temps_mesure_a_250_lx_ou_plus
+  const quantité = relevé.value.quantite_de_sommeil
+  const fatigue = relevé.value.fatigue
+  // Les blocs suivent l'ordre de CONCEPTION.md, section « Relevé du jour ».
   return [
+    {
+      titre: 'Sommeil',
+      lignes: [
+        ligneDeLaNote('Endormissement', ENDORMISSEMENT, relevé.value.endormissement),
+        ligneDeLaNote('Continuité de la nuit', CONTINUITÉ, relevé.value.continuite),
+        `Quantité de sommeil : ${heuresEtMinutes(quantité.duree_ms)}, objectif de plus de 7 h tenu : ${ouiOuNon(quantité.objectif_tenu)}`,
+      ],
+    },
     {
       titre: 'Soir, 3 h avant le coucher',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_du_soir, '10 lx'),
@@ -135,6 +180,14 @@ const fenêtres = computed<Fenêtre[]>(() => {
     {
       titre: 'Nuit, du coucher au lever',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_de_la_nuit, '1 lx'),
+    },
+    {
+      titre: 'Fatigue, le soir suivant',
+      lignes: [
+        fatigue === null
+          ? 'Fatigue de la journée : pas encore notée'
+          : ligneDeLaNote('Fatigue de la journée', FATIGUE, fatigue),
+      ],
     },
     {
       titre: 'Matin, 2 h après le lever',
