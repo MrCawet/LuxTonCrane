@@ -22,11 +22,6 @@ Décision de l'opérateur le 2026-11-08 : une page web ne peut pas rappeler seul
 page ; la saisie reste sur le web. Priorité proposée par l'agent, `confort` : l'agenda se remplit sans rappel. Attend
 US-0004 et US-0005.
 
-Le 2026-11-08, en la commençant, l'agent tranche la question restée ouverte (heure fixe le matin, ou premier
-déverrouillage après le lever ?) par une heure fixe, à faire valider par l'opérateur : depuis Android 8, le
-déverrouillage (`ACTION_USER_PRESENT`) n'est plus annoncé à une application qui ne tourne pas, il faudrait le guetter
-depuis un service de premier plan permanent.
-
 ## Besoin
 
 **En tant que** opérateur, **je veux** une notification le matin et vers 21 h, qui ouvre la page web, **afin de**
@@ -52,3 +47,10 @@ Hypothèse : le rappel du matin sonne à 8 h, celui du soir à 21 h, à heure fi
 5. Le lendemain, les deux rappels reviennent sans rouvrir l'application, redémarrage du téléphone compris.
 
 Dire aussi si l'heure fixe de 8 h convient (hypothèse de l'agent), ou s'il vaut mieux une autre heure.
+
+## Questions ouvertes
+
+- À quelle heure le matin : une heure fixe, ou au premier déverrouillage après le lever ?
+  - Réponse provisoire de l'agent (2026-11-08), à faire valider par l'opérateur : une heure fixe, 8 h. Depuis
+    Android 8, le déverrouillage (`ACTION_USER_PRESENT`) n'est plus annoncé à une application qui ne tourne pas ; il
+    faudrait le guetter depuis un service de premier plan permanent.
