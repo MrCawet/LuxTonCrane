@@ -19,7 +19,8 @@ import android.widget.TextView
 import java.time.ZoneId
 
 /**
- * Demande la permission d'afficher la notification, puis démarre la mesure.
+ * Demande la permission d'afficher les notifications, puis démarre la mesure.
+ * Planifie les rappels de l'agenda du sommeil, qui ouvrent la page web.
  * Affiche la dernière synchronisation réussie avec le serveur, et permet de synchroniser tout de suite.
  * Le relevé du jour se lit sur la page web.
  */
@@ -39,6 +40,7 @@ class Accueil : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(screen())
         préférencesDeLaSynchronisation(this).registerOnSharedPreferenceChangeListener(suiviDeLaSynchronisation)
+        planifierLesRappelsDeLAgenda(this)
 
         if (notificationPermissionIsMissing()) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQUEST)
