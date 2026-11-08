@@ -4,6 +4,9 @@ import ReleveDuJour from './ReleveDuJour.vue'
 import { JETON, doublureDuServeur } from './doublureDuServeur'
 
 const RELEVÉ = {
+  endormissement: { niveau: 'calme', objectif_tenu: true },
+  continuite: { niveau: 'reveil_long', objectif_tenu: false },
+  quantite_de_sommeil: { duree_ms: 27900000, objectif_tenu: true },
   lumiere_du_soir: {
     temps_au_dessus_du_seuil_ms: 600000,
     valeur_la_plus_haute_lux: 50,
@@ -18,14 +21,15 @@ const RELEVÉ = {
   },
   lumiere_du_matin: { temps_a_10_000_lx_ou_plus_ms: 2400000, objectif_tenu: true, couverture: 0.5 },
   lumiere_de_la_journee: { part_du_temps_mesure_a_250_lx_ou_plus: 0.25, objectif_tenu: false, couverture: 0.8 },
+  fatigue: { niveau: 'genante', objectif_tenu: false },
 }
 
 const COUCHER_MS = new Date(2026, 10, 7, 23, 15).getTime()
 const LEVER_MS = new Date(2026, 10, 8, 7, 0).getTime()
 
-/** Un serveur où la nuit de ce matin est notée. */
-function serveurAvecLaNuitDeCeMatin() {
-  const serveur = doublureDuServeur(RELEVÉ)
+/** Un serveur où la nuit de ce matin est notée, et qui rend `relevé`. */
+function serveurAvecLaNuitDeCeMatin(relevé: unknown = RELEVÉ) {
+  const serveur = doublureDuServeur(relevé)
   serveur.nuits.set('2026-11-08', {
     jour: '2026-11-08',
     endormissement: 'calme',
@@ -46,7 +50,7 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-test("le relevé prend les heures de l'agenda du matin et le coucher souhaité réglé", async () => {
+test("le relevé est celui de la nuit de ce matin, avec le coucher souhaité réglé", async () => {
   const serveur = serveurAvecLaNuitDeCeMatin()
   serveur.réglages.coucher_souhaite = '22:30'
 
@@ -58,7 +62,7 @@ test("le relevé prend les heures de l'agenda du matin et le coucher souhaité r
   const coucherSouhaité = new Date(2026, 10, 8, 22, 30).getTime()
   const demandeDuRelevé = serveur.demandes.find((demande) => demande.adresse.startsWith('/api/releve'))
   expect(demandeDuRelevé?.adresse).toBe(
-    `/api/releve?coucher_ms=${COUCHER_MS}&lever_ms=${LEVER_MS}&coucher_souhaite_ms=${coucherSouhaité}`,
+    `/api/releve?jour=2026-11-08&coucher_souhaite_ms=${coucherSouhaité}`,
   )
 })
 
@@ -112,4 +116,32 @@ test('la page affiche les quatre fenêtres du relevé, avec les textes du télé
   expect(texte).toContain('Temps mesuré à 250 lx ou plus : 25 %')
   expect(texte).toContain('Objectif tenu : non')
   expect(texte).toContain('Objectif tenu : oui')
+})
+
+test("le relevé montre les notes de l'agenda et la quantité de sommeil, avec leur objectif", async () => {
+  serveurAvecLaNuitDeCeMatin()
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
+  await flushPromises()
+
+  const texte = page.text()
+  expect(texte).toContain('Sommeil')
+  expect(texte).toContain('Endormissement : Calme, objectif tenu : oui')
+  expect(texte).toContain('Continuité de la nuit : Réveil long, objectif tenu : non')
+  expect(texte).toContain('Quantité de sommeil : 7 h 45 min, objectif de plus de 7 h tenu : oui')
+  expect(texte).toContain('Fatigue, le soir suivant')
+  expect(texte).toContain('Fatigue de la journée : Gênante, objectif tenu : non')
+})
+
+test("tant que la fatigue n'est pas notée, le relevé le dit", async () => {
+  serveurAvecLaNuitDeCeMatin({ ...RELEVÉ, fatigue: null })
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
+  await flushPromises()
+
+  expect(page.text()).toContain('Fatigue de la journée : pas encore notée')
 })
