@@ -5,7 +5,7 @@ titre: La livraison déploie seule, et seulement les parties modifiées
 statut: en_cours
 priorite: confort
 cree_le: 2026-11-07
-maj_le: 2026-11-07
+maj_le: 2026-11-08
 source: interne
 emetteur: Opérateur
 composants: [ci, serveur, web, android]
@@ -54,7 +54,7 @@ Décisions de l'opérateur, le 2026-11-07 :
 - [ ] Une fusion qui ne touche que `web/` déploie la page, et rien d'autre.
 - [x] Une fusion qui touche `serveur/` déploie le serveur, qui répond ensuite.
 - [x] Une fusion qui touche `android/` ou le pont crée une release avec l'APK.
-- [ ] Lancée à la main, la livraison livre les trois.
+- [x] Lancée à la main, la livraison livre les trois.
 
 ## Suivi
 
@@ -63,3 +63,9 @@ Décisions de l'opérateur, le 2026-11-07 :
 - 2026-11-07, fusion de la PR #12 (`serveur/`, `android/`, pont, sans `web/`) : serveur et application livrés,
   release `2026-11-07-1335`, page non livrée. Reste à voir une fusion qui ne touche que `web/`, et un lancement à la
   main.
+- 2026-11-07, fusion de la PR #15 (`android/` seul) : seule l'application est livrée.
+- 2026-11-08, fusion de la PR #17 : serveur et page en échec, mcProd refuse la clé de déploiement. Le 2026-11-07 à
+  18 h 02, `~lux-ton-crane/.ssh/authorized_keys` avait été réécrit par un bloc géré « BEGIN PVE / END PVE », sans la
+  clé. Remise après le bloc le 2026-11-08 (sauvegarde `authorized_keys.bak-2026-11-08`), sur décision de l'opérateur ;
+  une prochaine réécriture du bloc peut l'effacer encore. Livraison relancée à la main : les trois parties livrées.
+  Reste à voir une fusion qui ne touche que `web/`.
