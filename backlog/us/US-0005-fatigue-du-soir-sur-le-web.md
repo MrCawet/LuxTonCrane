@@ -36,4 +36,4 @@ de** la comparer à la nuit qui l'a précédée.
 ## Critères d'acceptation
 
 - [ ] La page note la fatigue du jour, sur les quatre niveaux de CONCEPTION.md, et la retrouve préremplie.
-- [ ] Le serveur la garde par jour, le même que celui de la nuit qui l'a précédée, même si cette nuit n'est pas notée.
+- [x] Le serveur la garde par jour, le même que celui de la nuit qui l'a précédée, même si cette nuit n'est pas notée.
