@@ -279,3 +279,29 @@ fn le_coucher_souhaité_se_règle_et_vaut_23_h_par_défaut() {
         json!({"coucher_souhaite": "22:30"})
     );
 }
+
+#[test]
+fn la_fatigue_du_jour_se_note_et_se_relit() {
+    let mut serveur = serveur_vide("fatigue");
+
+    let absente = serveur.répondre(requête(Méthode::Get, "/api/journees/2026-11-08", ""));
+    let envoi = serveur.répondre(requête(
+        Méthode::Post,
+        "/api/journees/2026-11-08",
+        r#"{"fatigue": "genante"}"#,
+    ));
+    let inconnue = serveur.répondre(requête(
+        Méthode::Post,
+        "/api/journees/2026-11-08",
+        r#"{"fatigue": "epuise"}"#,
+    ));
+    let lecture = serveur.répondre(requête(Méthode::Get, "/api/journees/2026-11-08", ""));
+
+    assert_eq!(absente.statut, 404);
+    assert_eq!(envoi.statut, 204);
+    assert_eq!(inconnue.statut, 400);
+    assert_eq!(
+        serde_json::from_str::<Value>(&lecture.corps).unwrap(),
+        json!({"jour": "2026-11-08", "fatigue": "genante"})
+    );
+}

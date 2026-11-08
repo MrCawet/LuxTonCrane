@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use agenda::{AgendaSqlite, Continuité, Endormissement, Nuit};
+use agenda::{AgendaSqlite, Continuité, Endormissement, Fatigue, Nuit};
 use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
@@ -168,6 +168,18 @@ struct NuitJson<'a> {
     lever_ms: i64,
 }
 
+#[derive(Deserialize)]
+struct FatigueReçueJson {
+    fatigue: String,
+}
+
+/// La fatigue d'une journée, telle que la page web la reçoit.
+#[derive(Serialize)]
+struct JournéeJson<'a> {
+    jour: &'a str,
+    fatigue: &'static str,
+}
+
 #[derive(Serialize, Deserialize)]
 struct RéglagesJson {
     coucher_souhaite: String,
@@ -308,6 +320,30 @@ impl Serveur {
         }
     }
 
+    fn journée(&self, jour: &str) -> Réponse {
+        match self.agenda.fatigue(jour) {
+            Ok(Some(fatigue)) => en_json(&JournéeJson {
+                jour,
+                fatigue: fatigue.nom(),
+            }),
+            Ok(None) => Réponse::vide(404),
+            Err(_) => Réponse::vide(500),
+        }
+    }
+
+    fn noter_la_fatigue(&self, jour: &str, corps: &str) -> Réponse {
+        let Ok(reçue) = serde_json::from_str::<FatigueReçueJson>(corps) else {
+            return Réponse::vide(400);
+        };
+        let Some(fatigue) = Fatigue::depuis_le_nom(&reçue.fatigue) else {
+            return Réponse::vide(400);
+        };
+        match self.agenda.garder_la_fatigue(jour, fatigue) {
+            Ok(()) => Réponse::vide(204),
+            Err(_) => Réponse::vide(500),
+        }
+    }
+
     fn réglages(&self) -> Réponse {
         match self.agenda.coucher_souhaité() {
             Ok(coucher_souhaite) => en_json(&RéglagesJson { coucher_souhaite }),
@@ -377,6 +413,16 @@ impl Serveur {
             return match requête.méthode {
                 Méthode::Get => self.nuit(jour),
                 Méthode::Post => self.noter_la_nuit(jour, requête.corps),
+                Méthode::Autre => Réponse::vide(404),
+            };
+        }
+        if let Some(jour) = chemin.strip_prefix("/api/journees/") {
+            if !jour_lisible(jour) {
+                return Réponse::vide(400);
+            }
+            return match requête.méthode {
+                Méthode::Get => self.journée(jour),
+                Méthode::Post => self.noter_la_fatigue(jour, requête.corps),
                 Méthode::Autre => Réponse::vide(404),
             };
         }

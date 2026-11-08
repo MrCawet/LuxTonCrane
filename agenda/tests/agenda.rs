@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use agenda::{AgendaSqlite, Continuité, Endormissement, Nuit};
+use agenda::{AgendaSqlite, Continuité, Endormissement, Fatigue, Nuit};
 
 fn fresh_database_path(test_name: &str) -> PathBuf {
     let file_name = format!("agenda_{}_{}.db", test_name, std::process::id());
@@ -96,4 +96,37 @@ fn chaque_niveau_se_retrouve_par_son_nom() {
     assert_eq!(Endormissement::nom(&Endormissement::Agité), "agite");
     assert_eq!(Continuité::nom(&Continuité::SansRéveil), "sans_reveil");
     assert_eq!(Endormissement::depuis_le_nom("inconnu"), None);
+}
+
+#[test]
+fn la_fatigue_du_jour_se_garde_même_sans_la_nuit_et_se_corrige() {
+    let path = fresh_database_path("fatigue");
+    let agenda = AgendaSqlite::open(&path).unwrap();
+    assert_eq!(agenda.fatigue("2026-11-08").unwrap(), None);
+
+    agenda
+        .garder_la_fatigue("2026-11-08", Fatigue::Gênante)
+        .unwrap();
+    agenda
+        .garder_la_fatigue("2026-11-08", Fatigue::Légère)
+        .unwrap();
+
+    let relue = AgendaSqlite::open(&path)
+        .unwrap()
+        .fatigue("2026-11-08")
+        .unwrap();
+    assert_eq!(relue, Some(Fatigue::Légère));
+}
+
+#[test]
+fn chaque_niveau_de_fatigue_se_retrouve_par_son_nom() {
+    for fatigue in [
+        Fatigue::Aucune,
+        Fatigue::Légère,
+        Fatigue::Gênante,
+        Fatigue::Somnolence,
+    ] {
+        assert_eq!(Fatigue::depuis_le_nom(fatigue.nom()), Some(fatigue));
+    }
+    assert_eq!(Fatigue::Gênante.nom(), "genante");
 }

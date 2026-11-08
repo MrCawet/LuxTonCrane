@@ -24,6 +24,14 @@ pub enum Continuité {
     NuitInterrompue,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Fatigue {
+    Aucune,
+    Légère,
+    Gênante,
+    Somnolence,
+}
+
 /// Une nuit de l'agenda, reconnue à la date de son lever.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Nuit {
@@ -86,6 +94,29 @@ impl Continuité {
     }
 }
 
+/// Le nom d'un niveau, tel que la page web et la base l'écrivent.
+impl Fatigue {
+    pub fn nom(&self) -> &'static str {
+        match self {
+            Fatigue::Aucune => "aucune",
+            Fatigue::Légère => "legere",
+            Fatigue::Gênante => "genante",
+            Fatigue::Somnolence => "somnolence",
+        }
+    }
+
+    pub fn depuis_le_nom(nom: &str) -> Option<Fatigue> {
+        [
+            Fatigue::Aucune,
+            Fatigue::Légère,
+            Fatigue::Gênante,
+            Fatigue::Somnolence,
+        ]
+        .into_iter()
+        .find(|niveau| niveau.nom() == nom)
+    }
+}
+
 fn niveau_illisible(nom: &str) -> rusqlite::Error {
     rusqlite::Error::InvalidParameterName(format!("niveau inconnu dans la base : {nom}"))
 }
@@ -101,6 +132,10 @@ impl AgendaSqlite {
                 continuite TEXT NOT NULL,
                 coucher_ms INTEGER NOT NULL,
                 lever_ms INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS journee (
+                jour TEXT PRIMARY KEY,
+                fatigue TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS reglage (
                 nom TEXT PRIMARY KEY,
@@ -180,5 +215,32 @@ impl AgendaSqlite {
             params![heure],
         )?;
         Ok(())
+    }
+}
+
+/// La fatigue de la journée, notée le soir, par jour : celui de la nuit qui l'a précédée.
+impl AgendaSqlite {
+    pub fn garder_la_fatigue(&self, jour: &str, fatigue: Fatigue) -> rusqlite::Result<()> {
+        self.connection.execute(
+            "INSERT OR REPLACE INTO journee (jour, fatigue) VALUES (?1, ?2)",
+            params![jour, fatigue.nom()],
+        )?;
+        Ok(())
+    }
+
+    pub fn fatigue(&self, jour: &str) -> rusqlite::Result<Option<Fatigue>> {
+        let nom: Option<String> = self
+            .connection
+            .query_row(
+                "SELECT fatigue FROM journee WHERE jour = ?1",
+                params![jour],
+                |row| row.get(0),
+            )
+            .optional()?;
+        let Some(nom) = nom else {
+            return Ok(None);
+        };
+        let fatigue = Fatigue::depuis_le_nom(&nom).ok_or_else(|| niveau_illisible(&nom))?;
+        Ok(Some(fatigue))
     }
 }
