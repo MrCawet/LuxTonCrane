@@ -144,11 +144,14 @@ fn demande_du_relevé<'a>(autorisation: Option<&'a str>, chemin: &'a str) -> Req
 
 fn chemin_du_relevé() -> String {
     format!(
-        "/api/releve?coucher_ms={}&lever_ms={}&coucher_souhaite_ms={}",
-        COUCHER_MS,
-        COUCHER_MS + 8 * HEURE_MS,
+        "/api/releve?jour=2026-11-08&coucher_souhaite_ms={}",
         COUCHER_MS + 24 * HEURE_MS
     )
+}
+
+/// La nuit du 2026-11-08 : calme, réveil bref, 8 h au lit à partir de `COUCHER_MS`.
+fn noter_la_nuit(serveur: &mut Serveur) {
+    serveur.répondre(requête(Méthode::Post, "/api/nuits/2026-11-08", NUIT));
 }
 
 #[test]
@@ -161,6 +164,7 @@ fn le_serveur_calcule_le_relevé_du_jour_sur_les_mesures_reçues() {
         COUCHER_MS - HEURE_MS
     );
     serveur.répondre(envoi(Some(&autorisation), &corps));
+    noter_la_nuit(&mut serveur);
 
     let chemin = chemin_du_relevé();
     let réponse = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
@@ -187,17 +191,61 @@ fn le_serveur_calcule_le_relevé_du_jour_sur_les_mesures_reçues() {
 }
 
 #[test]
-fn le_relevé_est_refusé_sans_le_bon_jeton_ou_s_il_manque_un_instant() {
+fn le_relevé_est_refusé_sans_le_bon_jeton_sans_coucher_souhaité_ou_sans_la_nuit() {
     let mut serveur = serveur_vide("releve_refus");
     let autorisation = format!("Bearer {JETON}");
     let chemin = chemin_du_relevé();
-    let chemin_incomplet = format!("/api/releve?coucher_ms={COUCHER_MS}");
+    let chemin_incomplet = "/api/releve?jour=2026-11-08";
 
+    let sans_la_nuit = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
+    noter_la_nuit(&mut serveur);
     let sans_jeton = serveur.répondre(demande_du_relevé(None, &chemin));
-    let incomplet = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin_incomplet));
+    let incomplet = serveur.répondre(demande_du_relevé(Some(&autorisation), chemin_incomplet));
 
+    assert_eq!(sans_la_nuit.statut, 404);
     assert_eq!(sans_jeton.statut, 401);
     assert_eq!(incomplet.statut, 400);
+}
+
+#[test]
+fn le_relevé_montre_les_notes_de_l_agenda_et_la_quantité_de_sommeil() {
+    let mut serveur = serveur_vide("releve_sommeil");
+    let autorisation = format!("Bearer {JETON}");
+    let nuit_agitée = NUIT.replace("calme", "agite");
+    serveur.répondre(requête(
+        Méthode::Post,
+        "/api/nuits/2026-11-08",
+        &nuit_agitée,
+    ));
+    let chemin = chemin_du_relevé();
+
+    let sans_fatigue = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
+    serveur.répondre(requête(
+        Méthode::Post,
+        "/api/journees/2026-11-08",
+        r#"{"fatigue": "legere"}"#,
+    ));
+    let avec_fatigue = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
+
+    let relevé: Value = serde_json::from_str(&sans_fatigue.corps).unwrap();
+    assert_eq!(
+        relevé["endormissement"],
+        json!({"niveau": "agite", "objectif_tenu": false})
+    );
+    assert_eq!(
+        relevé["continuite"],
+        json!({"niveau": "reveil_bref", "objectif_tenu": true})
+    );
+    assert_eq!(
+        relevé["quantite_de_sommeil"],
+        json!({"duree_ms": 8 * HEURE_MS, "objectif_tenu": true})
+    );
+    assert_eq!(relevé["fatigue"], Value::Null);
+    let relevé: Value = serde_json::from_str(&avec_fatigue.corps).unwrap();
+    assert_eq!(
+        relevé["fatigue"],
+        json!({"niveau": "legere", "objectif_tenu": true})
+    );
 }
 
 fn requête<'a>(méthode: Méthode, chemin: &'a str, corps: &'a str) -> Requête<'a> {
