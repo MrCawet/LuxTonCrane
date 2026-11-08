@@ -8,6 +8,11 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 const COUCHER_SOUHAITÉ_PAR_DÉFAUT: &str = "23:00";
 
+const HEURE_MS: i64 = 60 * 60 * 1000;
+
+/// D'après le consensus AASM et SRS (2015) pour les adultes : à ajuster selon la fatigue de la journée.
+const OBJECTIF_DE_QUANTITÉ_DE_SOMMEIL_MS: i64 = 7 * HEURE_MS;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Endormissement {
     Immédiat,
@@ -41,6 +46,14 @@ pub struct Nuit {
     pub continuité: Continuité,
     pub coucher_ms: i64,
     pub lever_ms: i64,
+}
+
+/// Le temps au lit d'une nuit, du coucher au lever : il inclut l'endormissement et les réveils.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct QuantitéDeSommeil {
+    pub durée_ms: i64,
+    /// Plus de 7 h.
+    pub objectif_tenu: bool,
 }
 
 /// L'agenda, gardé dans une base SQLite : celle des mesures, sur le serveur.
@@ -114,6 +127,38 @@ impl Fatigue {
         ]
         .into_iter()
         .find(|niveau| niveau.nom() == nom)
+    }
+}
+
+/// Les objectifs de CONCEPTION.md : les deux premiers niveaux de chaque échelle.
+impl Endormissement {
+    pub fn objectif_tenu(&self) -> bool {
+        matches!(self, Endormissement::Immédiat | Endormissement::Calme)
+    }
+}
+
+/// Les objectifs de CONCEPTION.md : les deux premiers niveaux de chaque échelle.
+impl Continuité {
+    pub fn objectif_tenu(&self) -> bool {
+        matches!(self, Continuité::SansRéveil | Continuité::RéveilBref)
+    }
+}
+
+/// Les objectifs de CONCEPTION.md : les deux premiers niveaux de chaque échelle.
+impl Fatigue {
+    pub fn objectif_tenu(&self) -> bool {
+        matches!(self, Fatigue::Aucune | Fatigue::Légère)
+    }
+}
+
+/// La quantité de sommeil d'une nuit, tirée des heures du coucher et du lever.
+impl Nuit {
+    pub fn quantité_de_sommeil(&self) -> QuantitéDeSommeil {
+        let durée_ms = self.lever_ms - self.coucher_ms;
+        QuantitéDeSommeil {
+            durée_ms,
+            objectif_tenu: durée_ms > OBJECTIF_DE_QUANTITÉ_DE_SOMMEIL_MS,
+        }
     }
 }
 

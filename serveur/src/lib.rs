@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use agenda::{AgendaSqlite, Continuité, Endormissement, Fatigue, Nuit};
+use agenda::{AgendaSqlite, Continuité, Endormissement, Fatigue, Nuit, QuantitéDeSommeil};
 use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
@@ -78,13 +78,31 @@ struct LumièreDeLaJournéeJson {
     couverture: f64,
 }
 
+/// Une note de l'agenda, telle que la page web la reçoit dans le relevé.
+#[derive(Serialize)]
+struct NoteJson {
+    niveau: &'static str,
+    objectif_tenu: bool,
+}
+
+#[derive(Serialize)]
+struct QuantitéDeSommeilJson {
+    duree_ms: i64,
+    objectif_tenu: bool,
+}
+
 /// Le relevé du jour, tel que la page web le reçoit : les noms des champs sont sans accents.
 #[derive(Serialize)]
 struct RelevéDuJourJson {
+    endormissement: NoteJson,
+    continuite: NoteJson,
+    quantite_de_sommeil: QuantitéDeSommeilJson,
     lumiere_du_soir: LumièreÀÉviterJson,
     lumiere_de_la_nuit: LumièreÀÉviterJson,
     lumiere_du_matin: LumièreDuMatinJson,
     lumiere_de_la_journee: LumièreDeLaJournéeJson,
+    /// Aucune tant qu'elle n'est pas notée, le soir.
+    fatigue: Option<NoteJson>,
 }
 
 impl From<LumièreÀÉviter> for LumièreÀÉviterJson {
@@ -118,34 +136,49 @@ impl From<LumièreDeLaJournée> for LumièreDeLaJournéeJson {
     }
 }
 
-impl From<RelevéDuJour> for RelevéDuJourJson {
-    fn from(relevé: RelevéDuJour) -> RelevéDuJourJson {
-        RelevéDuJourJson {
-            lumiere_du_soir: LumièreÀÉviterJson::from(relevé.lumière_du_soir),
-            lumiere_de_la_nuit: LumièreÀÉviterJson::from(relevé.lumière_de_la_nuit),
-            lumiere_du_matin: LumièreDuMatinJson::from(relevé.lumière_du_matin),
-            lumiere_de_la_journee: LumièreDeLaJournéeJson::from(relevé.lumière_de_la_journée),
+impl From<QuantitéDeSommeil> for QuantitéDeSommeilJson {
+    fn from(quantité: QuantitéDeSommeil) -> QuantitéDeSommeilJson {
+        QuantitéDeSommeilJson {
+            duree_ms: quantité.durée_ms,
+            objectif_tenu: quantité.objectif_tenu,
         }
     }
 }
 
-/// La valeur entière du paramètre `nom` dans `paramètres` (`a=1&b=2`), si elle y est.
-fn paramètre(paramètres: &str, nom: &str) -> Option<i64> {
+/// Le relevé de la lumière, avec les notes de la nuit et la fatigue de la journée qui suit.
+impl RelevéDuJourJson {
+    fn new(relevé: RelevéDuJour, nuit: &Nuit, fatigue: Option<Fatigue>) -> RelevéDuJourJson {
+        let fatigue = fatigue.map(|fatigue| NoteJson {
+            niveau: fatigue.nom(),
+            objectif_tenu: fatigue.objectif_tenu(),
+        });
+        RelevéDuJourJson {
+            endormissement: NoteJson {
+                niveau: nuit.endormissement.nom(),
+                objectif_tenu: nuit.endormissement.objectif_tenu(),
+            },
+            continuite: NoteJson {
+                niveau: nuit.continuité.nom(),
+                objectif_tenu: nuit.continuité.objectif_tenu(),
+            },
+            quantite_de_sommeil: QuantitéDeSommeilJson::from(nuit.quantité_de_sommeil()),
+            lumiere_du_soir: LumièreÀÉviterJson::from(relevé.lumière_du_soir),
+            lumiere_de_la_nuit: LumièreÀÉviterJson::from(relevé.lumière_de_la_nuit),
+            lumiere_du_matin: LumièreDuMatinJson::from(relevé.lumière_du_matin),
+            lumiere_de_la_journee: LumièreDeLaJournéeJson::from(relevé.lumière_de_la_journée),
+            fatigue,
+        }
+    }
+}
+
+/// La valeur du paramètre `nom` dans `paramètres` (`a=1&b=2`), si elle y est.
+fn paramètre<'a>(paramètres: &'a str, nom: &str) -> Option<&'a str> {
     paramètres.split('&').find_map(|paire| {
         let (clé, valeur) = paire.split_once('=')?;
         if clé != nom {
             return None;
         }
-        valeur.parse().ok()
-    })
-}
-
-/// Les trois instants du relevé, lus dans les paramètres de la demande.
-fn heures_demandées(paramètres: &str) -> Option<HeuresDuCoucherEtDuLever> {
-    Some(HeuresDuCoucherEtDuLever {
-        coucher_ms: paramètre(paramètres, "coucher_ms")?,
-        lever_ms: paramètre(paramètres, "lever_ms")?,
-        coucher_suivant_ms: paramètre(paramètres, "coucher_souhaite_ms")?,
+        Some(valeur)
     })
 }
 
@@ -269,19 +302,37 @@ impl Serveur {
         }
     }
 
+    /// Le relevé de la nuit qui finit le `jour` demandé : ses heures viennent de l'agenda, la fin de la journée du
+    /// coucher souhaité.
     fn relevé(&self, paramètres: &str) -> Réponse {
-        let Some(heures) = heures_demandées(paramètres) else {
+        let jour = paramètre(paramètres, "jour");
+        let coucher_souhaité_ms = paramètre(paramètres, "coucher_souhaite_ms")
+            .and_then(|valeur| valeur.parse::<i64>().ok());
+        let (Some(jour), Some(coucher_souhaité_ms)) = (jour, coucher_souhaité_ms) else {
             return Réponse::vide(400);
+        };
+        if !jour_lisible(jour) {
+            return Réponse::vide(400);
+        }
+        let nuit = match self.agenda.nuit(jour) {
+            Ok(Some(nuit)) => nuit,
+            Ok(None) => return Réponse::vide(404),
+            Err(_) => return Réponse::vide(500),
+        };
+        let Ok(fatigue) = self.agenda.fatigue(jour) else {
+            return Réponse::vide(500);
         };
         let historique = match self.journal.historique() {
             Ok(historique) => historique,
             Err(_) => return Réponse::vide(500),
         };
-        let relevé = RelevéDuJourJson::from(relevé_du_jour(&heures, &historique));
-        match serde_json::to_string(&relevé) {
-            Ok(corps) => Réponse { statut: 200, corps },
-            Err(_) => Réponse::vide(500),
-        }
+        let heures = HeuresDuCoucherEtDuLever {
+            coucher_ms: nuit.coucher_ms,
+            lever_ms: nuit.lever_ms,
+            coucher_suivant_ms: coucher_souhaité_ms,
+        };
+        let relevé = relevé_du_jour(&heures, &historique);
+        en_json(&RelevéDuJourJson::new(relevé, &nuit, fatigue))
     }
 
     fn nuit(&self, jour: &str) -> Réponse {
