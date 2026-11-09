@@ -1,6 +1,6 @@
 # Recherche : lumière, sommeil, TDAH et santé
 
-État des connaissances au 31 octobre 2026, à partir des résumés et des revues trouvés en ligne. Les articles complets n'ont pas tous été lus. Ce document n'est pas un avis médical : la mélatonine et la luminothérapie se discutent avec un médecin.
+État des connaissances au 31 octobre 2026 (dose du matin revue le 9 novembre 2026), à partir des résumés et des revues trouvés en ligne. Les articles complets n'ont pas tous été lus. Ce document n'est pas un avis médical : la mélatonine et la luminothérapie se discutent avec un médecin.
 
 ## Combien de lumière, et quand
 
@@ -16,7 +16,21 @@ Ces 250 lx sont un minimum pour tout le monde, pas une dose de traitement. Ils p
 
 Pour comparer, dehors en journée on reçoit environ 1 000 à 10 000 lx par temps couvert, et 30 000 à 100 000 lx au soleil.
 
-La dose de **traitement** du retard de phase est différente : **10 000 lx pendant 30 minutes le matin**. C'est ce que donne une lampe de luminothérapie à environ 30 à 60 cm du visage, et c'est la dose utilisée dans les essais cités plus bas. Une demi-heure dehors le matin l'atteint souvent.
+La dose de **traitement** du retard de phase est différente : **10 000 lx pendant 30 minutes le matin**. C'est ce que donne une lampe de luminothérapie à environ 30 à 60 cm du visage, et c'est la dose utilisée dans les essais cités plus bas. Une demi-heure dehors le matin l'atteint par beau temps ; par temps couvert, en hiver, rarement.
+
+### Une dose plus faible, plus longue : 2 500 lx pendant 2 h
+
+Les 10 000 lx ne sont pas la dose d'origine. Les premiers essais de luminothérapie (dépression saisonnière, années 1980) donnaient **2 500 lx pendant 2 h**. En 1990, Terman et ses collègues obtiennent avec 10 000 lx pendant 30 min le matin environ 75 % de rémissions, à peu près autant qu'avec 2 500 lx pendant 2 h dans leurs essais précédents ; ils y voient une **réciprocité entre l'intensité et la durée**. Les 10 000 lx sont devenus la référence parce qu'une séance courte se tient mieux au quotidien, pas parce qu'ils seraient plus efficaces.
+
+Ce qu'il faut garder en tête :
+
+- l'équivalence vient de la comparaison de séries d'essais différentes, pas d'un essai qui compare les deux doses de front ;
+- elle vaut entre ces deux doses : aux durées courtes (30 à 40 min), une lumière plus faible (400 lx, et même 3 000 lx) était nettement moins efficace (revue Terman et Terman, 2005). Une dose ne se résume donc pas à « lux × durée » ;
+- les protocoles de luminothérapie donnent **2 500 lx pendant 1 à 2 h** comme alternative au standard de 10 000 lx pendant 30 min ;
+- pour le retard de phase, les revues citent des expositions le matin de **2 500 lx ou plus**, sur des durées de 30 min à 2 h ; les essais à 2 h sont jugés peu tenables au quotidien ;
+- je n'ai pas trouvé de dose validée à **2 000 lx**.
+
+Par temps couvert, dehors (1 000 à 10 000 lx), 2 500 lx s'atteignent bien plus souvent que 10 000 lx. Le prix est la durée : 2 h, soit toute la fenêtre du matin.
 
 ## Lumière et santé
 
@@ -148,7 +162,7 @@ Ils sont classés dans l'ICSD-3-TR, la classification internationale des trouble
 ## Ce que ça change pour LuxTonCrane
 
 - **Les repères à suivre :** la lumière reçue le jour (≥ 250 lx), celle du soir (≤ 10 lx dans les 3 heures avant le coucher) et celle de la nuit (≤ 1 lx). L'heure de la mesure compte autant que sa valeur.
-- **La lumière du matin :** elle est la plus utile pour avancer l'horloge. Les essais l'ont donnée pendant 30 minutes, à 10 000 lux.
+- **La lumière du matin :** elle est la plus utile pour avancer l'horloge. Les essais l'ont donnée pendant 30 minutes à 10 000 lux, ou pendant 2 h à 2 500 lux, une dose plus facile à atteindre dehors par temps couvert.
 - **Les limites du téléphone :**
   - son capteur mesure les lux ordinaires, pas les lux mélanopiques ;
   - il est conçu pour régler la luminosité de l'écran, pas pour mesurer, et sa précision varie selon le modèle ;
@@ -169,6 +183,7 @@ Ils sont classés dans l'ICSD-3-TR, la classification internationale des trouble
 - Capteurs de lumière des téléphones : [Université d'Alcalá](https://ebuah.uah.es/xmlui/handle/10017/63987), [Université de Lisbonne](https://repositorio.ulisboa.pt/handle/10400.5/31278)
 - Durée de sommeil : [consensus AASM et SRS 2015](https://www.aasm.org/resources/pdf/adultsleepdurationconsensus.pdf)
 - Critères du retard de phase : [brouillon ICSD-3-TR (AASM)](https://aasm.org/wp-content/uploads/2022/05/ICSD-3-TR-CRSWD-Draft.pdf), [MDedge](https://www.mdedge.com/psychiatry/article/63478/sleep-medicine/night-owls-reset-physiologic-clock-delayed-sleep-phase/page/0/1)
+- Dose de 2 500 lx pendant 2 h et réciprocité intensité-durée : [Terman et al. 1990, *Psychopharmacology Bulletin* (PubMed 2371371)](https://pubmed.ncbi.nlm.nih.gov/2371371/), [Terman et Terman 2005, *CNS Spectrums* 10(8):647-663](https://cet.org/wp-content/uploads/2017/10/Terman-2005-CNS-Spectrums.pdf), [protocole « 2 500 lx pendant 1 à 2 h » (Clinician.com)](https://www.clinician.com/articles/69159-light-therapy-for-seasonal-affective-disorder-sad), [retard de phase et lumière du matin (Center for Environmental Therapeutics)](https://cet.org/delayed-sleep-phase-disorder/), [synthèse MDedge](https://www.mdedge.com/psychiatry/article/63478/sleep-medicine/night-owls-reset-physiologic-clock-delayed-sleep-phase/page/0/2)
 - Dépression et luminothérapie : [CANMAT 2023 (PMC11351064)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11351064/), [synthèse AAFP 2025](https://www.aafp.org/pubs/afp/issues/2025/1000/practice-guidelines-major-depressive-disorder.html), [UBC, dépression saisonnière](https://sad.psychiatry.ubc.ca/?p=425)
 - Effets secondaires et précautions : [American Journal of Psychiatry 1998](https://ajp.psychiatryonline.org/doi/10.1176/ajp.155.2.293), [revue de Vilnius](https://epublications.vu.lt/object/elaba:4663933/index.html), [HealthLinkBC](https://www.healthlinkbc.ca/healthwise/seasonal-affective-disorder-using-light-therapy)
 - Dépression bipolaire : [méta-analyse 2020 (PMC7187384)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7187384/), [Psychiatric News 2018](https://alert.psychnews.org/2018/03/light-therapy-for-bipolar-depression.html)
