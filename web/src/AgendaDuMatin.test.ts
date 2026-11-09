@@ -78,3 +78,28 @@ test("les heures du coucher et du lever se saisissent à la minute près", async
     expect(pas).toBeLessThanOrEqual(60)
   }
 })
+
+test("la page dit pourquoi elle refuse l'agenda, et n'envoie rien", async () => {
+  const serveur = doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await page.find('input[value="calme"]').setValue(true)
+  await page.find('input[name="lever"]').setValue('')
+  await page.find('form').trigger('submit')
+  await flushPromises()
+
+  expect(serveur.nuits.size).toBe(0)
+  expect(page.text()).toContain('Choisis un niveau pour la continuité de la nuit.')
+  expect(page.text()).toContain("Indique l'heure du lever.")
+})
+
+test('la page montre la raison quand le navigateur refuse un champ', async () => {
+  doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await page.find('input[name="lever"]').trigger('invalid')
+
+  expect(page.text()).toContain('Lever :')
+})

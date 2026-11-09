@@ -2,7 +2,7 @@
 id: ANO-0002
 type: anomalie
 titre: L'agenda du matin ne part pas quand une heure n'est pas un quart d'heure
-statut: a_valider
+statut: en_cours
 priorite: essentiel
 cree_le: 2026-11-09
 maj_le: 2026-11-09
@@ -29,7 +29,9 @@ avait marché (`POST` en 204).
 
 ## Comportement attendu
 
-L'agenda se garde quelle que soit la minute du coucher et du lever.
+L'agenda se garde quelle que soit la minute du coucher et du lever. Une saisie refusée l'est avec sa raison, affichée
+sur la page : la page ne bloque jamais en silence (demande de l'opérateur le 2026-11-09 : « Il faut aussi affiché
+pourquoi c'est refusé, les erreurs de saisie »).
 
 ## Piste technique
 
@@ -39,6 +41,10 @@ bloque l'envoi du formulaire, sans message visible sur Firefox Android, avant qu
 ## Critères d'acceptation
 
 - [x] Un coucher et un lever à la minute près (par exemple 23:07 et 07:52) se gardent depuis la page.
+- [ ] L'agenda du matin refusé affiche toutes ses erreurs de saisie : note non choisie, heure vide, coucher et lever à
+  la même heure ; rien n'est envoyé.
+- [ ] Un champ refusé par le navigateur affiche sa raison sur la page.
+- [ ] Un coucher souhaité vide n'est pas envoyé, et la page le dit.
 
 ## Validation
 
