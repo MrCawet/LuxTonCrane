@@ -84,11 +84,11 @@ onMounted(chargerLaNuit)
       <div class="grid grid-cols-2 gap-3">
         <label class="flex flex-col gap-1">
           Coucher
-          <input v-model="coucher" name="coucher" type="time" step="900" class="rounded border border-gray-400 p-2" />
+          <input v-model="coucher" name="coucher" type="time" class="rounded border border-gray-400 p-2" />
         </label>
         <label class="flex flex-col gap-1">
           Lever
-          <input v-model="lever" name="lever" type="time" step="900" class="rounded border border-gray-400 p-2" />
+          <input v-model="lever" name="lever" type="time" class="rounded border border-gray-400 p-2" />
         </label>
       </div>
       <button type="submit" class="rounded bg-gray-900 p-2 text-white">Garder l'agenda</button>
