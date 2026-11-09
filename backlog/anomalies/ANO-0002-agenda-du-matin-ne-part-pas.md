@@ -2,7 +2,7 @@
 id: ANO-0002
 type: anomalie
 titre: L'agenda du matin ne part pas quand une heure n'est pas un quart d'heure
-statut: en_cours
+statut: a_valider
 priorite: essentiel
 cree_le: 2026-11-09
 maj_le: 2026-11-09
@@ -41,13 +41,16 @@ bloque l'envoi du formulaire, sans message visible sur Firefox Android, avant qu
 ## Critères d'acceptation
 
 - [x] Un coucher et un lever à la minute près (par exemple 23:07 et 07:52) se gardent depuis la page.
-- [ ] L'agenda du matin refusé affiche toutes ses erreurs de saisie : note non choisie, heure vide, coucher et lever à
+- [x] L'agenda du matin refusé affiche toutes ses erreurs de saisie : note non choisie, heure vide, coucher et lever à
   la même heure ; rien n'est envoyé.
-- [ ] Un champ refusé par le navigateur affiche sa raison sur la page.
-- [ ] Un coucher souhaité vide n'est pas envoyé, et la page le dit.
+- [x] Un champ refusé par le navigateur affiche sa raison sur la page.
+- [x] Un coucher souhaité vide n'est pas envoyé, et la page le dit.
 
 ## Validation
 
 Sur https://lux-ton-crane.cawet.net, depuis le téléphone : remplir l'agenda du matin avec un lever qui n'est pas un
 quart d'heure (par exemple 07:52), appuyer sur « Garder l'agenda » : la page affiche « Agenda gardé. », et le relevé du
 jour reprend ces heures.
+
+Puis vider le champ « Lever » sans choisir de continuité et appuyer de nouveau : la page liste en rouge « Choisis un
+niveau pour la continuité de la nuit. » et « Indique l'heure du lever. », et rien n'est gardé.

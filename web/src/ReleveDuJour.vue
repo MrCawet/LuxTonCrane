@@ -76,6 +76,10 @@ async function chargerLeRéglage() {
 }
 
 async function réglerLeCoucherSouhaité() {
+  if (coucherSouhaité.value === '') {
+    messageDuRéglage.value = "Indique l'heure du coucher souhaité."
+    return
+  }
   const réponse = await fetch('/api/reglages', {
     method: 'POST',
     headers: entêtes(),

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { CONTINUITÉ, ENDORMISSEMENT } from './echellesDuSommeil'
+import { erreursDeLAgendaDuMatin, raisonDuNavigateur } from './erreursDeSaisie'
 import { heureLocale, heuresDeLaNuit, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
@@ -26,6 +27,16 @@ const choix = ref({ endormissement: '', continuite: '' })
 const coucher = ref('23:00')
 const lever = ref('07:00')
 const message = ref<string | null>(null)
+const erreurs = ref<string[]>([])
+
+const NOMS_DES_CHAMPS: Record<string, string> = { coucher: 'Coucher', lever: 'Lever' }
+
+/** Le navigateur refuse un champ : la page en dit la raison au lieu de bloquer en silence. */
+function champRefusé(évènement: Event) {
+  const champ = évènement.target as HTMLInputElement
+  message.value = null
+  erreurs.value = [raisonDuNavigateur(NOMS_DES_CHAMPS[champ.name] ?? champ.name, champ)]
+}
 
 function entêtes(): HeadersInit {
   return { Authorization: `Bearer ${props.jeton}` }
@@ -43,8 +54,9 @@ async function chargerLaNuit() {
 }
 
 async function garderLAgenda() {
-  if (choix.value.endormissement === '' || choix.value.continuite === '') {
-    message.value = 'Choisis un niveau pour l\'endormissement et pour la continuité.'
+  erreurs.value = erreursDeLAgendaDuMatin({ ...choix.value, coucher: coucher.value, lever: lever.value })
+  message.value = null
+  if (erreurs.value.length > 0) {
     return
   }
   const heures = heuresDeLaNuit(coucher.value, lever.value, aujourdhui)
@@ -67,7 +79,7 @@ onMounted(chargerLaNuit)
 <template>
   <section class="flex flex-col gap-4">
     <h2 class="text-xl font-semibold">Agenda du matin</h2>
-    <form class="flex flex-col gap-4" @submit.prevent="garderLAgenda">
+    <form class="flex flex-col gap-4" @submit.prevent="garderLAgenda" @invalid.capture="champRefusé">
       <fieldset v-for="échelle in ÉCHELLES" :key="échelle.champ" class="flex flex-col gap-2">
         <legend class="mb-1 font-semibold">{{ échelle.titre }}</legend>
         <label v-for="niveau in échelle.niveaux" :key="niveau.nom" class="flex items-start gap-2">
@@ -92,6 +104,9 @@ onMounted(chargerLaNuit)
         </label>
       </div>
       <button type="submit" class="rounded bg-gray-900 p-2 text-white">Garder l'agenda</button>
+      <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-red-700">
+        <li v-for="erreur in erreurs" :key="erreur">{{ erreur }}</li>
+      </ul>
       <p v-if="message !== null">{{ message }}</p>
     </form>
   </section>
