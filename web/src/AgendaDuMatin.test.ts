@@ -65,3 +65,16 @@ test('les niveaux se lisent par ce qui s\'est passé', async () => {
   expect(page.text()).toContain("je ne me souviens pas d'avoir attendu")
   expect(page.text()).toContain('je me suis levé, j\'ai pris le téléphone, ou je suis resté éveillé longtemps')
 })
+
+// Un pas plus grand que la minute fait refuser au navigateur, sans message visible sur Firefox Android, une heure
+// comme 07:52 : le formulaire ne part pas (ANO-0002).
+test("les heures du coucher et du lever se saisissent à la minute près", async () => {
+  doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  for (const nom of ['coucher', 'lever']) {
+    const pas = Number(page.find(`input[name="${nom}"]`).attributes('step') ?? '60')
+    expect(pas).toBeLessThanOrEqual(60)
+  }
+})
