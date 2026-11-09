@@ -4,13 +4,13 @@ type: epique
 titre: Le rapport sur le web
 statut: en_cours
 cree_le: 2026-11-06
-maj_le: 2026-11-08
+maj_le: 2026-11-09
 source: REQ-0001
 emetteur: Opérateur
 composants: [android, pont, releve, serveur, web]
 tickets_lies: [REQ-0001]
 objectif: aucun
-tickets: [US-0001, US-0002, US-0003, ANO-0001, US-0004, US-0005, US-0006, US-0007]
+tickets: [US-0001, US-0002, US-0003, ANO-0001, US-0004, US-0005, US-0006, US-0007, ANO-0002]
 ---
 
 ## Provenance
@@ -38,6 +38,8 @@ capteurs et l'enregistrement des données, synchronisées régulièrement sur le
 - [US-0006](../us/US-0006-rappels-de-l-agenda.md) : le téléphone rappelle l'agenda le matin et vers 21 h. À valider.
 - [US-0007](../us/US-0007-agenda-dans-le-releve.md) : le relevé du jour montre les notes de l'agenda et la quantité
   de sommeil. À valider.
+- [ANO-0002](../anomalies/ANO-0002-agenda-du-matin-ne-part-pas.md) : l'agenda du matin ne part pas quand une
+  heure n'est pas un quart d'heure. À valider.
 
 ## À découper
 
