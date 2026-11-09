@@ -94,6 +94,20 @@ test('le coucher souhaité se retrouve et se règle', async () => {
   expect(serveur.réglages.coucher_souhaite).toBe('23:45')
 })
 
+test("un coucher souhaité vide n'est pas envoyé, et la page le dit", async () => {
+  const serveur = doublureDuServeur(RELEVÉ)
+  serveur.réglages.coucher_souhaite = '22:30'
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  await page.find('input[name="coucher_souhaite"]').setValue('')
+  await page.find('button[name="regler"]').trigger('click')
+  await flushPromises()
+
+  expect(serveur.réglages.coucher_souhaite).toBe('22:30')
+  expect(page.text()).toContain("Indique l'heure du coucher souhaité.")
+})
+
 test('la page affiche les quatre fenêtres du relevé, avec les textes du téléphone', async () => {
   serveurAvecLaNuitDeCeMatin()
 

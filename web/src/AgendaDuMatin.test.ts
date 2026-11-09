@@ -65,3 +65,41 @@ test('les niveaux se lisent par ce qui s\'est passé', async () => {
   expect(page.text()).toContain("je ne me souviens pas d'avoir attendu")
   expect(page.text()).toContain('je me suis levé, j\'ai pris le téléphone, ou je suis resté éveillé longtemps')
 })
+
+// Un pas plus grand que la minute fait refuser au navigateur, sans message visible sur Firefox Android, une heure
+// comme 07:52 : le formulaire ne part pas (ANO-0002).
+test("les heures du coucher et du lever se saisissent à la minute près", async () => {
+  doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  for (const nom of ['coucher', 'lever']) {
+    const pas = Number(page.find(`input[name="${nom}"]`).attributes('step') ?? '60')
+    expect(pas).toBeLessThanOrEqual(60)
+  }
+})
+
+test("la page dit pourquoi elle refuse l'agenda, et n'envoie rien", async () => {
+  const serveur = doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await page.find('input[value="calme"]').setValue(true)
+  await page.find('input[name="lever"]').setValue('')
+  await page.find('form').trigger('submit')
+  await flushPromises()
+
+  expect(serveur.nuits.size).toBe(0)
+  expect(page.text()).toContain('Choisis un niveau pour la continuité de la nuit.')
+  expect(page.text()).toContain("Indique l'heure du lever.")
+})
+
+test('la page montre la raison quand le navigateur refuse un champ', async () => {
+  doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await page.find('input[name="lever"]').trigger('invalid')
+
+  expect(page.text()).toContain('Lever :')
+})
