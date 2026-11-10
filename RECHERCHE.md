@@ -32,6 +32,16 @@ Ce qu'il faut garder en tête :
 
 Par temps couvert, dehors (1 000 à 10 000 lx), 2 500 lx s'atteignent bien plus souvent que 10 000 lx. Le prix est la durée : 2 h, soit toute la fenêtre du matin.
 
+### Et la même dose à midi ?
+
+L'effet d'une lumière vive dépend de l'heure de **l'horloge interne**, pas de celle de la montre :
+
+- **Pour avancer l'horloge :** la lumière avance l'horloge quand elle arrive après son point critique, proche du point bas de la température, environ 2 h avant le réveil naturel ; avant ce point, elle la retarde (Khalsa et al., 2003, courbe de réponse de phase chez 21 adultes). Le matin biologique est donc le meilleur moment. Cette étude ne trouve **pas de longue « zone morte »** dans la journée biologique : la lumière de midi déplace encore l'horloge, moins qu'au matin biologique. Avec un retard de phase, midi peut tomber encore tôt dans la journée biologique : plus le réveil naturel est tardif, plus la lumière de midi garde un effet d'avance.
+- **Pour l'humeur (dépression saisonnière) :** dans l'analyse de 332 patients résumée par Terman et Terman (2005), après une semaine, la lumière du matin donnait 53 % de rémissions, celle du soir 38 % et celle de midi 32 %. Midi marche, moins bien que le matin. Une étude sur des employés de bureau trouvait un horaire libre, en milieu de matinée ou d'après-midi, efficace, sans être le meilleur.
+- **Contre la lumière du soir :** après une semaine avec environ 4 h de lumière vive par jour, la lumière de la nuit freinait moins la mélatonine qu'après une semaine dans la pénombre : 41 % de suppression contre 53 %, avec de fortes différences d'une personne à l'autre (Hébert et al., 2002). Une journée lumineuse rend l'horloge moins sensible à la lumière du soir ; à l'inverse, une journée très sombre la rend plus sensible (Chang et al., 2011).
+
+En pratique : la lumière vive de midi n'est pas perdue, surtout dehors, mais pour corriger un retard de phase, la plus utile reste celle qui suit le lever au plus tôt.
+
 ## Lumière et santé
 
 - **Santé psychique :** dans la UK Biobank, environ 86 000 personnes ont porté au poignet un capteur de lumière pendant une semaine (Burns et al., *Nature Mental Health*, 2023). Plus de lumière le jour était associé à moins de dépression, d'automutilation et de psychose. Plus de lumière la nuit était associé à davantage de ces troubles. C'est une association : la maladie peut aussi changer l'exposition à la lumière.
@@ -184,6 +194,8 @@ Ils sont classés dans l'ICSD-3-TR, la classification internationale des trouble
 - Durée de sommeil : [consensus AASM et SRS 2015](https://www.aasm.org/resources/pdf/adultsleepdurationconsensus.pdf)
 - Critères du retard de phase : [brouillon ICSD-3-TR (AASM)](https://aasm.org/wp-content/uploads/2022/05/ICSD-3-TR-CRSWD-Draft.pdf), [MDedge](https://www.mdedge.com/psychiatry/article/63478/sleep-medicine/night-owls-reset-physiologic-clock-delayed-sleep-phase/page/0/1)
 - Dose de 2 500 lx pendant 2 h et réciprocité intensité-durée : [Terman et al. 1990, *Psychopharmacology Bulletin* (PubMed 2371371)](https://pubmed.ncbi.nlm.nih.gov/2371371/), [Terman et Terman 2005, *CNS Spectrums* 10(8):647-663](https://cet.org/wp-content/uploads/2017/10/Terman-2005-CNS-Spectrums.pdf), [protocole « 2 500 lx pendant 1 à 2 h » (Clinician.com)](https://www.clinician.com/articles/69159-light-therapy-for-seasonal-affective-disorder-sad), [retard de phase et lumière du matin (Center for Environmental Therapeutics)](https://cet.org/delayed-sleep-phase-disorder/), [synthèse MDedge](https://www.mdedge.com/psychiatry/article/63478/sleep-medicine/night-owls-reset-physiologic-clock-delayed-sleep-phase/page/0/2)
+- Courbe de réponse de phase : [Khalsa et al. 2003, *Journal of Physiology* (PubMed 12717008)](https://pubmed.ncbi.nlm.nih.gov/12717008/)
+- Historique de lumière et sensibilité du soir : [Hébert et al. 2002, *Journal of Pineal Research* (PMC3925650)](https://pmc.ncbi.nlm.nih.gov/articles/PMC3925650), [Chang et al. 2011 (PMC3060589)](https://pmc.ncbi.nlm.nih.gov/articles/PMC3060589)
 - Dépression et luminothérapie : [CANMAT 2023 (PMC11351064)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11351064/), [synthèse AAFP 2025](https://www.aafp.org/pubs/afp/issues/2025/1000/practice-guidelines-major-depressive-disorder.html), [UBC, dépression saisonnière](https://sad.psychiatry.ubc.ca/?p=425)
 - Effets secondaires et précautions : [American Journal of Psychiatry 1998](https://ajp.psychiatryonline.org/doi/10.1176/ajp.155.2.293), [revue de Vilnius](https://epublications.vu.lt/object/elaba:4663933/index.html), [HealthLinkBC](https://www.healthlinkbc.ca/healthwise/seasonal-affective-disorder-using-light-therapy)
 - Dépression bipolaire : [méta-analyse 2020 (PMC7187384)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7187384/), [Psychiatric News 2018](https://alert.psychnews.org/2018/03/light-therapy-for-bipolar-depression.html)
