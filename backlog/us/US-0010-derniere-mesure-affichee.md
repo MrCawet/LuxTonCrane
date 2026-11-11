@@ -2,7 +2,7 @@
 id: US-0010
 type: us
 titre: La dernière mesure dans la notification, un widget et l'accueil
-statut: a_valider
+statut: termine
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -52,9 +52,13 @@ garde toujours chaque mesure.
 
 ## Critères d'acceptation
 
-- [ ] La notification de la mesure affiche la dernière mesure, en lx, et la suit.
-- [ ] Un widget de la taille d'une icône affiche la dernière mesure, en lx, et la suit.
-- [ ] L'accueil de l'application affiche la dernière mesure en énorme, en lx, et la suit.
+- [x] La notification de la mesure affiche la dernière mesure, en lx, et la suit.
+- [x] Un widget de la taille d'une icône affiche la dernière mesure, en lx, et la suit.
+- [x] L'accueil de l'application affiche la dernière mesure en énorme, en lx, et la suit.
+
+## Validation
+
+Le 2026-11-11, l'opérateur valide l'APK livré après la PR #25 : « C'est bon terminé. »
 
 ## Questions ouvertes
 
