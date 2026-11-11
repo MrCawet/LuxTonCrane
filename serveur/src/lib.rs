@@ -9,8 +9,8 @@ use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
 use releve::{
-    HeuresDuCoucherEtDuLever, LumièreDeLaJournée, LumièreDuMatin, LumièreÀÉviter, RelevéDuJour,
-    relevé_du_jour,
+    Fenêtre, HeuresDuCoucherEtDuLever, LumièreDeLaJournée, LumièreDuMatin, LumièreÀÉviter,
+    PériodeMesurée, RelevéDuJour, relevé_du_jour,
 };
 use serde::{Deserialize, Serialize};
 
@@ -55,6 +55,42 @@ struct RésuméJson {
     derniere: Option<MesureJson>,
 }
 
+#[derive(Serialize)]
+struct FenêtreJson {
+    debut_ms: i64,
+    fin_ms: i64,
+}
+
+#[derive(Serialize)]
+struct PériodeMesuréeJson {
+    debut_ms: i64,
+    fin_ms: i64,
+    valeur_lux: f32,
+}
+
+impl From<Fenêtre> for FenêtreJson {
+    fn from(fenêtre: Fenêtre) -> FenêtreJson {
+        FenêtreJson {
+            debut_ms: fenêtre.début_ms,
+            fin_ms: fenêtre.fin_ms,
+        }
+    }
+}
+
+impl From<PériodeMesurée> for PériodeMesuréeJson {
+    fn from(période: PériodeMesurée) -> PériodeMesuréeJson {
+        PériodeMesuréeJson {
+            debut_ms: période.début_ms,
+            fin_ms: période.fin_ms,
+            valeur_lux: période.valeur_lux,
+        }
+    }
+}
+
+fn périodes_en_json(périodes: Vec<PériodeMesurée>) -> Vec<PériodeMesuréeJson> {
+    périodes.into_iter().map(PériodeMesuréeJson::from).collect()
+}
+
 /// La lumière du soir ou de la nuit, telle que la page web la reçoit.
 #[derive(Serialize)]
 struct LumièreÀÉviterJson {
@@ -62,6 +98,8 @@ struct LumièreÀÉviterJson {
     valeur_la_plus_haute_lux: Option<f32>,
     objectif_tenu: bool,
     couverture: f64,
+    fenetre: FenêtreJson,
+    periodes_mesurees: Vec<PériodeMesuréeJson>,
 }
 
 #[derive(Serialize)]
@@ -69,6 +107,8 @@ struct LumièreDuMatinJson {
     temps_a_10_000_lx_ou_plus_ms: i64,
     objectif_tenu: bool,
     couverture: f64,
+    fenetre: FenêtreJson,
+    periodes_mesurees: Vec<PériodeMesuréeJson>,
 }
 
 #[derive(Serialize)]
@@ -76,6 +116,8 @@ struct LumièreDeLaJournéeJson {
     part_du_temps_mesure_a_250_lx_ou_plus: Option<f64>,
     objectif_tenu: bool,
     couverture: f64,
+    fenetre: FenêtreJson,
+    periodes_mesurees: Vec<PériodeMesuréeJson>,
 }
 
 /// Une note de l'agenda, telle que la page web la reçoit dans le relevé.
@@ -112,6 +154,8 @@ impl From<LumièreÀÉviter> for LumièreÀÉviterJson {
             valeur_la_plus_haute_lux: lumière.valeur_la_plus_haute_lux,
             objectif_tenu: lumière.objectif_tenu,
             couverture: lumière.couverture,
+            fenetre: FenêtreJson::from(lumière.fenêtre),
+            periodes_mesurees: périodes_en_json(lumière.périodes_mesurées),
         }
     }
 }
@@ -122,6 +166,8 @@ impl From<LumièreDuMatin> for LumièreDuMatinJson {
             temps_a_10_000_lx_ou_plus_ms: lumière.temps_à_10_000_lx_ou_plus_ms,
             objectif_tenu: lumière.objectif_tenu,
             couverture: lumière.couverture,
+            fenetre: FenêtreJson::from(lumière.fenêtre),
+            periodes_mesurees: périodes_en_json(lumière.périodes_mesurées),
         }
     }
 }
@@ -132,6 +178,8 @@ impl From<LumièreDeLaJournée> for LumièreDeLaJournéeJson {
             part_du_temps_mesure_a_250_lx_ou_plus: lumière.part_du_temps_mesuré_à_250_lx_ou_plus,
             objectif_tenu: lumière.objectif_tenu,
             couverture: lumière.couverture,
+            fenetre: FenêtreJson::from(lumière.fenêtre),
+            periodes_mesurees: périodes_en_json(lumière.périodes_mesurées),
         }
     }
 }
