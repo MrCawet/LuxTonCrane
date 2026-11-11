@@ -191,6 +191,44 @@ fn le_serveur_calcule_le_relevé_du_jour_sur_les_mesures_reçues() {
 }
 
 #[test]
+fn le_relevé_donne_pour_chaque_fenêtre_ses_bornes_et_ses_périodes_mesurées() {
+    let mut serveur = serveur_vide("releve_courbe");
+    let autorisation = format!("Bearer {JETON}");
+    let corps = format!(
+        r#"[{{"valeur_lux": 50.0, "instant_ms": {}}}]"#,
+        COUCHER_MS - HEURE_MS
+    );
+    serveur.répondre(envoi(Some(&autorisation), &corps));
+    noter_la_nuit(&mut serveur);
+
+    let chemin = chemin_du_relevé();
+    let réponse = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
+
+    let relevé: Value = serde_json::from_str(&réponse.corps).unwrap();
+    let dix_minutes_ms = 10 * 60 * 1000;
+    assert_eq!(
+        relevé["lumiere_du_soir"]["fenetre"],
+        json!({ "debut_ms": COUCHER_MS - 3 * HEURE_MS, "fin_ms": COUCHER_MS })
+    );
+    assert_eq!(
+        relevé["lumiere_du_soir"]["periodes_mesurees"],
+        json!([{
+            "debut_ms": COUCHER_MS - HEURE_MS,
+            "fin_ms": COUCHER_MS - HEURE_MS + dix_minutes_ms,
+            "valeur_lux": 50.0
+        }])
+    );
+    for fenêtre in [
+        "lumiere_de_la_nuit",
+        "lumiere_du_matin",
+        "lumiere_de_la_journee",
+    ] {
+        assert_eq!(relevé[fenêtre]["periodes_mesurees"], json!([]));
+        assert!(relevé[fenêtre]["fenetre"]["debut_ms"].is_i64());
+    }
+}
+
+#[test]
 fn le_relevé_est_refusé_sans_le_bon_jeton_sans_coucher_souhaité_ou_sans_la_nuit() {
     let mut serveur = serveur_vide("releve_refus");
     let autorisation = format!("Bearer {JETON}");
