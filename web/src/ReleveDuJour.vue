@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import CourbeDeLaLumiere from './CourbeDeLaLumiere.vue'
+import type { FenêtreDuRelevé, PériodeMesurée } from './courbeDeLaLumiere'
 import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, type Niveau } from './echellesDuSommeil'
 import { coucherSouhaitéMs, jourLocal } from './heuresDuReleve'
 
@@ -11,18 +13,24 @@ interface LumièreÀÉviter {
   valeur_la_plus_haute_lux: number | null
   objectif_tenu: boolean
   couverture: number
+  fenetre: FenêtreDuRelevé
+  periodes_mesurees: PériodeMesurée[]
 }
 
 interface LumièreDuMatin {
   temps_a_10_000_lx_ou_plus_ms: number
   objectif_tenu: boolean
   couverture: number
+  fenetre: FenêtreDuRelevé
+  periodes_mesurees: PériodeMesurée[]
 }
 
 interface LumièreDeLaJournée {
   part_du_temps_mesure_a_250_lx_ou_plus: number | null
   objectif_tenu: boolean
   couverture: number
+  fenetre: FenêtreDuRelevé
+  periodes_mesurees: PériodeMesurée[]
 }
 
 /** Une note de l'agenda : `niveau` est le nom d'un niveau de son échelle. */
@@ -61,9 +69,19 @@ interface Ligne {
   objectif?: Objectif
 }
 
+/** `seuil` est le seuil tel que le relevé l'écrit, `10 000 lx` par exemple. */
+interface Courbe {
+  fenêtre: FenêtreDuRelevé
+  périodes: PériodeMesurée[]
+  seuilLx: number
+  seuil: string
+}
+
 interface Fenêtre {
   titre: string
   lignes: Ligne[]
+  /** Seulement pour les fenêtres de lumière. */
+  courbe?: Courbe
 }
 
 interface NuitJson {
@@ -162,6 +180,14 @@ function ligneDeLaNote(libellé: string, échelle: Niveau[], note: Note): Ligne 
   }
 }
 
+function courbeDe(
+  lumière: LumièreÀÉviter | LumièreDuMatin | LumièreDeLaJournée,
+  seuilLx: number,
+  seuil: string,
+): Courbe {
+  return { fenêtre: lumière.fenetre, périodes: lumière.periodes_mesurees, seuilLx, seuil }
+}
+
 function lignesDeLaLumièreÀÉviter(lumière: LumièreÀÉviter, seuil: string): Ligne[] {
   const valeur = lumière.valeur_la_plus_haute_lux
   return [
@@ -203,10 +229,12 @@ const fenêtres = computed<Fenêtre[]>(() => {
     {
       titre: 'Soir, 3 h avant le coucher',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_du_soir, '10 lx'),
+      courbe: courbeDe(relevé.value.lumiere_du_soir, 10, '10 lx'),
     },
     {
       titre: 'Nuit, du coucher au lever',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_de_la_nuit, '1 lx'),
+      courbe: courbeDe(relevé.value.lumiere_de_la_nuit, 1, '1 lx'),
     },
     {
       titre: 'Fatigue, le soir suivant',
@@ -226,6 +254,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
         },
         { libellé: 'Couverture', valeur: pourcentage(matin.couverture) },
       ],
+      courbe: courbeDe(matin, 10_000, '10 000 lx'),
     },
     {
       titre: 'Journée, du lever à 3 h avant le coucher souhaité',
@@ -237,6 +266,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
         },
         { libellé: 'Couverture', valeur: pourcentage(journée.couverture) },
       ],
+      courbe: courbeDe(journée, 250, '250 lx'),
     },
   ]
 })
@@ -286,6 +316,13 @@ const fenêtres = computed<Fenêtre[]>(() => {
           </dd>
         </div>
       </dl>
+      <CourbeDeLaLumiere
+        v-if="fenêtre.courbe !== undefined"
+        :fenêtre="fenêtre.courbe.fenêtre"
+        :périodes="fenêtre.courbe.périodes"
+        :seuil-lx="fenêtre.courbe.seuilLx"
+        :seuil="fenêtre.courbe.seuil"
+      />
     </article>
   </section>
 </template>

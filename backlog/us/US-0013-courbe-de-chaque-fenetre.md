@@ -2,7 +2,7 @@
 id: US-0013
 type: us
 titre: Chaque fenêtre de lumière du relevé montre sa courbe
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -54,7 +54,7 @@ bibliothèque.
 
 ## Critères d'acceptation
 
-- [ ] Chaque fenêtre de lumière du relevé montre la courbe de ses mesures valables, du début à la fin de la fenêtre.
-- [ ] Le seuil de la fenêtre se lit sur le graphique.
-- [ ] Le temps non mesuré se voit comme un trou dans la courbe.
+- [x] Chaque fenêtre de lumière du relevé montre la courbe de ses mesures valables, du début à la fin de la fenêtre.
+- [x] Le seuil de la fenêtre se lit sur le graphique.
+- [x] Le temps non mesuré se voit comme un trou dans la courbe.
 - [ ] L'opérateur juge le graphique lisible, sur le téléphone et sur l'ordinateur.
