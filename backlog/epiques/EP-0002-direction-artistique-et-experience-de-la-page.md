@@ -30,6 +30,7 @@ commençant par la lisibilité.
 
 ## À découper
 
+- Deuxième tranche, l'allure générale : la page reprend le thème [Dracula](https://draculatheme.com/?platforms=linux)
+  (choix de l'opérateur, 2026-11-11). Attend la revue de US-0009.
 - Lisibilité du relevé du jour : attend la revue de US-0009.
 - Ordre des blocs selon le moment de la journée : attend la revue de US-0009.
-- Allure générale (couleurs, thème) : attend la revue de US-0009.
