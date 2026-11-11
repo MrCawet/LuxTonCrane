@@ -45,12 +45,22 @@ const RELEVÉ = {
   fatigue: { niveau: 'genante', objectif_tenu: false },
 }
 
+// La veille, le soir est tenu ; aujourd'hui, il ne l'est pas.
+const RELEVÉS_DES_DERNIÈRES_NUITS = [
+  {
+    ...RELEVÉ,
+    jour: '2026-11-07',
+    lumiere_du_soir: { ...RELEVÉ.lumiere_du_soir, temps_au_dessus_du_seuil_ms: 0, objectif_tenu: true },
+  },
+  { ...RELEVÉ, jour: '2026-11-08' },
+]
+
 const COUCHER_MS = instantMs(7, 23, 15)
 const LEVER_MS = instantMs(8, 7, 0)
 
-/** Un serveur où la nuit de ce matin est notée, et qui rend `relevé`. */
+/** Un serveur où la nuit de ce matin est notée, et qui rend `relevé` et ceux des deux dernières nuits. */
 function serveurAvecLaNuitDeCeMatin(relevé: unknown = RELEVÉ) {
-  const serveur = doublureDuServeur(relevé)
+  const serveur = doublureDuServeur(relevé, RELEVÉS_DES_DERNIÈRES_NUITS)
   serveur.nuits.set('2026-11-08', {
     jour: '2026-11-08',
     endormissement: 'calme',
@@ -207,4 +217,25 @@ test('chaque fenêtre de lumière montre sa courbe, avec son seuil et ses heures
   const texte = page.text()
   expect(texte).toContain('20:15')
   expect(texte).toContain('19:30')
+})
+
+test('chaque fenêtre de lumière montre sa tendance des dernières nuits, avec son objectif', async () => {
+  serveurAvecLaNuitDeCeMatin()
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
+  await flushPromises()
+
+  const tendances = page.findAll('[aria-label^="Tendance"]')
+  expect(tendances.map((tendance) => tendance.attributes('aria-label'))).toEqual([
+    'Tendance des dernières nuits : au-dessus de 10 lx',
+    'Tendance des dernières nuits : au-dessus de 1 lx',
+    'Tendance des dernières nuits : à 10 000 lx ou plus',
+    'Tendance des dernières nuits : temps mesuré à 250 lx ou plus',
+  ])
+  const joursDuSoir = tendances[0].findAll('li').map((jour) => jour.attributes('aria-label'))
+  expect(joursDuSoir).toEqual(['sam. 7 : 0 min, objectif tenu', 'dim. 8 : 10 min, objectif non tenu'])
+  const joursDeLaJournée = tendances[3].findAll('li').map((jour) => jour.attributes('aria-label'))
+  expect(joursDeLaJournée[1]).toBe('dim. 8 : 25 %, objectif non tenu')
 })
