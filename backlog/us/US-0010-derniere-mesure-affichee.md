@@ -2,7 +2,7 @@
 id: US-0010
 type: us
 titre: La dernière mesure dans la notification, un widget et l'accueil
-statut: qualifie
+statut: pret
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -30,7 +30,7 @@ l'écran d'accueil et sur l'accueil de l'application, **afin de** savoir combien
 - La notification de la mesure affiche la dernière mesure, en lx.
 - Un widget de la taille d'une icône, que l'opérateur pose sur l'écran d'accueil, affiche la dernière mesure, en lx.
 - L'accueil de l'application affiche la dernière mesure, en lx, en énorme.
-- Les trois suivent chaque nouvelle mesure.
+- Les trois suivent chaque nouvelle mesure, prise téléphone couvert ou non.
 
 Hypothèse : écran allumé, le capteur donne plusieurs valeurs par seconde, et Android ignore les mises à jour de
 notification trop rapprochées : l'affichage suit au plus une mesure toutes les quelques secondes. Le journal, lui,
@@ -72,3 +72,6 @@ garde toujours chaque mesure.
     Rien
     ```
 - Le téléphone couvert : la dernière mesure s'affiche-t-elle quand même, ou un mot le dit-il à sa place ?
+  ```
+  La valeur quand même
+  ```
