@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import ReleveDuJour from './ReleveDuJour.vue'
 import { JETON, doublureDuServeur } from './doublureDuServeur'
 
@@ -38,6 +38,14 @@ function serveurAvecLaNuitDeCeMatin(relevé: unknown = RELEVÉ) {
     lever_ms: LEVER_MS,
   })
   return serveur
+}
+
+/** Chaque ligne du relevé, écrite « ce qu'on mesure : valeur, objectif ». */
+function lignesDuRelevé(page: VueWrapper): string[] {
+  return page.findAll('dl > div').map((ligne) => {
+    const [mesuré, ...valeurs] = ligne.findAll('dt, dd').map((partie) => partie.text())
+    return `${mesuré} : ${valeurs.join(', ')}`
+  })
 }
 
 beforeEach(() => {
@@ -108,7 +116,7 @@ test("un coucher souhaité vide n'est pas envoyé, et la page le dit", async () 
   expect(page.text()).toContain("Indique l'heure du coucher souhaité.")
 })
 
-test('la page affiche les quatre fenêtres du relevé, avec les textes du téléphone', async () => {
+test("la page affiche les quatre fenêtres du relevé, l'objectif sur la ligne qu'il juge", async () => {
   serveurAvecLaNuitDeCeMatin()
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
@@ -118,21 +126,20 @@ test('la page affiche les quatre fenêtres du relevé, avec les textes du télé
 
   const texte = page.text()
   expect(texte).toContain('Soir, 3 h avant le coucher')
-  expect(texte).toContain('Au-dessus de 10 lx : 10 min')
-  expect(texte).toContain('Valeur la plus haute : 50 lx')
-  expect(texte).toContain('Couverture : 6 %')
   expect(texte).toContain('Nuit, du coucher au lever')
-  expect(texte).toContain('Au-dessus de 1 lx : 0 min')
-  expect(texte).toContain('Valeur la plus haute : rien de mesuré')
   expect(texte).toContain('Matin, 2 h après le lever')
-  expect(texte).toContain('À 10 000 lx ou plus : 40 min')
   expect(texte).toContain('Journée, du lever à 3 h avant le coucher souhaité')
-  expect(texte).toContain('Temps mesuré à 250 lx ou plus : 25 %')
-  expect(texte).toContain('Objectif tenu : non')
-  expect(texte).toContain('Objectif tenu : oui')
+  const lignes = lignesDuRelevé(page)
+  expect(lignes).toContain('Au-dessus de 10 lx : 10 min, objectif non tenu')
+  expect(lignes).toContain('Valeur la plus haute : 50 lx')
+  expect(lignes).toContain('Couverture : 6 %')
+  expect(lignes).toContain('Au-dessus de 1 lx : 0 min, objectif tenu')
+  expect(lignes).toContain('Valeur la plus haute : rien de mesuré')
+  expect(lignes).toContain('À 10 000 lx ou plus : 40 min, objectif tenu')
+  expect(lignes).toContain('Temps mesuré à 250 lx ou plus : 25 %, objectif non tenu')
 })
 
-test("le relevé montre les notes de l'agenda et la quantité de sommeil, avec leur objectif", async () => {
+test("le relevé montre les notes de l'agenda et la quantité de sommeil, l'objectif sur leur ligne", async () => {
   serveurAvecLaNuitDeCeMatin()
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
@@ -142,11 +149,12 @@ test("le relevé montre les notes de l'agenda et la quantité de sommeil, avec l
 
   const texte = page.text()
   expect(texte).toContain('Sommeil')
-  expect(texte).toContain('Endormissement : Calme, objectif tenu : oui')
-  expect(texte).toContain('Continuité de la nuit : Réveil long, objectif tenu : non')
-  expect(texte).toContain('Quantité de sommeil : 7 h 45 min, objectif de plus de 7 h tenu : oui')
   expect(texte).toContain('Fatigue, le soir suivant')
-  expect(texte).toContain('Fatigue de la journée : Gênante, objectif tenu : non')
+  const lignes = lignesDuRelevé(page)
+  expect(lignes).toContain('Endormissement : Calme, objectif tenu')
+  expect(lignes).toContain('Continuité de la nuit : Réveil long, objectif non tenu')
+  expect(lignes).toContain('Quantité de sommeil : 7 h 45 min, objectif de plus de 7 h tenu')
+  expect(lignes).toContain('Fatigue de la journée : Gênante, objectif non tenu')
 })
 
 test("tant que la fatigue n'est pas notée, le relevé le dit", async () => {
@@ -157,5 +165,5 @@ test("tant que la fatigue n'est pas notée, le relevé le dit", async () => {
   await page.find('button[name="voir"]').trigger('click')
   await flushPromises()
 
-  expect(page.text()).toContain('Fatigue de la journée : pas encore notée')
+  expect(lignesDuRelevé(page)).toContain('Fatigue de la journée : pas encore notée')
 })
