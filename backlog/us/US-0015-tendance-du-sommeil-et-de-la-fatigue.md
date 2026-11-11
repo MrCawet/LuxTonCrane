@@ -2,7 +2,7 @@
 id: US-0015
 type: us
 titre: Le sommeil et la fatigue montrent leur tendance des derniers jours
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -48,8 +48,8 @@ Les relevés des derniers jours sont déjà rendus par `GET /api/releves` (US-00
 
 ## Critères d'acceptation
 
-- [ ] Le bloc du sommeil montre la tendance de l'endormissement, de la continuité de la nuit et de la quantité de
+- [x] Le bloc du sommeil montre la tendance de l'endormissement, de la continuité de la nuit et de la quantité de
   sommeil, une barre par nuit notée.
-- [ ] Le bloc de la fatigue montre la tendance de la fatigue de la journée.
-- [ ] Un objectif tenu se distingue d'un objectif non tenu.
+- [x] Le bloc de la fatigue montre la tendance de la fatigue de la journée.
+- [x] Un objectif tenu se distingue d'un objectif non tenu.
 - [ ] L'opérateur juge ces tendances lisibles, sur le téléphone et sur l'ordinateur.

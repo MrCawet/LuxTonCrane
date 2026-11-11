@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import CourbeDeLaLumiere from './CourbeDeLaLumiere.vue'
-import TendanceDesNuits, { type JourDeLaTendance } from './TendanceDesNuits.vue'
+import TendanceDesNuits, { type JourDeLaTendance, type Repère } from './TendanceDesNuits.vue'
 import type { FenêtreDuRelevé, PériodeMesurée } from './courbeDeLaLumiere'
 import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, type Niveau } from './echellesDuSommeil'
 import { coucherSouhaitéMs, jourLocal } from './heuresDuReleve'
@@ -83,12 +83,13 @@ interface RelevéDaté extends RelevéDuJour {
   jour: string
 }
 
-/** `échelle` est la valeur d'une barre pleine. */
+/** `échelle` est la valeur d'une barre pleine ; sans `unité`, la valeur est le niveau d'une note. */
 interface Tendance {
   libellé: string
   jours: JourDeLaTendance[]
   échelle: number
-  unité: string
+  unité?: string
+  repère?: Repère
 }
 
 interface Fenêtre {
@@ -96,7 +97,7 @@ interface Fenêtre {
   lignes: Ligne[]
   /** Seulement pour les fenêtres de lumière. */
   courbe?: Courbe
-  tendance?: Tendance
+  tendances: Tendance[]
 }
 
 interface NuitJson {
@@ -216,7 +217,7 @@ const UNE_HEURE_MS = 60 * 60_000
 function tendanceDe(
   libellé: string,
   échelle: number,
-  unité: string,
+  unité: string | undefined,
   jourDe: (relevé: RelevéDaté) => Omit<JourDeLaTendance, 'jour'>,
 ): Tendance {
   const jours = relevésDesDernièresNuits.value.map((relevéDeLaNuit) => ({
@@ -224,6 +225,72 @@ function tendanceDe(
     ...jourDe(relevéDeLaNuit),
   }))
   return { libellé, jours, échelle, unité }
+}
+
+/** La tendance d'une note : plus la note est bonne, plus la barre est haute. Seule la fatigue peut manquer. */
+function tendanceDeLaNote(
+  libellé: string,
+  échelle: Niveau[],
+  noteDe: (relevé: RelevéDaté) => Note | null,
+): Tendance {
+  return tendanceDe(libellé, échelle.length, undefined, (relevéDeLaNuit) => {
+    const note = noteDe(relevéDeLaNuit)
+    if (note === null) {
+      return { valeur: 0, texte: 'pas encore notée', nombre: '', objectifTenu: null }
+    }
+    const rang = échelle.findIndex((niveau) => niveau.nom === note.niveau)
+    return {
+      valeur: échelle.length - rang,
+      texte: titreDuNiveau(échelle, note.niveau),
+      nombre: '',
+      objectifTenu: note.objectif_tenu,
+    }
+  })
+}
+
+const OBJECTIF_DE_QUANTITÉ_DE_SOMMEIL_MS = 7 * UNE_HEURE_MS
+
+function heuresAvecUneDécimale(duréeMs: number): string {
+  const heures = duréeMs / UNE_HEURE_MS
+  return heures.toLocaleString('fr-FR', { maximumFractionDigits: 1 })
+}
+
+function tendanceDeLaQuantitéDeSommeil(): Tendance {
+  const tendance = tendanceDe('quantité de sommeil', 9 * UNE_HEURE_MS, 'heures', (relevéDeLaNuit) => {
+    const quantité = relevéDeLaNuit.quantite_de_sommeil
+    return {
+      valeur: quantité.duree_ms,
+      texte: heuresEtMinutes(quantité.duree_ms),
+      nombre: heuresAvecUneDécimale(quantité.duree_ms),
+      objectifTenu: quantité.objectif_tenu,
+    }
+  })
+  return { ...tendance, repère: { valeur: OBJECTIF_DE_QUANTITÉ_DE_SOMMEIL_MS, texte: '7 h' } }
+}
+
+function tendanceDuMatin(): Tendance {
+  return tendanceDe('à 10 000 lx ou plus', UNE_HEURE_MS, 'min', (relevéDeLaNuit) => {
+    const lumière = relevéDeLaNuit.lumiere_du_matin
+    return {
+      valeur: lumière.temps_a_10_000_lx_ou_plus_ms,
+      texte: minutes(lumière.temps_a_10_000_lx_ou_plus_ms),
+      nombre: nombreDeMinutes(lumière.temps_a_10_000_lx_ou_plus_ms),
+      objectifTenu: lumière.objectif_tenu,
+    }
+  })
+}
+
+function tendanceDeLaJournée(): Tendance {
+  return tendanceDe('temps mesuré à 250 lx ou plus', 1, '%', (relevéDeLaNuit) => {
+    const lumière = relevéDeLaNuit.lumiere_de_la_journee
+    const part = lumière.part_du_temps_mesure_a_250_lx_ou_plus
+    return {
+      valeur: part ?? 0,
+      texte: part === null ? 'rien de mesuré' : pourcentage(part),
+      nombre: part === null ? '–' : `${Math.round(part * 100)}`,
+      objectifTenu: lumière.objectif_tenu,
+    }
+  })
 }
 
 function tendanceDeLaLumièreÀÉviter(
@@ -278,18 +345,23 @@ const fenêtres = computed<Fenêtre[]>(() => {
           objectif: { nom: 'objectif de plus de 7 h', tenu: quantité.objectif_tenu },
         },
       ],
+      tendances: [
+        tendanceDeLaNote('endormissement', ENDORMISSEMENT, (relevéDeLaNuit) => relevéDeLaNuit.endormissement),
+        tendanceDeLaNote('continuité de la nuit', CONTINUITÉ, (relevéDeLaNuit) => relevéDeLaNuit.continuite),
+        tendanceDeLaQuantitéDeSommeil(),
+      ],
     },
     {
       titre: 'Soir, 3 h avant le coucher',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_du_soir, '10 lx'),
       courbe: courbeDe(relevé.value.lumiere_du_soir, 10, '10 lx'),
-      tendance: tendanceDeLaLumièreÀÉviter('10 lx', (relevéDeLaNuit) => relevéDeLaNuit.lumiere_du_soir),
+      tendances: [tendanceDeLaLumièreÀÉviter('10 lx', (relevéDeLaNuit) => relevéDeLaNuit.lumiere_du_soir)],
     },
     {
       titre: 'Nuit, du coucher au lever',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_de_la_nuit, '1 lx'),
       courbe: courbeDe(relevé.value.lumiere_de_la_nuit, 1, '1 lx'),
-      tendance: tendanceDeLaLumièreÀÉviter('1 lx', (relevéDeLaNuit) => relevéDeLaNuit.lumiere_de_la_nuit),
+      tendances: [tendanceDeLaLumièreÀÉviter('1 lx', (relevéDeLaNuit) => relevéDeLaNuit.lumiere_de_la_nuit)],
     },
     {
       titre: 'Fatigue, le soir suivant',
@@ -297,6 +369,9 @@ const fenêtres = computed<Fenêtre[]>(() => {
         fatigue === null
           ? { libellé: 'Fatigue de la journée', valeur: 'pas encore notée' }
           : ligneDeLaNote('Fatigue de la journée', FATIGUE, fatigue),
+      ],
+      tendances: [
+        tendanceDeLaNote('fatigue de la journée', FATIGUE, (relevéDeLaNuit) => relevéDeLaNuit.fatigue),
       ],
     },
     {
@@ -310,15 +385,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
         { libellé: 'Couverture', valeur: pourcentage(matin.couverture) },
       ],
       courbe: courbeDe(matin, 10_000, '10 000 lx'),
-      tendance: tendanceDe('à 10 000 lx ou plus', UNE_HEURE_MS, 'min', (relevéDeLaNuit) => {
-        const lumière = relevéDeLaNuit.lumiere_du_matin
-        return {
-          valeur: lumière.temps_a_10_000_lx_ou_plus_ms,
-          texte: minutes(lumière.temps_a_10_000_lx_ou_plus_ms),
-          nombre: nombreDeMinutes(lumière.temps_a_10_000_lx_ou_plus_ms),
-          objectifTenu: lumière.objectif_tenu,
-        }
-      }),
+      tendances: [tendanceDuMatin()],
     },
     {
       titre: 'Journée, du lever à 3 h avant le coucher souhaité',
@@ -331,16 +398,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
         { libellé: 'Couverture', valeur: pourcentage(journée.couverture) },
       ],
       courbe: courbeDe(journée, 250, '250 lx'),
-      tendance: tendanceDe('temps mesuré à 250 lx ou plus', 1, '%', (relevéDeLaNuit) => {
-        const lumière = relevéDeLaNuit.lumiere_de_la_journee
-        const part = lumière.part_du_temps_mesure_a_250_lx_ou_plus
-        return {
-          valeur: part ?? 0,
-          texte: part === null ? 'rien de mesuré' : pourcentage(part),
-          nombre: part === null ? '–' : `${Math.round(part * 100)}`,
-          objectifTenu: lumière.objectif_tenu,
-        }
-      }),
+      tendances: [tendanceDeLaJournée()],
     },
   ]
 })
@@ -397,13 +455,17 @@ const fenêtres = computed<Fenêtre[]>(() => {
         :seuil-lx="fenêtre.courbe.seuilLx"
         :seuil="fenêtre.courbe.seuil"
       />
-      <TendanceDesNuits
-        v-if="fenêtre.tendance !== undefined && fenêtre.tendance.jours.length > 0"
-        :libellé="fenêtre.tendance.libellé"
-        :jours="fenêtre.tendance.jours"
-        :échelle="fenêtre.tendance.échelle"
-        :unité="fenêtre.tendance.unité"
-      />
+      <template v-if="relevésDesDernièresNuits.length > 0">
+        <TendanceDesNuits
+          v-for="tendance in fenêtre.tendances"
+          :key="tendance.libellé"
+          :libellé="tendance.libellé"
+          :jours="tendance.jours"
+          :échelle="tendance.échelle"
+          :unité="tendance.unité"
+          :repère="tendance.repère"
+        />
+      </template>
     </article>
   </section>
 </template>
