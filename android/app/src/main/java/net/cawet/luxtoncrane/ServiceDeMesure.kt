@@ -16,7 +16,9 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
@@ -27,6 +29,7 @@ import net.cawet.luxtoncrane.pont.Journal
  * Service de premier plan : sans lui, Android ne transmet aucune valeur du capteur
  * à une application en arrière-plan. Écran allumé, le capteur de lumière reste ouvert ;
  * écran éteint, une alarme l'ouvre environ toutes les 9 minutes, le temps d'une mesure.
+ * Il affiche la dernière mesure dans sa notification, dans les widgets et sur l'accueil.
  */
 class ServiceDeMesure : Service(), SensorEventListener {
 
@@ -35,6 +38,19 @@ class ServiceDeMesure : Service(), SensorEventListener {
     private lateinit var alarmManager: AlarmManager
     private lateinit var alarmIntent: PendingIntent
     private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var notificationManager: NotificationManager
+    private val mainThread = Handler(Looper.getMainLooper())
+
+    /** La mesure qui attend d'être affichée, écran allumé ; `null` si aucun affichage n'est prévu. */
+    private var mesureÀAfficherLux: Float? = null
+
+    private val afficherLaMesureEnAttente = Runnable {
+        val valeurLux = mesureÀAfficherLux
+        mesureÀAfficherLux = null
+        if (valeurLux != null) {
+            afficherLaMesure(valeurLux)
+        }
+    }
 
     private val screenAndAlarmReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -77,6 +93,7 @@ class ServiceDeMesure : Service(), SensorEventListener {
                 return
             }
             enregistrer(lumière)
+            afficherLaMesure(lumière.valeurLux)
             terminerLaMesureÉcranÉteint()
         }
 
@@ -129,6 +146,7 @@ class ServiceDeMesure : Service(), SensorEventListener {
             annulerLAlarme()
             fermerLesCapteurs()
             terminerLaMesureÉcranÉteint()
+            mainThread.removeCallbacks(afficherLaMesureEnAttente)
             journal.close()
         }
         super.onDestroy()
@@ -140,7 +158,11 @@ class ServiceDeMesure : Service(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         when (event.sensor.type) {
             Sensor.TYPE_PROXIMITY -> noterLaProximité(event)
-            Sensor.TYPE_LIGHT -> enregistrer(valeurDeLumière(event))
+            Sensor.TYPE_LIGHT -> {
+                val lumière = valeurDeLumière(event)
+                enregistrer(lumière)
+                afficherBientôt(lumière.valeurLux)
+            }
         }
     }
 
@@ -167,6 +189,24 @@ class ServiceDeMesure : Service(), SensorEventListener {
         } catch (échec: EchecPont) {
             Log.e(LOG_TAG, "Une mesure n'a pas pu être enregistrée.", échec)
         }
+    }
+
+    /**
+     * Écran allumé, le capteur peut donner plusieurs valeurs par seconde, et Android ignore les mises à jour
+     * de notification trop rapprochées : l'affichage ne suit qu'une mesure par seconde au plus, la plus récente.
+     */
+    private fun afficherBientôt(valeurLux: Float) {
+        val affichagePrévu = mesureÀAfficherLux != null
+        mesureÀAfficherLux = valeurLux
+        if (!affichagePrévu) {
+            mainThread.postDelayed(afficherLaMesureEnAttente, DÉLAI_ENTRE_DEUX_AFFICHAGES_MS)
+        }
+    }
+
+    private fun afficherLaMesure(valeurLux: Float) {
+        transmettreLaDernièreMesure(this, valeurLux)
+        val notification = notification(texteDeLaDernièreMesure(valeurLux))
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun ouvrirLesCapteurs() {
@@ -245,20 +285,29 @@ class ServiceDeMesure : Service(), SensorEventListener {
             "Mesure de la lumière",
             NotificationManager.IMPORTANCE_LOW,
         )
-        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(channel)
 
-        val builder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-        builder.setContentTitle("Mesure de la lumière en cours")
-        builder.setSmallIcon(android.R.drawable.ic_menu_view)
-        builder.setOngoing(true)
-        val notification = builder.build()
-
+        val notification = notification(texteDeLaMesure = null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
+    }
+
+    /** `texteDeLaMesure` : la dernière mesure, en titre, ou `null` avant la première. */
+    private fun notification(texteDeLaMesure: String?): Notification {
+        val builder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+        if (texteDeLaMesure == null) {
+            builder.setContentTitle("Mesure de la lumière en cours")
+        } else {
+            builder.setContentTitle(texteDeLaMesure)
+            builder.setContentText("Mesure de la lumière en cours")
+        }
+        builder.setSmallIcon(android.R.drawable.ic_menu_view)
+        builder.setOngoing(true)
+        return builder.build()
     }
 
     private class ValeurDeLumière(val valeurLux: Float, val instantMs: Long)
@@ -269,6 +318,7 @@ class ServiceDeMesure : Service(), SensorEventListener {
         const val NOTIFICATION_ID = 1
         const val ALARM_ACTION = "net.cawet.luxtoncrane.ALARME"
         const val INTERVALLE_ENTRE_DEUX_ALARMES_MS = 9L * 60 * 1000
+        const val DÉLAI_ENTRE_DEUX_AFFICHAGES_MS = 1000L
 
         /** Garde-fou : si le capteur ne répond pas, le processeur se rendort quand même. */
         const val DURÉE_MAXIMALE_D_UNE_MESURE_MS = 10L * 1000
