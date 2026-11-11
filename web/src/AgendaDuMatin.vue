@@ -78,7 +78,7 @@ onMounted(chargerLaNuit)
 </script>
 
 <template>
-  <section class="flex flex-col gap-5 rounded-2xl bg-white p-5 shadow-sm">
+  <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Agenda du matin</h2>
     <form class="flex flex-col gap-6" @submit.prevent="garderLAgenda" @invalid.capture="champRefusé">
       <ChoixDuNiveau
@@ -92,15 +92,15 @@ onMounted(chargerLaNuit)
       <div class="grid grid-cols-2 gap-3">
         <label class="flex flex-col gap-1">
           Coucher
-          <input v-model="coucher" name="coucher" type="time" class="rounded-lg border border-gray-400 p-3" />
+          <input v-model="coucher" name="coucher" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
         </label>
         <label class="flex flex-col gap-1">
           Lever
-          <input v-model="lever" name="lever" type="time" class="rounded-lg border border-gray-400 p-3" />
+          <input v-model="lever" name="lever" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
         </label>
       </div>
-      <button type="submit" class="rounded-lg bg-gray-900 p-3 font-semibold text-white">Garder l'agenda</button>
-      <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-red-700">
+      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Garder l'agenda</button>
+      <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-dracula-red">
         <li v-for="erreur in erreurs" :key="erreur">{{ erreur }}</li>
       </ul>
       <p v-if="message !== null">{{ message }}</p>

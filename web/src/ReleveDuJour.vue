@@ -214,7 +214,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-5 rounded-2xl bg-white p-5 shadow-sm">
+  <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Relevé du jour</h2>
     <div class="flex items-end gap-3">
       <label class="flex flex-col gap-1">
@@ -224,19 +224,19 @@ const fenêtres = computed<Fenêtre[]>(() => {
           name="coucher_souhaite"
           type="time"
           step="900"
-          class="rounded-lg border border-gray-400 p-3"
+          class="rounded-lg border border-dracula-comment bg-dracula-background p-3"
         />
       </label>
-      <button type="button" name="regler" class="rounded-lg border border-gray-900 px-4 py-3" @click="réglerLeCoucherSouhaité">
+      <button type="button" name="regler" class="rounded-lg border border-dracula-purple px-4 py-3 text-dracula-purple" @click="réglerLeCoucherSouhaité">
         Garder
       </button>
     </div>
     <p v-if="messageDuRéglage !== null">{{ messageDuRéglage }}</p>
-    <button type="button" name="voir" class="rounded-lg bg-gray-900 p-3 font-semibold text-white" @click="voirLeRelevé">
+    <button type="button" name="voir" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background" @click="voirLeRelevé">
       Voir le relevé du jour
     </button>
 
-    <p v-if="erreur !== null" class="text-red-700">{{ erreur }}</p>
+    <p v-if="erreur !== null" class="text-dracula-red">{{ erreur }}</p>
 
     <article v-for="fenêtre in fenêtres" :key="fenêtre.titre" class="flex flex-col gap-1">
       <h3 class="font-semibold">{{ fenêtre.titre }}</h3>

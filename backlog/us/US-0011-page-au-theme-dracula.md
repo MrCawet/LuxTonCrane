@@ -2,7 +2,7 @@
 id: US-0011
 type: us
 titre: La page web prend le thème Dracula
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -46,6 +46,6 @@ La variante claire (Alucard), l'application Android, la mise en couleur des obje
 
 ## Critères d'acceptation
 
-- [ ] La page, sur le téléphone et sur l'ordinateur, est dans les couleurs de la palette Dracula.
-- [ ] La carte choisie se voit toujours d'un coup d'œil.
+- [x] La page, sur le téléphone et sur l'ordinateur, est dans les couleurs de la palette Dracula.
+- [x] La carte choisie se voit toujours d'un coup d'œil.
 - [ ] L'opérateur reconnaît le thème Dracula et le juge agréable à lire.

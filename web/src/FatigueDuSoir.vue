@@ -41,11 +41,11 @@ onMounted(chargerLaFatigue)
 </script>
 
 <template>
-  <section class="flex flex-col gap-5 rounded-2xl bg-white p-5 shadow-sm">
+  <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Fatigue du soir</h2>
     <form class="flex flex-col gap-6" @submit.prevent="garderLaFatigue">
       <ChoixDuNiveau v-model="fatigue" nom="fatigue" titre="Fatigue de la journée" :niveaux="FATIGUE" />
-      <button type="submit" class="rounded-lg bg-gray-900 p-3 font-semibold text-white">Garder la fatigue</button>
+      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Garder la fatigue</button>
       <p v-if="message !== null">{{ message }}</p>
     </form>
   </section>
