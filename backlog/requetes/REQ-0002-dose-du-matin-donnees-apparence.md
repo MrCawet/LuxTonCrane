@@ -10,8 +10,8 @@ emetteur: Opérateur
 canal: conversation
 recue_le: 2026-11-09
 composants: [releve, serveur, web, android, journal_sqlite, pont]
-tickets_lies: [US-0008, DT-0002, US-0009, EP-0002, US-0011]
-tickets_derives: [US-0008, DT-0002, US-0009, US-0011]
+tickets_lies: [US-0008, DT-0002, US-0009, EP-0002, US-0011, US-0012]
+tickets_derives: [US-0008, DT-0002, US-0009, US-0011, US-0012]
 resolution: qualifiee
 ---
 

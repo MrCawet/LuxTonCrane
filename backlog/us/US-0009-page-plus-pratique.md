@@ -2,7 +2,7 @@
 id: US-0009
 type: us
 titre: La saisie de l'agenda se lit confortablement
-statut: a_valider
+statut: termine
 priorite: confort
 cree_le: 2026-11-09
 maj_le: 2026-11-11
@@ -55,7 +55,7 @@ l'épique, après la revue de ce ticket.
   entière, et le choix se voit.
 - [x] Le titre d'un niveau se lit séparé de sa description.
 - [x] Sur l'ordinateur, la saisie de l'agenda est aussi confortable à lire que sur le téléphone.
-- [ ] L'opérateur juge la saisie de l'agenda confortable à lire.
+- [x] L'opérateur juge la saisie de l'agenda confortable à lire.
 
 ## Questions ouvertes
 
