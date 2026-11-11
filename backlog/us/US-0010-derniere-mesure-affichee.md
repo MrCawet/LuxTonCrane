@@ -39,7 +39,8 @@ garde toujours chaque mesure.
 ## Hors périmètre
 
 - La valeur dans l'icône de la barre du haut, ou dans la pastille d'Android 16.
-- Toute autre information que la dernière mesure (objectif, couleur selon le niveau…).
+- Toute autre information que la dernière mesure (heure, objectif, couleur selon le niveau…).
+- Signaler que le service de mesure est arrêté.
 
 ## Piste technique
 
@@ -62,4 +63,12 @@ garde toujours chaque mesure.
   ```
 - La dernière mesure s'affiche-t-elle avec son heure ? Écran éteint, elle a jusqu'à 9 min ; service arrêté, elle
   peut être bien plus vieille.
+  ```
+  Normalement écran allumé l'appli prend les mesures en temps réel non? A chaque changement annoncé par le capteurs ?
+  ```
+  - Écran allumé, la valeur affichée est celle du moment ; elle ne reste figée que si le service de mesure s'arrête.
+    Que faire de l'heure de la mesure : rien, ou signaler l'arrêt du service ?
+    ```
+    Rien
+    ```
 - Le téléphone couvert : la dernière mesure s'affiche-t-elle quand même, ou un mot le dit-il à sa place ?
