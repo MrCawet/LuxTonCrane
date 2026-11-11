@@ -27,6 +27,7 @@ l'écran d'accueil et sur l'accueil de l'application, **afin de** savoir combien
 
 ## Comportement attendu
 
+- La dernière mesure s'écrit avec une décimale sous 10 lx (« 0,4 lx »), en entier au-dessus (« 12 481 lx »).
 - La notification de la mesure affiche la dernière mesure, en lx.
 - Un widget de la taille d'une icône, que l'opérateur pose sur l'écran d'accueil, affiche la dernière mesure, en lx.
 - L'accueil de l'application affiche la dernière mesure, en lx, en énorme.
@@ -74,4 +75,8 @@ garde toujours chaque mesure.
 - Le téléphone couvert : la dernière mesure s'affiche-t-elle quand même, ou un mot le dit-il à sa place ?
   ```
   La valeur quand même
+  ```
+- Le capteur donne des lux à virgule, et l'objectif de la nuit est au plus 1 lx : comment écrire la dernière mesure ?
+  ```
+  Virgule sous 10 lx
   ```
