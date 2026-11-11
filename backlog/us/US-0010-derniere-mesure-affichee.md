@@ -28,8 +28,8 @@ l'écran d'accueil et sur l'accueil de l'application, **afin de** savoir combien
 ## Comportement attendu
 
 - La notification de la mesure affiche la dernière mesure, en lx.
-- Un widget, que l'opérateur pose sur l'écran d'accueil, affiche la dernière mesure, en lx.
-- L'accueil de l'application affiche la dernière mesure, en lx.
+- Un widget de la taille d'une icône, que l'opérateur pose sur l'écran d'accueil, affiche la dernière mesure, en lx.
+- L'accueil de l'application affiche la dernière mesure, en lx, en énorme.
 - Les trois suivent chaque nouvelle mesure.
 
 Hypothèse : écran allumé, le capteur donne plusieurs valeurs par seconde, et Android ignore les mises à jour de
@@ -51,12 +51,15 @@ garde toujours chaque mesure.
 ## Critères d'acceptation
 
 - [ ] La notification de la mesure affiche la dernière mesure, en lx, et la suit.
-- [ ] Un widget de l'écran d'accueil affiche la dernière mesure, en lx, et la suit.
-- [ ] L'accueil de l'application affiche la dernière mesure, en lx, et la suit.
+- [ ] Un widget de la taille d'une icône affiche la dernière mesure, en lx, et la suit.
+- [ ] L'accueil de l'application affiche la dernière mesure en énorme, en lx, et la suit.
 
 ## Questions ouvertes
 
 - « En gros » : la dernière mesure s'écrit-elle en grand sur l'accueil, ou est-ce « pour résumer » ?
+  ```
+  Je veux la valeur dans la notif, dans un widget de la taille d'un icon sur l'écran d'accueil, et en énorme quand on ouvre l'appli luxtoncrane
+  ```
 - La dernière mesure s'affiche-t-elle avec son heure ? Écran éteint, elle a jusqu'à 9 min ; service arrêté, elle
   peut être bien plus vieille.
 - Le téléphone couvert : la dernière mesure s'affiche-t-elle quand même, ou un mot le dit-il à sa place ?
