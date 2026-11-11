@@ -10,7 +10,7 @@ emetteur: Opérateur
 composants: [web]
 tickets_lies: [REQ-0002]
 objectif: aucun
-tickets: [US-0009, US-0011]
+tickets: [US-0009, US-0011, US-0012]
 ---
 
 ## Provenance
@@ -28,8 +28,8 @@ commençant par la lisibilité.
 
 - [US-0009](../us/US-0009-page-plus-pratique.md) : la saisie de l'agenda se lit confortablement.
 - [US-0011](../us/US-0011-page-au-theme-dracula.md) : la page web prend le thème Dracula.
+- [US-0012](../us/US-0012-releve-du-jour-lisible.md) : le relevé du jour se lit d'un coup d'œil.
 
 ## À découper
 
-- Lisibilité du relevé du jour : attend la revue de US-0009 et US-0011.
-- Ordre des blocs selon le moment de la journée : attend la revue de US-0009 et US-0011.
+- Ordre des blocs selon le moment de la journée : attend la revue de US-0012.
