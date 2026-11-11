@@ -45,12 +45,13 @@ const RELEVÉ = {
   fatigue: { niveau: 'genante', objectif_tenu: false },
 }
 
-// La veille, le soir est tenu ; aujourd'hui, il ne l'est pas.
+// La veille, le soir est tenu et la fatigue n'a pas été notée ; aujourd'hui, le soir n'est pas tenu.
 const RELEVÉS_DES_DERNIÈRES_NUITS = [
   {
     ...RELEVÉ,
     jour: '2026-11-07',
     lumiere_du_soir: { ...RELEVÉ.lumiere_du_soir, temps_au_dessus_du_seuil_ms: 0, objectif_tenu: true },
+    fatigue: null,
   },
   { ...RELEVÉ, jour: '2026-11-08' },
 ]
@@ -77,6 +78,12 @@ function lignesDuRelevé(page: VueWrapper): string[] {
     const [mesuré, ...valeurs] = ligne.findAll('dt, dd').map((partie) => partie.text())
     return `${mesuré} : ${valeurs.join(', ')}`
   })
+}
+
+/** Les jours de la tendance nommée, tels qu'ils se lisent : « jour : valeur, objectif ». */
+function joursDeLaTendance(page: VueWrapper, nom: string): string[] {
+  const tendance = page.find(`[aria-label="Tendance des dernières nuits : ${nom}"]`)
+  return tendance.findAll('li').map((jour) => jour.attributes('aria-label') ?? '')
 }
 
 beforeEach(() => {
@@ -227,15 +234,30 @@ test('chaque fenêtre de lumière montre sa tendance des dernières nuits, avec 
   await page.find('button[name="voir"]').trigger('click')
   await flushPromises()
 
-  const tendances = page.findAll('[aria-label^="Tendance"]')
-  expect(tendances.map((tendance) => tendance.attributes('aria-label'))).toEqual([
-    'Tendance des dernières nuits : au-dessus de 10 lx',
-    'Tendance des dernières nuits : au-dessus de 1 lx',
-    'Tendance des dernières nuits : à 10 000 lx ou plus',
-    'Tendance des dernières nuits : temps mesuré à 250 lx ou plus',
-  ])
-  const joursDuSoir = tendances[0].findAll('li').map((jour) => jour.attributes('aria-label'))
+  const joursDuSoir = joursDeLaTendance(page, 'au-dessus de 10 lx')
   expect(joursDuSoir).toEqual(['sam. 7 : 0 min, objectif tenu', 'dim. 8 : 10 min, objectif non tenu'])
-  const joursDeLaJournée = tendances[3].findAll('li').map((jour) => jour.attributes('aria-label'))
+  expect(joursDeLaTendance(page, 'au-dessus de 1 lx')).toHaveLength(2)
+  expect(joursDeLaTendance(page, 'à 10 000 lx ou plus')).toHaveLength(2)
+  const joursDeLaJournée = joursDeLaTendance(page, 'temps mesuré à 250 lx ou plus')
   expect(joursDeLaJournée[1]).toBe('dim. 8 : 25 %, objectif non tenu')
+})
+
+test('le sommeil et la fatigue montrent leur tendance des dernières nuits, avec leur objectif', async () => {
+  serveurAvecLaNuitDeCeMatin()
+
+  const page = mount(ReleveDuJour, { props: { jeton: JETON } })
+  await flushPromises()
+  await page.find('button[name="voir"]').trigger('click')
+  await flushPromises()
+
+  expect(joursDeLaTendance(page, 'endormissement')).toEqual([
+    'sam. 7 : Calme, objectif tenu',
+    'dim. 8 : Calme, objectif tenu',
+  ])
+  expect(joursDeLaTendance(page, 'continuité de la nuit')[1]).toBe('dim. 8 : Réveil long, objectif non tenu')
+  expect(joursDeLaTendance(page, 'quantité de sommeil')[1]).toBe('dim. 8 : 7 h 45 min, objectif tenu')
+  expect(joursDeLaTendance(page, 'fatigue de la journée')).toEqual([
+    'sam. 7 : pas encore notée',
+    'dim. 8 : Gênante, objectif non tenu',
+  ])
 })
