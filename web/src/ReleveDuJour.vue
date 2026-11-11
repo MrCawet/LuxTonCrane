@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import CourbeDeLaLumiere from './CourbeDeLaLumiere.vue'
+import TendanceDesNuits, { type JourDeLaTendance } from './TendanceDesNuits.vue'
 import type { FenêtreDuRelevé, PériodeMesurée } from './courbeDeLaLumiere'
 import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, type Niveau } from './echellesDuSommeil'
 import { coucherSouhaitéMs, jourLocal } from './heuresDuReleve'
@@ -77,11 +78,25 @@ interface Courbe {
   seuil: string
 }
 
+/** Le relevé d'une des dernières nuits, avec le jour de son lever. */
+interface RelevéDaté extends RelevéDuJour {
+  jour: string
+}
+
+/** `échelle` est la valeur d'une barre pleine. */
+interface Tendance {
+  libellé: string
+  jours: JourDeLaTendance[]
+  échelle: number
+  unité: string
+}
+
 interface Fenêtre {
   titre: string
   lignes: Ligne[]
   /** Seulement pour les fenêtres de lumière. */
   courbe?: Courbe
+  tendance?: Tendance
 }
 
 interface NuitJson {
@@ -91,6 +106,7 @@ interface NuitJson {
 
 const coucherSouhaité = ref('23:00')
 const relevé = ref<RelevéDuJour | null>(null)
+const relevésDesDernièresNuits = ref<RelevéDaté[]>([])
 const erreur = ref<string | null>(null)
 const messageDuRéglage = ref<string | null>(null)
 
@@ -146,10 +162,16 @@ async function voirLeRelevé() {
   }
   erreur.value = null
   relevé.value = await réponse.json()
+  const réponseDesDernièresNuits = await fetch(`/api/releves?${paramètres}`, { headers: entêtes() })
+  relevésDesDernièresNuits.value = réponseDesDernièresNuits.ok ? await réponseDesDernièresNuits.json() : []
+}
+
+function nombreDeMinutes(duréeMs: number): string {
+  return `${Math.floor(duréeMs / 60_000)}`
 }
 
 function minutes(duréeMs: number): string {
-  return `${Math.floor(duréeMs / 60_000)} min`
+  return `${nombreDeMinutes(duréeMs)} min`
 }
 
 function heuresEtMinutes(duréeMs: number): string {
@@ -186,6 +208,37 @@ function courbeDe(
   seuil: string,
 ): Courbe {
   return { fenêtre: lumière.fenetre, périodes: lumière.periodes_mesurees, seuilLx, seuil }
+}
+
+const UNE_HEURE_MS = 60 * 60_000
+
+/** La tendance d'une valeur du relevé : `jourDe` la tire du relevé de chaque nuit. */
+function tendanceDe(
+  libellé: string,
+  échelle: number,
+  unité: string,
+  jourDe: (relevé: RelevéDaté) => Omit<JourDeLaTendance, 'jour'>,
+): Tendance {
+  const jours = relevésDesDernièresNuits.value.map((relevéDeLaNuit) => ({
+    jour: relevéDeLaNuit.jour,
+    ...jourDe(relevéDeLaNuit),
+  }))
+  return { libellé, jours, échelle, unité }
+}
+
+function tendanceDeLaLumièreÀÉviter(
+  seuil: string,
+  lumièreDe: (relevé: RelevéDaté) => LumièreÀÉviter,
+): Tendance {
+  return tendanceDe(`au-dessus de ${seuil}`, UNE_HEURE_MS, 'min', (relevéDeLaNuit) => {
+    const lumière = lumièreDe(relevéDeLaNuit)
+    return {
+      valeur: lumière.temps_au_dessus_du_seuil_ms,
+      texte: minutes(lumière.temps_au_dessus_du_seuil_ms),
+      nombre: nombreDeMinutes(lumière.temps_au_dessus_du_seuil_ms),
+      objectifTenu: lumière.objectif_tenu,
+    }
+  })
 }
 
 function lignesDeLaLumièreÀÉviter(lumière: LumièreÀÉviter, seuil: string): Ligne[] {
@@ -230,11 +283,13 @@ const fenêtres = computed<Fenêtre[]>(() => {
       titre: 'Soir, 3 h avant le coucher',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_du_soir, '10 lx'),
       courbe: courbeDe(relevé.value.lumiere_du_soir, 10, '10 lx'),
+      tendance: tendanceDeLaLumièreÀÉviter('10 lx', (relevéDeLaNuit) => relevéDeLaNuit.lumiere_du_soir),
     },
     {
       titre: 'Nuit, du coucher au lever',
       lignes: lignesDeLaLumièreÀÉviter(relevé.value.lumiere_de_la_nuit, '1 lx'),
       courbe: courbeDe(relevé.value.lumiere_de_la_nuit, 1, '1 lx'),
+      tendance: tendanceDeLaLumièreÀÉviter('1 lx', (relevéDeLaNuit) => relevéDeLaNuit.lumiere_de_la_nuit),
     },
     {
       titre: 'Fatigue, le soir suivant',
@@ -255,6 +310,15 @@ const fenêtres = computed<Fenêtre[]>(() => {
         { libellé: 'Couverture', valeur: pourcentage(matin.couverture) },
       ],
       courbe: courbeDe(matin, 10_000, '10 000 lx'),
+      tendance: tendanceDe('à 10 000 lx ou plus', UNE_HEURE_MS, 'min', (relevéDeLaNuit) => {
+        const lumière = relevéDeLaNuit.lumiere_du_matin
+        return {
+          valeur: lumière.temps_a_10_000_lx_ou_plus_ms,
+          texte: minutes(lumière.temps_a_10_000_lx_ou_plus_ms),
+          nombre: nombreDeMinutes(lumière.temps_a_10_000_lx_ou_plus_ms),
+          objectifTenu: lumière.objectif_tenu,
+        }
+      }),
     },
     {
       titre: 'Journée, du lever à 3 h avant le coucher souhaité',
@@ -267,6 +331,16 @@ const fenêtres = computed<Fenêtre[]>(() => {
         { libellé: 'Couverture', valeur: pourcentage(journée.couverture) },
       ],
       courbe: courbeDe(journée, 250, '250 lx'),
+      tendance: tendanceDe('temps mesuré à 250 lx ou plus', 1, '%', (relevéDeLaNuit) => {
+        const lumière = relevéDeLaNuit.lumiere_de_la_journee
+        const part = lumière.part_du_temps_mesure_a_250_lx_ou_plus
+        return {
+          valeur: part ?? 0,
+          texte: part === null ? 'rien de mesuré' : pourcentage(part),
+          nombre: part === null ? '–' : `${Math.round(part * 100)}`,
+          objectifTenu: lumière.objectif_tenu,
+        }
+      }),
     },
   ]
 })
@@ -322,6 +396,13 @@ const fenêtres = computed<Fenêtre[]>(() => {
         :périodes="fenêtre.courbe.périodes"
         :seuil-lx="fenêtre.courbe.seuilLx"
         :seuil="fenêtre.courbe.seuil"
+      />
+      <TendanceDesNuits
+        v-if="fenêtre.tendance !== undefined && fenêtre.tendance.jours.length > 0"
+        :libellé="fenêtre.tendance.libellé"
+        :jours="fenêtre.tendance.jours"
+        :échelle="fenêtre.tendance.échelle"
+        :unité="fenêtre.tendance.unité"
       />
     </article>
   </section>

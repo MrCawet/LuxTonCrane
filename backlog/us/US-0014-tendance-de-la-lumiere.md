@@ -2,7 +2,7 @@
 id: US-0014
 type: us
 titre: Chaque fenêtre de lumière montre sa tendance des derniers jours
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -52,7 +52,7 @@ Le serveur rend les relevés des 7 dernières nuits notées par une nouvelle rou
 
 ## Critères d'acceptation
 
-- [ ] Chaque fenêtre de lumière montre une barre par nuit notée des 7 derniers jours, avec son jour.
-- [ ] La barre d'un jour dont l'objectif est tenu se distingue de celle d'un jour dont il ne l'est pas.
-- [ ] Le coucher suivant d'un jour passé est celui noté le lendemain.
+- [x] Chaque fenêtre de lumière montre une barre par nuit notée des 7 derniers jours, avec son jour.
+- [x] La barre d'un jour dont l'objectif est tenu se distingue de celle d'un jour dont il ne l'est pas.
+- [x] Le coucher suivant d'un jour passé est celui noté le lendemain.
 - [ ] L'opérateur juge la tendance lisible, sur le téléphone et sur l'ordinateur.
