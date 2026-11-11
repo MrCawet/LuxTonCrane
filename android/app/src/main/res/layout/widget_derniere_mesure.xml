@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/derniere_mesure"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:autoSizeMaxTextSize="40sp"
+    android:autoSizeMinTextSize="8sp"
+    android:autoSizeTextType="uniform"
+    android:background="#B3000000"
+    android:gravity="center"
+    android:maxLines="1"
+    android:padding="4dp"
+    android:text="— lx"
+    android:textColor="#FFFFFF" />

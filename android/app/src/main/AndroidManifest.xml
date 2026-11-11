@@ -30,6 +30,18 @@
                 android:value="Mesure de la lumière ambiante, écran allumé et écran éteint" />
         </service>
 
+        <receiver
+            android:name=".WidgetDeLaDerniereMesure"
+            android:exported="false"
+            android:label="Dernière mesure">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_derniere_mesure" />
+        </receiver>
+
     </application>
 
 </manifest>

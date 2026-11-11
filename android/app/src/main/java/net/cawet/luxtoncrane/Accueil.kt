@@ -9,6 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import android.graphics.Color
 import android.text.InputType
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
 import android.view.WindowInsets
 import android.widget.Button
@@ -21,11 +23,12 @@ import java.time.ZoneId
 /**
  * Demande la permission d'afficher les notifications, puis démarre la mesure.
  * Planifie les rappels de l'agenda du sommeil, qui ouvrent la page web.
- * Affiche la dernière synchronisation réussie avec le serveur, et permet de synchroniser tout de suite.
+ * Affiche la dernière mesure en énorme, et la dernière synchronisation réussie avec le serveur, et permet de synchroniser tout de suite.
  * Le relevé du jour se lit sur la page web.
  */
 class Accueil : Activity() {
 
+    private lateinit var affichageDeLaDernièreMesure: TextView
     private lateinit var affichageDeLaSynchronisation: TextView
     private lateinit var affichageDuDernierÉchec: TextView
 
@@ -36,10 +39,18 @@ class Accueil : Activity() {
         }
     }
 
+    // Gardé dans un champ, pour la même raison.
+    private val suiviDeLaDernièreMesure = SharedPreferences.OnSharedPreferenceChangeListener { _, clé ->
+        if (clé == LAST_MEASURE_KEY) {
+            afficherLaDernièreMesure()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(screen())
         préférencesDeLaSynchronisation(this).registerOnSharedPreferenceChangeListener(suiviDeLaSynchronisation)
+        préférencesDeLaDernièreMesure(this).registerOnSharedPreferenceChangeListener(suiviDeLaDernièreMesure)
         planifierLesRappelsDeLAgenda(this)
 
         if (notificationPermissionIsMissing()) {
@@ -51,11 +62,13 @@ class Accueil : Activity() {
 
     override fun onResume() {
         super.onResume()
+        afficherLaDernièreMesure()
         afficherLaDernièreSynchronisation()
     }
 
     override fun onDestroy() {
         préférencesDeLaSynchronisation(this).unregisterOnSharedPreferenceChangeListener(suiviDeLaSynchronisation)
+        préférencesDeLaDernièreMesure(this).unregisterOnSharedPreferenceChangeListener(suiviDeLaDernièreMesure)
         super.onDestroy()
     }
 
@@ -69,6 +82,11 @@ class Accueil : Activity() {
     private fun screen(): ScrollView {
         val column = LinearLayout(this)
         column.orientation = LinearLayout.VERTICAL
+
+        affichageDeLaDernièreMesure = TextView(this)
+        affichageDeLaDernièreMesure.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
+        affichageDeLaDernièreMesure.gravity = Gravity.CENTER
+        column.addView(affichageDeLaDernièreMesure)
 
         val message = TextView(this)
         message.text = "Mesure de la lumière en cours, écran allumé."
@@ -107,6 +125,11 @@ class Accueil : Activity() {
             view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    private fun afficherLaDernièreMesure() {
+        val valeurLux = dernièreMesureLux(this)
+        affichageDeLaDernièreMesure.text = if (valeurLux == null) "— lx" else texteDeLaDernièreMesure(valeurLux)
     }
 
     private fun afficherLaDernièreSynchronisation() {

@@ -2,7 +2,7 @@
 id: US-0010
 type: us
 titre: La dernière mesure dans la notification, un widget et l'accueil
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -34,7 +34,7 @@ l'écran d'accueil et sur l'accueil de l'application, **afin de** savoir combien
 - Les trois suivent chaque nouvelle mesure, prise téléphone couvert ou non.
 
 Hypothèse : écran allumé, le capteur donne plusieurs valeurs par seconde, et Android ignore les mises à jour de
-notification trop rapprochées : l'affichage suit au plus une mesure toutes les quelques secondes. Le journal, lui,
+notification trop rapprochées : l'affichage suit au plus une mesure par seconde, la plus récente. Le journal, lui,
 garde toujours chaque mesure.
 
 ## Hors périmètre
