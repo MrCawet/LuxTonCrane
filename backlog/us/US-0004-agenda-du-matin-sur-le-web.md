@@ -2,10 +2,10 @@
 id: US-0004
 type: us
 titre: L'agenda du matin se remplit sur la page web, et le relevé prend ses heures
-statut: a_valider
+statut: termine
 priorite: essentiel
 cree_le: 2026-11-08
-maj_le: 2026-11-08
+maj_le: 2026-11-11
 source: REQ-0001
 emetteur: Opérateur
 composants: [serveur, web, ci]
@@ -61,3 +61,7 @@ Hypothèses :
 - [x] La page note l'agenda du matin, et le retrouve prérempli.
 - [x] Le relevé du jour prend les heures de l'agenda et le coucher souhaité du réglage, et demande l'agenda s'il manque.
 - [x] `agenda/` est dans les chemins surveillés par l'intégration et la livraison du serveur.
+
+## Validation
+
+Le 2026-11-11, l'opérateur valide : « Tu peu les valider. »
