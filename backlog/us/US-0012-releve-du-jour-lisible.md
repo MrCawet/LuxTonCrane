@@ -2,7 +2,7 @@
 id: US-0012
 type: us
 titre: Le relevé du jour se lit d'un coup d'œil
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-11
 maj_le: 2026-11-11
@@ -48,8 +48,8 @@ moment de la journée reste à découper dans l'épique.
 
 ## Critères d'acceptation
 
-- [ ] Chaque fenêtre du relevé est une carte, son titre se lit séparé de ses lignes.
-- [ ] Chaque objectif du relevé se lit sur sa ligne, tenu en vert, non tenu en rouge.
-- [ ] Le relevé dit toujours tout ce qu'il disait : notes de l'agenda, quantité de sommeil, temps au-dessus des
+- [x] Chaque fenêtre du relevé est une carte, son titre se lit séparé de ses lignes.
+- [x] Chaque objectif du relevé se lit sur sa ligne, tenu en vert, non tenu en rouge.
+- [x] Le relevé dit toujours tout ce qu'il disait : notes de l'agenda, quantité de sommeil, temps au-dessus des
   seuils, valeur la plus haute, couverture.
 - [ ] L'opérateur juge le relevé confortable à lire, sur le téléphone et sur l'ordinateur.

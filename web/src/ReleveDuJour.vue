@@ -48,9 +48,22 @@ interface RelevéDuJour {
   fatigue: Note | null
 }
 
+/** `nom` dit ce qui est visé : « objectif », ou « objectif de plus de 7 h ». */
+interface Objectif {
+  nom: string
+  tenu: boolean
+}
+
+/** Une ligne du relevé : ce qu'on mesure, sa valeur, et l'objectif qui la juge s'il y en a un. */
+interface Ligne {
+  libellé: string
+  valeur: string
+  objectif?: Objectif
+}
+
 interface Fenêtre {
   titre: string
-  lignes: string[]
+  lignes: Ligne[]
 }
 
 interface NuitJson {
@@ -131,8 +144,8 @@ function pourcentage(part: number): string {
   return `${Math.round(part * 100)} %`
 }
 
-function ouiOuNon(tenu: boolean): string {
-  return tenu ? 'oui' : 'non'
+function étiquetteDe(objectif: Objectif): string {
+  return objectif.tenu ? `${objectif.nom} tenu` : `${objectif.nom} non tenu`
 }
 
 /** Le titre du niveau noté, tel que l'échelle l'écrit. */
@@ -141,23 +154,29 @@ function titreDuNiveau(échelle: Niveau[], nom: string): string {
   return niveau === undefined ? nom : niveau.titre
 }
 
-function ligneDeLaNote(titre: string, échelle: Niveau[], note: Note): string {
-  return `${titre} : ${titreDuNiveau(échelle, note.niveau)}, objectif tenu : ${ouiOuNon(note.objectif_tenu)}`
+function ligneDeLaNote(libellé: string, échelle: Niveau[], note: Note): Ligne {
+  return {
+    libellé,
+    valeur: titreDuNiveau(échelle, note.niveau),
+    objectif: { nom: 'objectif', tenu: note.objectif_tenu },
+  }
 }
 
-function lignesDeLaLumièreÀÉviter(lumière: LumièreÀÉviter, seuil: string): string[] {
+function lignesDeLaLumièreÀÉviter(lumière: LumièreÀÉviter, seuil: string): Ligne[] {
   const valeur = lumière.valeur_la_plus_haute_lux
   return [
-    `Au-dessus de ${seuil} : ${minutes(lumière.temps_au_dessus_du_seuil_ms)}`,
-    `Valeur la plus haute : ${valeur === null ? 'rien de mesuré' : `${valeur} lx`}`,
-    `Objectif tenu : ${ouiOuNon(lumière.objectif_tenu)}`,
-    `Couverture : ${pourcentage(lumière.couverture)}`,
+    {
+      libellé: `Au-dessus de ${seuil}`,
+      valeur: minutes(lumière.temps_au_dessus_du_seuil_ms),
+      objectif: { nom: 'objectif', tenu: lumière.objectif_tenu },
+    },
+    { libellé: 'Valeur la plus haute', valeur: valeur === null ? 'rien de mesuré' : `${valeur} lx` },
+    { libellé: 'Couverture', valeur: pourcentage(lumière.couverture) },
   ]
 }
 
 onMounted(chargerLeRéglage)
 
-// Les textes sont ceux qu'avait l'accueil Android.
 const fenêtres = computed<Fenêtre[]>(() => {
   if (relevé.value === null) {
     return []
@@ -174,7 +193,11 @@ const fenêtres = computed<Fenêtre[]>(() => {
       lignes: [
         ligneDeLaNote('Endormissement', ENDORMISSEMENT, relevé.value.endormissement),
         ligneDeLaNote('Continuité de la nuit', CONTINUITÉ, relevé.value.continuite),
-        `Quantité de sommeil : ${heuresEtMinutes(quantité.duree_ms)}, objectif de plus de 7 h tenu : ${ouiOuNon(quantité.objectif_tenu)}`,
+        {
+          libellé: 'Quantité de sommeil',
+          valeur: heuresEtMinutes(quantité.duree_ms),
+          objectif: { nom: 'objectif de plus de 7 h', tenu: quantité.objectif_tenu },
+        },
       ],
     },
     {
@@ -189,24 +212,30 @@ const fenêtres = computed<Fenêtre[]>(() => {
       titre: 'Fatigue, le soir suivant',
       lignes: [
         fatigue === null
-          ? 'Fatigue de la journée : pas encore notée'
+          ? { libellé: 'Fatigue de la journée', valeur: 'pas encore notée' }
           : ligneDeLaNote('Fatigue de la journée', FATIGUE, fatigue),
       ],
     },
     {
       titre: 'Matin, 2 h après le lever',
       lignes: [
-        `À 10 000 lx ou plus : ${minutes(matin.temps_a_10_000_lx_ou_plus_ms)}`,
-        `Objectif tenu : ${ouiOuNon(matin.objectif_tenu)}`,
-        `Couverture : ${pourcentage(matin.couverture)}`,
+        {
+          libellé: 'À 10 000 lx ou plus',
+          valeur: minutes(matin.temps_a_10_000_lx_ou_plus_ms),
+          objectif: { nom: 'objectif', tenu: matin.objectif_tenu },
+        },
+        { libellé: 'Couverture', valeur: pourcentage(matin.couverture) },
       ],
     },
     {
       titre: 'Journée, du lever à 3 h avant le coucher souhaité',
       lignes: [
-        `Temps mesuré à 250 lx ou plus : ${partÀ250Lx === null ? 'rien de mesuré' : pourcentage(partÀ250Lx)}`,
-        `Objectif tenu : ${ouiOuNon(journée.objectif_tenu)}`,
-        `Couverture : ${pourcentage(journée.couverture)}`,
+        {
+          libellé: 'Temps mesuré à 250 lx ou plus',
+          valeur: partÀ250Lx === null ? 'rien de mesuré' : pourcentage(partÀ250Lx),
+          objectif: { nom: 'objectif', tenu: journée.objectif_tenu },
+        },
+        { libellé: 'Couverture', valeur: pourcentage(journée.couverture) },
       ],
     },
   ]
@@ -238,9 +267,25 @@ const fenêtres = computed<Fenêtre[]>(() => {
 
     <p v-if="erreur !== null" class="text-dracula-red">{{ erreur }}</p>
 
-    <article v-for="fenêtre in fenêtres" :key="fenêtre.titre" class="flex flex-col gap-1">
-      <h3 class="font-semibold">{{ fenêtre.titre }}</h3>
-      <p v-for="ligne in fenêtre.lignes" :key="ligne">{{ ligne }}</p>
+    <article
+      v-for="fenêtre in fenêtres"
+      :key="fenêtre.titre"
+      class="flex flex-col gap-3 rounded-xl border-2 border-dracula-comment p-4"
+    >
+      <h3 class="font-semibold text-dracula-purple">{{ fenêtre.titre }}</h3>
+      <dl class="flex flex-col gap-3">
+        <div v-for="ligne in fenêtre.lignes" :key="ligne.libellé" class="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <dt class="w-full text-base text-dracula-foreground/80">{{ ligne.libellé }}</dt>
+          <dd class="font-semibold">{{ ligne.valeur }}</dd>
+          <dd
+            v-if="ligne.objectif !== undefined"
+            class="rounded-full border px-3 text-base"
+            :class="ligne.objectif.tenu ? 'border-dracula-green text-dracula-green' : 'border-dracula-red text-dracula-red'"
+          >
+            {{ étiquetteDe(ligne.objectif) }}
+          </dd>
+        </div>
+      </dl>
     </article>
   </section>
 </template>
