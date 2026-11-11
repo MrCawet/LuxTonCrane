@@ -4,7 +4,7 @@ type: epique
 titre: Le rapport sur le web
 statut: en_cours
 cree_le: 2026-11-06
-maj_le: 2026-11-09
+maj_le: 2026-11-11
 source: REQ-0001
 emetteur: Opérateur
 composants: [android, pont, releve, serveur, web]
@@ -33,11 +33,11 @@ capteurs et l'enregistrement des données, synchronisées régulièrement sur le
 - [ANO-0001](../anomalies/ANO-0001-jeton-refuse-sans-que-l-accueil-le-dise.md) : le jeton est refusé sans que
   l'accueil le dise. Terminée.
 - [US-0004](../us/US-0004-agenda-du-matin-sur-le-web.md) : l'agenda du matin se remplit sur la page web, et le
-  relevé prend ses heures. À valider.
-- [US-0005](../us/US-0005-fatigue-du-soir-sur-le-web.md) : la fatigue de la journée se note le soir sur la page web. À valider.
-- [US-0006](../us/US-0006-rappels-de-l-agenda.md) : le téléphone rappelle l'agenda le matin et vers 21 h. À valider.
+  relevé prend ses heures. Terminée.
+- [US-0005](../us/US-0005-fatigue-du-soir-sur-le-web.md) : la fatigue de la journée se note le soir sur la page web. Terminée.
+- [US-0006](../us/US-0006-rappels-de-l-agenda.md) : le téléphone rappelle l'agenda le matin et vers 21 h. Terminée.
 - [US-0007](../us/US-0007-agenda-dans-le-releve.md) : le relevé du jour montre les notes de l'agenda et la quantité
-  de sommeil. À valider.
+  de sommeil. Terminée.
 - [ANO-0002](../anomalies/ANO-0002-agenda-du-matin-ne-part-pas.md) : l'agenda du matin ne part pas quand une
   heure n'est pas un quart d'heure. À valider.
 

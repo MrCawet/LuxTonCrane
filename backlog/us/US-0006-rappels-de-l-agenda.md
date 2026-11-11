@@ -2,10 +2,10 @@
 id: US-0006
 type: us
 titre: Le téléphone rappelle l'agenda le matin et vers 21 h
-statut: a_valider
+statut: termine
 priorite: confort
 cree_le: 2026-11-08
-maj_le: 2026-11-08
+maj_le: 2026-11-11
 source: REQ-0001
 emetteur: Opérateur
 composants: [android]
@@ -48,9 +48,14 @@ Hypothèse : le rappel du matin sonne à 8 h, celui du soir à 21 h, à heure fi
 
 Dire aussi si l'heure fixe de 8 h convient (hypothèse de l'agent), ou s'il vaut mieux une autre heure.
 
+Le 2026-11-11, l'opérateur valide : « Tu peu les valider. »
+
 ## Questions ouvertes
 
 - À quelle heure le matin : une heure fixe, ou au premier déverrouillage après le lever ?
   - Réponse provisoire de l'agent (2026-11-08), à faire valider par l'opérateur : une heure fixe, 8 h. Depuis
     Android 8, le déverrouillage (`ACTION_USER_PRESENT`) n'est plus annoncé à une application qui ne tourne pas ; il
     faudrait le guetter depuis un service de premier plan permanent.
+    ```
+    Tu peu les valider.
+    ```

@@ -2,10 +2,10 @@
 id: US-0007
 type: us
 titre: Le relevé du jour montre les notes de l'agenda et la quantité de sommeil
-statut: a_valider
+statut: termine
 priorite: essentiel
 cree_le: 2026-11-08
-maj_le: 2026-11-08
+maj_le: 2026-11-11
 source: REQ-0001
 emetteur: Opérateur
 composants: [releve, serveur, web]
@@ -54,3 +54,5 @@ Sur https://lux-ton-crane.cawet.net, une fois la branche fusionnée et livrée :
    n'est pas gardée. La noter (par exemple « Gênante »), puis revoir le relevé : « Fatigue de la journée : Gênante,
    objectif tenu : non ».
 4. Les blocs de lumière restent les mêmes qu'avant.
+
+Le 2026-11-11, l'opérateur valide : « Tu peu les valider. »
