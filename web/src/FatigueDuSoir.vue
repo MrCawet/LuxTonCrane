@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import ChoixDuNiveau from './ChoixDuNiveau.vue'
 import { FATIGUE } from './echellesDuSommeil'
 import { jourLocal } from './heuresDuReleve'
 
@@ -40,17 +41,11 @@ onMounted(chargerLaFatigue)
 </script>
 
 <template>
-  <section class="flex flex-col gap-4">
-    <h2 class="text-xl font-semibold">Fatigue du soir</h2>
-    <form class="flex flex-col gap-4" @submit.prevent="garderLaFatigue">
-      <fieldset class="flex flex-col gap-2">
-        <legend class="mb-1 font-semibold">Fatigue de la journée</legend>
-        <label v-for="niveau in FATIGUE" :key="niveau.nom" class="flex items-start gap-2">
-          <input v-model="fatigue" type="radio" name="fatigue" :value="niveau.nom" class="mt-1" />
-          <span><strong>{{ niveau.titre }}</strong> : {{ niveau.cequiSestPassé }}</span>
-        </label>
-      </fieldset>
-      <button type="submit" class="rounded bg-gray-900 p-2 text-white">Garder la fatigue</button>
+  <section class="flex flex-col gap-5 rounded-2xl bg-white p-5 shadow-sm">
+    <h2 class="text-2xl font-semibold">Fatigue du soir</h2>
+    <form class="flex flex-col gap-6" @submit.prevent="garderLaFatigue">
+      <ChoixDuNiveau v-model="fatigue" nom="fatigue" titre="Fatigue de la journée" :niveaux="FATIGUE" />
+      <button type="submit" class="rounded-lg bg-gray-900 p-3 font-semibold text-white">Garder la fatigue</button>
       <p v-if="message !== null">{{ message }}</p>
     </form>
   </section>

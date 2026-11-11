@@ -2,7 +2,7 @@
 id: US-0009
 type: us
 titre: La saisie de l'agenda se lit confortablement
-statut: pret
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-09
 maj_le: 2026-11-11
@@ -51,10 +51,10 @@ l'épique, après la revue de ce ticket.
 
 ## Critères d'acceptation
 
-- [ ] Sur le téléphone, chaque niveau de l'agenda du matin et de la fatigue du soir se choisit en touchant sa carte
+- [x] Sur le téléphone, chaque niveau de l'agenda du matin et de la fatigue du soir se choisit en touchant sa carte
   entière, et le choix se voit.
-- [ ] Le titre d'un niveau se lit séparé de sa description.
-- [ ] Sur l'ordinateur, la saisie de l'agenda est aussi confortable à lire que sur le téléphone.
+- [x] Le titre d'un niveau se lit séparé de sa description.
+- [x] Sur l'ordinateur, la saisie de l'agenda est aussi confortable à lire que sur le téléphone.
 - [ ] L'opérateur juge la saisie de l'agenda confortable à lire.
 
 ## Questions ouvertes
