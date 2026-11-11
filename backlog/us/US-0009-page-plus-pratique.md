@@ -9,7 +9,7 @@ maj_le: 2026-11-11
 source: REQ-0002
 emetteur: Opérateur
 composants: [web]
-tickets_lies: [REQ-0002, EP-0002]
+tickets_lies: [REQ-0002, EP-0002, US-0011]
 objectif: aucun
 niveau: 1
 epique: EP-0002

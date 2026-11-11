@@ -2,7 +2,7 @@
 id: EP-0002
 type: epique
 titre: La direction artistique et l'expérience utilisateur de la page web
-statut: nouveau
+statut: en_cours
 cree_le: 2026-11-11
 maj_le: 2026-11-11
 source: REQ-0002
@@ -10,7 +10,7 @@ emetteur: Opérateur
 composants: [web]
 tickets_lies: [REQ-0002]
 objectif: aucun
-tickets: [US-0009]
+tickets: [US-0009, US-0011]
 ---
 
 ## Provenance
@@ -27,10 +27,9 @@ commençant par la lisibilité.
 ## Tickets
 
 - [US-0009](../us/US-0009-page-plus-pratique.md) : la saisie de l'agenda se lit confortablement.
+- [US-0011](../us/US-0011-page-au-theme-dracula.md) : la page web prend le thème Dracula.
 
 ## À découper
 
-- Deuxième tranche, l'allure générale : la page reprend le thème [Dracula](https://draculatheme.com/?platforms=linux)
-  (choix de l'opérateur, 2026-11-11). Attend la revue de US-0009.
-- Lisibilité du relevé du jour : attend la revue de US-0009.
-- Ordre des blocs selon le moment de la journée : attend la revue de US-0009.
+- Lisibilité du relevé du jour : attend la revue de US-0009 et US-0011.
+- Ordre des blocs selon le moment de la journée : attend la revue de US-0009 et US-0011.
