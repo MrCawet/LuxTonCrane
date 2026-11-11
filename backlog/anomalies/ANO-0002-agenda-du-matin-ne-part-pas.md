@@ -2,10 +2,10 @@
 id: ANO-0002
 type: anomalie
 titre: L'agenda du matin ne part pas quand une heure n'est pas un quart d'heure
-statut: a_valider
+statut: termine
 priorite: essentiel
 cree_le: 2026-11-09
-maj_le: 2026-11-09
+maj_le: 2026-11-11
 source: interne
 emetteur: Opérateur
 composants: [web]
@@ -54,3 +54,5 @@ jour reprend ces heures.
 
 Puis vider le champ « Lever » sans choisir de continuité et appuyer de nouveau : la page liste en rouge « Choisis un
 niveau pour la continuité de la nuit. » et « Indique l'heure du lever. », et rien n'est gardé.
+
+Le 2026-11-11, l'opérateur valide : « Valide aussi l'anomalie ».
