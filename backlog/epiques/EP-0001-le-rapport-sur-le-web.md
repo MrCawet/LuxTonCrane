@@ -2,7 +2,7 @@
 id: EP-0001
 type: epique
 titre: Le rapport sur le web
-statut: en_cours
+statut: termine
 cree_le: 2026-11-06
 maj_le: 2026-11-11
 source: REQ-0001
@@ -39,7 +39,7 @@ capteurs et l'enregistrement des données, synchronisées régulièrement sur le
 - [US-0007](../us/US-0007-agenda-dans-le-releve.md) : le relevé du jour montre les notes de l'agenda et la quantité
   de sommeil. Terminée.
 - [ANO-0002](../anomalies/ANO-0002-agenda-du-matin-ne-part-pas.md) : l'agenda du matin ne part pas quand une
-  heure n'est pas un quart d'heure. À valider.
+  heure n'est pas un quart d'heure. Terminée.
 
 ## À découper
 
