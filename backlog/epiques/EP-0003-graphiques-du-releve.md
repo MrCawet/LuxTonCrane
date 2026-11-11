@@ -2,7 +2,7 @@
 id: EP-0003
 type: epique
 titre: Des petits graphiques dans le relevé du jour
-statut: nouveau
+statut: en_cours
 cree_le: 2026-11-11
 maj_le: 2026-11-11
 source: interne
@@ -10,7 +10,7 @@ emetteur: Opérateur
 composants: [serveur, web]
 tickets_lies: [US-0012]
 objectif: aucun
-tickets: [US-0013]
+tickets: [US-0013, US-0014, US-0015]
 ---
 
 ## Provenance
@@ -29,10 +29,10 @@ résument.
 ## Tickets
 
 - [US-0013](../us/US-0013-courbe-de-chaque-fenetre.md) : chaque fenêtre de lumière montre sa courbe.
+- [US-0014](../us/US-0014-tendance-de-la-lumiere.md) : chaque fenêtre de lumière montre sa tendance des derniers jours.
+- [US-0015](../us/US-0015-tendance-du-sommeil-et-de-la-fatigue.md) : le sommeil et la fatigue montrent leur tendance
+  des derniers jours.
 
 ## À découper
 
-- Tendance de la lumière : pour chaque fenêtre, le chiffre principal des 7 derniers jours en petites barres. Attend
-  la revue de US-0013.
-- Tendance du sommeil et de la fatigue : les notes et la quantité de sommeil des 7 derniers jours. Attend la revue
-  de US-0013.
+Rien pour l'instant. L'opérateur a demandé le 2026-11-11 d'enchaîner les trois tranches sans revue entre elles.

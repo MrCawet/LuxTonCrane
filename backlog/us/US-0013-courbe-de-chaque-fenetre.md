@@ -9,7 +9,7 @@ maj_le: 2026-11-11
 source: interne
 emetteur: Opérateur
 composants: [serveur, web]
-tickets_lies: [EP-0003, US-0012]
+tickets_lies: [EP-0003, US-0012, US-0014]
 objectif: aucun
 niveau: 1
 epique: EP-0003
