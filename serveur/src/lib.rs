@@ -14,6 +14,9 @@ use releve::{
 };
 use serde::{Deserialize, Serialize};
 
+/// Les jours de la tendance : une semaine.
+const NOMBRE_DE_NUITS_DE_LA_TENDANCE: u32 = 7;
+
 pub enum Méthode {
     Get,
     Post,
@@ -147,6 +150,14 @@ struct RelevéDuJourJson {
     fatigue: Option<NoteJson>,
 }
 
+/// Un relevé parmi ceux des dernières nuits, avec le jour de son lever.
+#[derive(Serialize)]
+struct RelevéDatéJson<'a> {
+    jour: &'a str,
+    #[serde(flatten)]
+    relevé: RelevéDuJourJson,
+}
+
 impl From<LumièreÀÉviter> for LumièreÀÉviterJson {
     fn from(lumière: LumièreÀÉviter) -> LumièreÀÉviterJson {
         LumièreÀÉviterJson {
@@ -228,6 +239,18 @@ fn paramètre<'a>(paramètres: &'a str, nom: &str) -> Option<&'a str> {
         }
         Some(valeur)
     })
+}
+
+/// Le jour (`AAAA-MM-JJ`) et le coucher souhaité d'une demande de relevé, s'ils sont lisibles.
+fn jour_et_coucher_souhaité(paramètres: &str) -> Option<(&str, i64)> {
+    let jour = paramètre(paramètres, "jour")?;
+    let coucher_souhaité_ms = paramètre(paramètres, "coucher_souhaite_ms")?
+        .parse::<i64>()
+        .ok()?;
+    if !jour_lisible(jour) {
+        return None;
+    }
+    Some((jour, coucher_souhaité_ms))
 }
 
 /// Une nuit de l'agenda, telle que la page web l'envoie ; le jour est dans le chemin.
@@ -353,15 +376,9 @@ impl Serveur {
     /// Le relevé de la nuit qui finit le `jour` demandé : ses heures viennent de l'agenda, la fin de la journée du
     /// coucher souhaité.
     fn relevé(&self, paramètres: &str) -> Réponse {
-        let jour = paramètre(paramètres, "jour");
-        let coucher_souhaité_ms = paramètre(paramètres, "coucher_souhaite_ms")
-            .and_then(|valeur| valeur.parse::<i64>().ok());
-        let (Some(jour), Some(coucher_souhaité_ms)) = (jour, coucher_souhaité_ms) else {
+        let Some((jour, coucher_souhaité_ms)) = jour_et_coucher_souhaité(paramètres) else {
             return Réponse::vide(400);
         };
-        if !jour_lisible(jour) {
-            return Réponse::vide(400);
-        }
         let nuit = match self.agenda.nuit(jour) {
             Ok(Some(nuit)) => nuit,
             Ok(None) => return Réponse::vide(404),
@@ -381,6 +398,40 @@ impl Serveur {
         };
         let relevé = relevé_du_jour(&heures, &historique);
         en_json(&RelevéDuJourJson::new(relevé, &nuit, fatigue))
+    }
+
+    /// Les relevés des dernières nuits notées, jusqu'au `jour` : chacun finit au coucher noté le lendemain.
+    fn relevés(&self, paramètres: &str) -> Réponse {
+        let Some((jour, coucher_souhaité_ms)) = jour_et_coucher_souhaité(paramètres) else {
+            return Réponse::vide(400);
+        };
+        let Ok(nuits) = self
+            .agenda
+            .dernières_nuits(jour, NOMBRE_DE_NUITS_DE_LA_TENDANCE)
+        else {
+            return Réponse::vide(500);
+        };
+        let Ok(historique) = self.journal.historique() else {
+            return Réponse::vide(500);
+        };
+        let mut relevés = Vec::new();
+        for (position, nuit) in nuits.iter().enumerate() {
+            let Ok(fatigue) = self.agenda.fatigue(&nuit.jour) else {
+                return Réponse::vide(500);
+            };
+            let nuit_suivante = nuits.get(position + 1);
+            let heures = HeuresDuCoucherEtDuLever {
+                coucher_ms: nuit.coucher_ms,
+                lever_ms: nuit.lever_ms,
+                coucher_suivant_ms: nuit.coucher_suivant_ms(nuit_suivante, coucher_souhaité_ms),
+            };
+            let relevé = relevé_du_jour(&heures, &historique);
+            relevés.push(RelevéDatéJson {
+                jour: &nuit.jour,
+                relevé: RelevéDuJourJson::new(relevé, nuit, fatigue),
+            });
+        }
+        en_json(&relevés)
     }
 
     fn nuit(&self, jour: &str) -> Réponse {
@@ -529,6 +580,7 @@ impl Serveur {
             (Méthode::Get, "/api/mesures") => self.résumé(),
             (Méthode::Post, "/api/mesures") => self.réception(requête.corps),
             (Méthode::Get, "/api/releve") => self.relevé(paramètres),
+            (Méthode::Get, "/api/releves") => self.relevés(paramètres),
             (Méthode::Get, "/api/reglages") => self.réglages(),
             (Méthode::Post, "/api/reglages") => self.régler(requête.corps),
             _ => Réponse::vide(404),
