@@ -254,3 +254,84 @@ fn une_mesure_prise_téléphone_couvert_compte_comme_non_mesurée() {
     assert_eq!(relevé.lumière_du_soir.temps_au_dessus_du_seuil_ms, 0);
     assert_eq!(relevé.lumière_du_soir.couverture, couverture_attendue);
 }
+
+#[test]
+fn une_fenêtre_donne_ses_bornes_et_ses_périodes_mesurées_avec_un_trou_pour_le_temps_non_mesuré() {
+    let historique = vec![
+        mesure(50.0, COUCHER_MS - 60 * MINUTE_MS),
+        mesure(5.0, COUCHER_MS - 55 * MINUTE_MS),
+        mesure(8.0, COUCHER_MS - 30 * MINUTE_MS),
+    ];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    let soir = relevé.lumière_du_soir;
+    assert_eq!(soir.fenêtre.début_ms, COUCHER_MS - 3 * HEURE_MS);
+    assert_eq!(soir.fenêtre.fin_ms, COUCHER_MS);
+    let périodes: Vec<(i64, i64, f32)> = soir
+        .périodes_mesurées
+        .iter()
+        .map(|période| (période.début_ms, période.fin_ms, période.valeur_lux))
+        .collect();
+    assert_eq!(
+        périodes,
+        vec![
+            (
+                COUCHER_MS - 60 * MINUTE_MS,
+                COUCHER_MS - 55 * MINUTE_MS,
+                50.0
+            ),
+            (
+                COUCHER_MS - 55 * MINUTE_MS,
+                COUCHER_MS - 45 * MINUTE_MS,
+                5.0
+            ),
+            (
+                COUCHER_MS - 30 * MINUTE_MS,
+                COUCHER_MS - 20 * MINUTE_MS,
+                8.0
+            ),
+        ]
+    );
+}
+
+#[test]
+fn le_matin_la_nuit_et_la_journée_donnent_aussi_leurs_périodes_mesurées() {
+    let historique = vec![mesure(12_000.0, LEVER_MS + 5 * MINUTE_MS)];
+
+    let relevé = relevé_du_jour(&heures(), &historique);
+
+    let période_attendue = (
+        LEVER_MS + 5 * MINUTE_MS,
+        LEVER_MS + 15 * MINUTE_MS,
+        12_000.0,
+    );
+    let période_du_matin = &relevé.lumière_du_matin.périodes_mesurées[0];
+    let période_de_la_journée = &relevé.lumière_de_la_journée.périodes_mesurées[0];
+    assert_eq!(
+        (
+            période_du_matin.début_ms,
+            période_du_matin.fin_ms,
+            période_du_matin.valeur_lux
+        ),
+        période_attendue
+    );
+    assert_eq!(
+        (
+            période_de_la_journée.début_ms,
+            période_de_la_journée.fin_ms,
+            période_de_la_journée.valeur_lux
+        ),
+        période_attendue
+    );
+    assert!(relevé.lumière_de_la_nuit.périodes_mesurées.is_empty());
+    assert_eq!(relevé.lumière_de_la_nuit.fenêtre.fin_ms, LEVER_MS);
+    assert_eq!(
+        relevé.lumière_du_matin.fenêtre.fin_ms,
+        LEVER_MS + 2 * HEURE_MS
+    );
+    assert_eq!(
+        relevé.lumière_de_la_journée.fenêtre.fin_ms,
+        COUCHER_SUIVANT_MS - 3 * HEURE_MS
+    );
+}
