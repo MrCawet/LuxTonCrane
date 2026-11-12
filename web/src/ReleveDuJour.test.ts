@@ -138,6 +138,8 @@ test('le coucher souhaité se retrouve et se règle', async () => {
   await flushPromises()
 
   expect(serveur.réglages.coucher_souhaite).toBe('23:45')
+  expect(page.find('button[name="regler"]').text()).toBe('Enregistrer')
+  expect(page.text()).toContain('Coucher souhaité enregistré.')
 })
 
 test("un coucher souhaité vide n'est pas envoyé, et la page le dit", async () => {

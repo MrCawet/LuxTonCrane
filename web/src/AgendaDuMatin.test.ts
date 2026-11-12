@@ -35,7 +35,8 @@ test("la page note l'agenda de la nuit qui finit ce matin", async () => {
     coucher_ms: COUCHER_MS,
     lever_ms: LEVER_MS,
   })
-  expect(page.text()).toContain('Agenda gardé.')
+  expect(page.find('button[type="submit"]').text()).toBe('Enregistrer')
+  expect(page.text()).toContain('Agenda enregistré.')
 })
 
 test('une nuit déjà notée se retrouve préremplie', async () => {

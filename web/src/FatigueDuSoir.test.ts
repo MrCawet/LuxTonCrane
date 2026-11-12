@@ -23,7 +23,8 @@ test("la page note la fatigue d'aujourd'hui", async () => {
   await flushPromises()
 
   expect(serveur.journées.get('2026-11-08')).toEqual({ jour: '2026-11-08', fatigue: 'genante' })
-  expect(page.text()).toContain('Fatigue gardée.')
+  expect(page.find('button[type="submit"]').text()).toBe('Enregistrer')
+  expect(page.text()).toContain('Fatigue enregistrée.')
 })
 
 test('une fatigue déjà notée se retrouve préremplie', async () => {
