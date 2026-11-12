@@ -4,13 +4,13 @@ type: epique
 titre: La direction artistique et l'expérience utilisateur de la page web
 statut: en_cours
 cree_le: 2026-11-11
-maj_le: 2026-11-11
+maj_le: 2026-11-12
 source: REQ-0002
 emetteur: Opérateur
 composants: [web]
 tickets_lies: [REQ-0002]
 objectif: aucun
-tickets: [US-0009, US-0011, US-0012]
+tickets: [US-0009, US-0011, US-0012, US-0016]
 ---
 
 ## Provenance
@@ -29,6 +29,7 @@ commençant par la lisibilité.
 - [US-0009](../us/US-0009-page-plus-pratique.md) : la saisie de l'agenda se lit confortablement.
 - [US-0011](../us/US-0011-page-au-theme-dracula.md) : la page web prend le thème Dracula.
 - [US-0012](../us/US-0012-releve-du-jour-lisible.md) : le relevé du jour se lit d'un coup d'œil.
+- [US-0016](../us/US-0016-saisie-plus-pratique.md) : les heures se saisissent à la roue, et une saisie enregistrée se lit.
 
 ## À découper
 
