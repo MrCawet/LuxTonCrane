@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import ChoixDuNiveau from './ChoixDuNiveau.vue'
 import RoueDeLHeure from './RoueDeLHeure.vue'
 import { CONTINUITÉ, ENDORMISSEMENT } from './echellesDuSommeil'
-import { erreursDeLAgendaDuMatin, raisonDuNavigateur } from './erreursDeSaisie'
+import { erreursDeLAgendaDuMatin } from './erreursDeSaisie'
 import { heureLocale, heuresDeLaNuit, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
@@ -30,15 +30,6 @@ const coucher = ref('23:00')
 const lever = ref('07:00')
 const message = ref<string | null>(null)
 const erreurs = ref<string[]>([])
-
-const NOMS_DES_CHAMPS: Record<string, string> = { coucher: 'Coucher', lever: 'Lever' }
-
-/** Le navigateur refuse un champ : la page en dit la raison au lieu de bloquer en silence. */
-function champRefusé(évènement: Event) {
-  const champ = évènement.target as HTMLInputElement
-  message.value = null
-  erreurs.value = [raisonDuNavigateur(NOMS_DES_CHAMPS[champ.name] ?? champ.name, champ)]
-}
 
 function entêtes(): HeadersInit {
   return { Authorization: `Bearer ${props.jeton}` }
@@ -81,7 +72,7 @@ onMounted(chargerLaNuit)
 <template>
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Agenda du matin</h2>
-    <form class="flex flex-col gap-6" @submit.prevent="enregistrerLAgenda" @invalid.capture="champRefusé">
+    <form class="flex flex-col gap-6" @submit.prevent="enregistrerLAgenda">
       <ChoixDuNiveau
         v-for="échelle in ÉCHELLES"
         :key="échelle.champ"

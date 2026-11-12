@@ -26,9 +26,3 @@ export function erreursDeLAgendaDuMatin(saisie: SaisieDeLAgendaDuMatin): string[
   }
   return erreurs
 }
-
-/** La raison pour laquelle le navigateur refuse un champ, précédée de son nom. */
-export function raisonDuNavigateur(nom: string, champ: HTMLInputElement): string {
-  const raison = champ.validationMessage === '' ? 'valeur refusée par le navigateur.' : champ.validationMessage
-  return `${nom} : ${raison}`
-}
