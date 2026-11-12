@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import ReleveDuJour from './ReleveDuJour.vue'
 import { JETON, doublureDuServeur } from './doublureDuServeur'
+import { choisirSurLaRoue, heureDeLaRoue, minutesDeLaRoue } from './roueDeLHeureDansLesTests'
 
 /** Un instant du 7 ou du 8 novembre 2026, dans le fuseau des tests. */
 function instantMs(jour: number, heure: number, minute: number): number {
@@ -130,10 +131,9 @@ test('le coucher souhaité se retrouve et se règle', async () => {
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
   await flushPromises()
-  const champ = page.find('input[name="coucher_souhaite"]')
-  expect((champ.element as HTMLInputElement).value).toBe('22:30')
+  expect(heureDeLaRoue(page, 'Coucher souhaité')).toBe('22:30')
 
-  await champ.setValue('23:45')
+  await choisirSurLaRoue(page, 'Coucher souhaité', '23:45')
   await page.find('button[name="regler"]').trigger('click')
   await flushPromises()
 
@@ -142,18 +142,13 @@ test('le coucher souhaité se retrouve et se règle', async () => {
   expect(page.text()).toContain('Coucher souhaité enregistré.')
 })
 
-test("un coucher souhaité vide n'est pas envoyé, et la page le dit", async () => {
-  const serveur = doublureDuServeur(RELEVÉ)
-  serveur.réglages.coucher_souhaite = '22:30'
+test('le coucher souhaité se choisit au quart d\'heure', async () => {
+  doublureDuServeur(RELEVÉ)
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
   await flushPromises()
-  await page.find('input[name="coucher_souhaite"]').setValue('')
-  await page.find('button[name="regler"]').trigger('click')
-  await flushPromises()
 
-  expect(serveur.réglages.coucher_souhaite).toBe('22:30')
-  expect(page.text()).toContain("Indique l'heure du coucher souhaité.")
+  expect(minutesDeLaRoue(page, 'Coucher souhaité')).toEqual(['00', '15', '30', '45'])
 })
 
 test("la page affiche les quatre fenêtres du relevé, l'objectif sur la ligne qu'il juge", async () => {
