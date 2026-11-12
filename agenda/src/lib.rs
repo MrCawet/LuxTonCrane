@@ -9,6 +9,7 @@ use rusqlite::{Connection, OptionalExtension, params};
 const COUCHER_SOUHAITÉ_PAR_DÉFAUT: &str = "23:00";
 
 const HEURE_MS: i64 = 60 * 60 * 1000;
+const JOUR_MS: i64 = 24 * HEURE_MS;
 
 /// D'après le consensus AASM et SRS (2015) pour les adultes : à ajuster selon la fatigue de la journée.
 const OBJECTIF_DE_QUANTITÉ_DE_SOMMEIL_MS: i64 = 7 * HEURE_MS;
@@ -151,8 +152,26 @@ impl Fatigue {
     }
 }
 
-/// La quantité de sommeil d'une nuit, tirée des heures du coucher et du lever.
+/// Le coucher qui suit le lever d'une nuit, et la quantité de sommeil, tirée des heures du coucher et du lever.
 impl Nuit {
+    /// Le coucher de `nuit_suivante` s'il tombe dans les 24 h après ce lever : la nuit notée le lendemain.
+    /// Sinon, l'heure du coucher souhaitée le même soir : `coucher_souhaité_ms` décalé de jours entiers.
+    pub fn coucher_suivant_ms(
+        &self,
+        nuit_suivante: Option<&Nuit>,
+        coucher_souhaité_ms: i64,
+    ) -> i64 {
+        if let Some(nuit_suivante) = nuit_suivante {
+            let écart_ms = nuit_suivante.coucher_ms - self.lever_ms;
+            if écart_ms > 0 && écart_ms <= JOUR_MS {
+                return nuit_suivante.coucher_ms;
+            }
+        }
+        let écart_ms = coucher_souhaité_ms - self.lever_ms;
+        let jours_de_trop = (écart_ms - 1).div_euclid(JOUR_MS);
+        coucher_souhaité_ms - jours_de_trop * JOUR_MS
+    }
+
     pub fn quantité_de_sommeil(&self) -> QuantitéDeSommeil {
         let durée_ms = self.lever_ms - self.coucher_ms;
         QuantitéDeSommeil {
@@ -160,6 +179,39 @@ impl Nuit {
             objectif_tenu: durée_ms > OBJECTIF_DE_QUANTITÉ_DE_SOMMEIL_MS,
         }
     }
+}
+
+/// Une ligne de la table `nuit`, telle que SQLite la rend.
+struct NightRow {
+    jour: String,
+    endormissement: String,
+    continuité: String,
+    coucher_ms: i64,
+    lever_ms: i64,
+}
+
+fn read_row(row: &rusqlite::Row) -> rusqlite::Result<NightRow> {
+    Ok(NightRow {
+        jour: row.get(0)?,
+        endormissement: row.get(1)?,
+        continuité: row.get(2)?,
+        coucher_ms: row.get(3)?,
+        lever_ms: row.get(4)?,
+    })
+}
+
+fn nuit_de_la_ligne(ligne: NightRow) -> rusqlite::Result<Nuit> {
+    let endormissement = Endormissement::depuis_le_nom(&ligne.endormissement)
+        .ok_or_else(|| niveau_illisible(&ligne.endormissement))?;
+    let continuité = Continuité::depuis_le_nom(&ligne.continuité)
+        .ok_or_else(|| niveau_illisible(&ligne.continuité))?;
+    Ok(Nuit {
+        jour: ligne.jour,
+        endormissement,
+        continuité,
+        coucher_ms: ligne.coucher_ms,
+        lever_ms: ligne.lever_ms,
+    })
 }
 
 fn niveau_illisible(nom: &str) -> rusqlite::Error {
@@ -212,31 +264,27 @@ impl AgendaSqlite {
         let ligne = self
             .connection
             .query_row(
-                "SELECT endormissement, continuite, coucher_ms, lever_ms FROM nuit WHERE jour = ?1",
+                "SELECT jour, endormissement, continuite, coucher_ms, lever_ms FROM nuit WHERE jour = ?1",
                 params![jour],
-                |row| {
-                    let endormissement: String = row.get(0)?;
-                    let continuité: String = row.get(1)?;
-                    let coucher_ms: i64 = row.get(2)?;
-                    let lever_ms: i64 = row.get(3)?;
-                    Ok((endormissement, continuité, coucher_ms, lever_ms))
-                },
+                read_row,
             )
             .optional()?;
-        let Some((endormissement, continuité, coucher_ms, lever_ms)) = ligne else {
-            return Ok(None);
-        };
-        let endormissement = Endormissement::depuis_le_nom(&endormissement)
-            .ok_or_else(|| niveau_illisible(&endormissement))?;
-        let continuité =
-            Continuité::depuis_le_nom(&continuité).ok_or_else(|| niveau_illisible(&continuité))?;
-        Ok(Some(Nuit {
-            jour: jour.to_string(),
-            endormissement,
-            continuité,
-            coucher_ms,
-            lever_ms,
-        }))
+        ligne.map(nuit_de_la_ligne).transpose()
+    }
+
+    /// Les `nombre` dernières nuits notées jusqu'au `jour` compris, de la plus ancienne à la plus récente.
+    pub fn dernières_nuits(&self, jour: &str, nombre: u32) -> rusqlite::Result<Vec<Nuit>> {
+        let mut statement = self.connection.prepare(
+            "SELECT jour, endormissement, continuite, coucher_ms, lever_ms FROM nuit
+             WHERE jour <= ?1 ORDER BY jour DESC LIMIT ?2",
+        )?;
+        let lignes = statement.query_map(params![jour, nombre], read_row)?;
+        let mut nuits = Vec::new();
+        for ligne in lignes {
+            nuits.push(nuit_de_la_ligne(ligne?)?);
+        }
+        nuits.reverse();
+        Ok(nuits)
     }
 }
 

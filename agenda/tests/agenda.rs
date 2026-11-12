@@ -169,3 +169,70 @@ fn la_quantité_de_sommeil_est_le_temps_au_lit_et_doit_dépasser_7_h() {
     assert_eq!(tout_juste_7_h.durée_ms, 7 * HEURE_MS);
     assert!(!tout_juste_7_h.objectif_tenu);
 }
+
+const JOUR_MS: i64 = 24 * HEURE_MS;
+
+fn nuit_levée_à(jour: &str, lever_ms: i64) -> Nuit {
+    Nuit {
+        jour: jour.to_string(),
+        endormissement: Endormissement::Calme,
+        continuité: Continuité::RéveilBref,
+        coucher_ms: lever_ms - 8 * HEURE_MS,
+        lever_ms,
+    }
+}
+
+#[test]
+fn les_dernières_nuits_notées_se_lisent_jusqu_au_jour_donné_de_la_plus_ancienne_à_la_plus_récente()
+{
+    let agenda = AgendaSqlite::open(&fresh_database_path("dernieres")).unwrap();
+    let lever_ms = 1793028800000;
+    for (position, jour) in [
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-08",
+        "2026-11-09",
+        "2026-11-10",
+    ]
+    .iter()
+    .enumerate()
+    {
+        agenda
+            .garder(&nuit_levée_à(jour, lever_ms + position as i64 * JOUR_MS))
+            .unwrap();
+    }
+
+    let nuits = agenda.dernières_nuits("2026-11-09", 3).unwrap();
+
+    let jours: Vec<&str> = nuits.iter().map(|nuit| nuit.jour.as_str()).collect();
+    assert_eq!(jours, vec!["2026-11-06", "2026-11-08", "2026-11-09"]);
+}
+
+#[test]
+fn le_coucher_suivant_est_celui_de_la_nuit_notée_le_lendemain() {
+    let lever_ms = 1793028800000;
+    let nuit = nuit_levée_à("2026-11-08", lever_ms);
+    let lendemain = nuit_levée_à("2026-11-09", lever_ms + JOUR_MS);
+    let coucher_souhaité_ms = lever_ms + 3 * JOUR_MS + 15 * HEURE_MS;
+
+    let coucher_suivant_ms = nuit.coucher_suivant_ms(Some(&lendemain), coucher_souhaité_ms);
+
+    assert_eq!(coucher_suivant_ms, lendemain.coucher_ms);
+}
+
+#[test]
+fn sans_nuit_notée_le_lendemain_le_coucher_suivant_est_le_coucher_souhaité_le_même_soir() {
+    let lever_ms = 1793028800000;
+    let nuit = nuit_levée_à("2026-11-08", lever_ms);
+    let deux_jours_plus_tard = nuit_levée_à("2026-11-10", lever_ms + 2 * JOUR_MS);
+    let coucher_souhaité_ms = lever_ms + 3 * JOUR_MS + 15 * HEURE_MS;
+
+    let coucher_suivant_ms =
+        nuit.coucher_suivant_ms(Some(&deux_jours_plus_tard), coucher_souhaité_ms);
+
+    assert_eq!(coucher_suivant_ms, lever_ms + 15 * HEURE_MS);
+    assert_eq!(
+        nuit.coucher_suivant_ms(None, coucher_souhaité_ms),
+        lever_ms + 15 * HEURE_MS
+    );
+}

@@ -37,6 +37,9 @@ pub struct LumièreÀÉviter {
     pub objectif_tenu: bool,
     /// La part de la fenêtre couverte par une mesure, de 0 à 1.
     pub couverture: f64,
+    pub fenêtre: Fenêtre,
+    /// Dans l'ordre chronologique ; le temps entre deux périodes n'est pas mesuré.
+    pub périodes_mesurées: Vec<PériodeMesurée>,
 }
 
 /// La lumière vive reçue dans les 2 h après le lever.
@@ -46,6 +49,9 @@ pub struct LumièreDuMatin {
     pub objectif_tenu: bool,
     /// La part de la fenêtre couverte par une mesure, de 0 à 1.
     pub couverture: f64,
+    pub fenêtre: Fenêtre,
+    /// Dans l'ordre chronologique ; le temps entre deux périodes n'est pas mesuré.
+    pub périodes_mesurées: Vec<PériodeMesurée>,
 }
 
 /// La lumière reçue du lever jusqu'à 3 h avant le coucher suivant.
@@ -56,6 +62,9 @@ pub struct LumièreDeLaJournée {
     pub objectif_tenu: bool,
     /// La part de la fenêtre couverte par une mesure, de 0 à 1.
     pub couverture: f64,
+    pub fenêtre: Fenêtre,
+    /// Dans l'ordre chronologique ; le temps entre deux périodes n'est pas mesuré.
+    pub périodes_mesurées: Vec<PériodeMesurée>,
 }
 
 pub struct RelevéDuJour {
@@ -65,10 +74,11 @@ pub struct RelevéDuJour {
     pub lumière_de_la_journée: LumièreDeLaJournée,
 }
 
-/// Une période de temps, du début inclus à la fin exclue.
-struct Fenêtre {
-    début_ms: i64,
-    fin_ms: i64,
+/// Une période de temps du relevé, du début inclus à la fin exclue.
+#[derive(Clone, Copy)]
+pub struct Fenêtre {
+    pub début_ms: i64,
+    pub fin_ms: i64,
 }
 
 /// Ce qu'une fenêtre dit d'une durée.
@@ -80,10 +90,18 @@ impl Fenêtre {
     }
 }
 
-/// Le temps pendant lequel une mesure vaut, à l'intérieur d'une fenêtre.
-struct PériodeMesurée {
-    valeur_lux: f32,
-    durée_ms: i64,
+/// Le temps pendant lequel une mesure valable vaut, à l'intérieur d'une fenêtre, du début inclus à la fin exclue.
+pub struct PériodeMesurée {
+    pub début_ms: i64,
+    pub fin_ms: i64,
+    pub valeur_lux: f32,
+}
+
+/// Ce que dure une période mesurée.
+impl PériodeMesurée {
+    fn durée_ms(&self) -> i64 {
+        self.fin_ms - self.début_ms
+    }
 }
 
 /// Une mesure vaut jusqu'à la suivante, pendant 10 min au plus.
@@ -103,8 +121,9 @@ fn périodes_mesurées(fenêtre: &Fenêtre, historique: &[Mesure]) -> Vec<Pério
         let fin_ms = fin_de_validité_ms.min(fenêtre.fin_ms);
         if fin_ms > début_ms {
             périodes.push(PériodeMesurée {
+                début_ms,
+                fin_ms,
                 valeur_lux: mesure.valeur_lux,
-                durée_ms: fin_ms - début_ms,
             });
         }
     }
@@ -116,14 +135,15 @@ fn lumière_à_éviter(
     seuil_lx: f32,
     historique: &[Mesure],
 ) -> LumièreÀÉviter {
+    let périodes_mesurées = périodes_mesurées(fenêtre, historique);
     let mut temps_au_dessus_du_seuil_ms = 0;
     let mut temps_mesuré_ms = 0;
     let mut valeur_la_plus_haute_lux: Option<f32> = None;
-    for période in périodes_mesurées(fenêtre, historique) {
+    for période in &périodes_mesurées {
         if période.valeur_lux > seuil_lx {
-            temps_au_dessus_du_seuil_ms += période.durée_ms;
+            temps_au_dessus_du_seuil_ms += période.durée_ms();
         }
-        temps_mesuré_ms += période.durée_ms;
+        temps_mesuré_ms += période.durée_ms();
         valeur_la_plus_haute_lux = match valeur_la_plus_haute_lux {
             Some(valeur_lux) => Some(valeur_lux.max(période.valeur_lux)),
             None => Some(période.valeur_lux),
@@ -135,34 +155,40 @@ fn lumière_à_éviter(
         valeur_la_plus_haute_lux,
         objectif_tenu,
         couverture: fenêtre.part(temps_mesuré_ms),
+        fenêtre: *fenêtre,
+        périodes_mesurées,
     }
 }
 
 fn lumière_du_matin(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDuMatin {
+    let périodes_mesurées = périodes_mesurées(fenêtre, historique);
     let mut temps_à_10_000_lx_ou_plus_ms = 0;
     let mut temps_mesuré_ms = 0;
-    for période in périodes_mesurées(fenêtre, historique) {
+    for période in &périodes_mesurées {
         if période.valeur_lux >= SEUIL_DU_MATIN_LX {
-            temps_à_10_000_lx_ou_plus_ms += période.durée_ms;
+            temps_à_10_000_lx_ou_plus_ms += période.durée_ms();
         }
-        temps_mesuré_ms += période.durée_ms;
+        temps_mesuré_ms += période.durée_ms();
     }
     let objectif_tenu = temps_à_10_000_lx_ou_plus_ms >= OBJECTIF_DU_MATIN_MS;
     LumièreDuMatin {
         temps_à_10_000_lx_ou_plus_ms,
         objectif_tenu,
         couverture: fenêtre.part(temps_mesuré_ms),
+        fenêtre: *fenêtre,
+        périodes_mesurées,
     }
 }
 
 fn lumière_de_la_journée(fenêtre: &Fenêtre, historique: &[Mesure]) -> LumièreDeLaJournée {
+    let périodes_mesurées = périodes_mesurées(fenêtre, historique);
     let mut temps_à_250_lx_ou_plus_ms = 0;
     let mut temps_mesuré_ms = 0;
-    for période in périodes_mesurées(fenêtre, historique) {
+    for période in &périodes_mesurées {
         if période.valeur_lux >= SEUIL_DE_LA_JOURNÉE_LX {
-            temps_à_250_lx_ou_plus_ms += période.durée_ms;
+            temps_à_250_lx_ou_plus_ms += période.durée_ms();
         }
-        temps_mesuré_ms += période.durée_ms;
+        temps_mesuré_ms += période.durée_ms();
     }
     let part_du_temps_mesuré_à_250_lx_ou_plus = if temps_mesuré_ms == 0 {
         None
@@ -174,6 +200,8 @@ fn lumière_de_la_journée(fenêtre: &Fenêtre, historique: &[Mesure]) -> Lumiè
         part_du_temps_mesuré_à_250_lx_ou_plus,
         objectif_tenu,
         couverture: fenêtre.part(temps_mesuré_ms),
+        fenêtre: *fenêtre,
+        périodes_mesurées,
     }
 }
 

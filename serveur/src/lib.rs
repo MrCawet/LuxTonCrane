@@ -9,10 +9,13 @@ use journal::{Journal, ajouter};
 use journal_sqlite::SqliteJournal;
 use mesure::Mesure;
 use releve::{
-    HeuresDuCoucherEtDuLever, LumièreDeLaJournée, LumièreDuMatin, LumièreÀÉviter, RelevéDuJour,
-    relevé_du_jour,
+    Fenêtre, HeuresDuCoucherEtDuLever, LumièreDeLaJournée, LumièreDuMatin, LumièreÀÉviter,
+    PériodeMesurée, RelevéDuJour, relevé_du_jour,
 };
 use serde::{Deserialize, Serialize};
+
+/// Les jours de la tendance : une semaine.
+const NOMBRE_DE_NUITS_DE_LA_TENDANCE: u32 = 7;
 
 pub enum Méthode {
     Get,
@@ -55,6 +58,42 @@ struct RésuméJson {
     derniere: Option<MesureJson>,
 }
 
+#[derive(Serialize)]
+struct FenêtreJson {
+    debut_ms: i64,
+    fin_ms: i64,
+}
+
+#[derive(Serialize)]
+struct PériodeMesuréeJson {
+    debut_ms: i64,
+    fin_ms: i64,
+    valeur_lux: f32,
+}
+
+impl From<Fenêtre> for FenêtreJson {
+    fn from(fenêtre: Fenêtre) -> FenêtreJson {
+        FenêtreJson {
+            debut_ms: fenêtre.début_ms,
+            fin_ms: fenêtre.fin_ms,
+        }
+    }
+}
+
+impl From<PériodeMesurée> for PériodeMesuréeJson {
+    fn from(période: PériodeMesurée) -> PériodeMesuréeJson {
+        PériodeMesuréeJson {
+            debut_ms: période.début_ms,
+            fin_ms: période.fin_ms,
+            valeur_lux: période.valeur_lux,
+        }
+    }
+}
+
+fn périodes_en_json(périodes: Vec<PériodeMesurée>) -> Vec<PériodeMesuréeJson> {
+    périodes.into_iter().map(PériodeMesuréeJson::from).collect()
+}
+
 /// La lumière du soir ou de la nuit, telle que la page web la reçoit.
 #[derive(Serialize)]
 struct LumièreÀÉviterJson {
@@ -62,6 +101,8 @@ struct LumièreÀÉviterJson {
     valeur_la_plus_haute_lux: Option<f32>,
     objectif_tenu: bool,
     couverture: f64,
+    fenetre: FenêtreJson,
+    periodes_mesurees: Vec<PériodeMesuréeJson>,
 }
 
 #[derive(Serialize)]
@@ -69,6 +110,8 @@ struct LumièreDuMatinJson {
     temps_a_10_000_lx_ou_plus_ms: i64,
     objectif_tenu: bool,
     couverture: f64,
+    fenetre: FenêtreJson,
+    periodes_mesurees: Vec<PériodeMesuréeJson>,
 }
 
 #[derive(Serialize)]
@@ -76,6 +119,8 @@ struct LumièreDeLaJournéeJson {
     part_du_temps_mesure_a_250_lx_ou_plus: Option<f64>,
     objectif_tenu: bool,
     couverture: f64,
+    fenetre: FenêtreJson,
+    periodes_mesurees: Vec<PériodeMesuréeJson>,
 }
 
 /// Une note de l'agenda, telle que la page web la reçoit dans le relevé.
@@ -105,6 +150,14 @@ struct RelevéDuJourJson {
     fatigue: Option<NoteJson>,
 }
 
+/// Un relevé parmi ceux des dernières nuits, avec le jour de son lever.
+#[derive(Serialize)]
+struct RelevéDatéJson<'a> {
+    jour: &'a str,
+    #[serde(flatten)]
+    relevé: RelevéDuJourJson,
+}
+
 impl From<LumièreÀÉviter> for LumièreÀÉviterJson {
     fn from(lumière: LumièreÀÉviter) -> LumièreÀÉviterJson {
         LumièreÀÉviterJson {
@@ -112,6 +165,8 @@ impl From<LumièreÀÉviter> for LumièreÀÉviterJson {
             valeur_la_plus_haute_lux: lumière.valeur_la_plus_haute_lux,
             objectif_tenu: lumière.objectif_tenu,
             couverture: lumière.couverture,
+            fenetre: FenêtreJson::from(lumière.fenêtre),
+            periodes_mesurees: périodes_en_json(lumière.périodes_mesurées),
         }
     }
 }
@@ -122,6 +177,8 @@ impl From<LumièreDuMatin> for LumièreDuMatinJson {
             temps_a_10_000_lx_ou_plus_ms: lumière.temps_à_10_000_lx_ou_plus_ms,
             objectif_tenu: lumière.objectif_tenu,
             couverture: lumière.couverture,
+            fenetre: FenêtreJson::from(lumière.fenêtre),
+            periodes_mesurees: périodes_en_json(lumière.périodes_mesurées),
         }
     }
 }
@@ -132,6 +189,8 @@ impl From<LumièreDeLaJournée> for LumièreDeLaJournéeJson {
             part_du_temps_mesure_a_250_lx_ou_plus: lumière.part_du_temps_mesuré_à_250_lx_ou_plus,
             objectif_tenu: lumière.objectif_tenu,
             couverture: lumière.couverture,
+            fenetre: FenêtreJson::from(lumière.fenêtre),
+            periodes_mesurees: périodes_en_json(lumière.périodes_mesurées),
         }
     }
 }
@@ -180,6 +239,18 @@ fn paramètre<'a>(paramètres: &'a str, nom: &str) -> Option<&'a str> {
         }
         Some(valeur)
     })
+}
+
+/// Le jour (`AAAA-MM-JJ`) et le coucher souhaité d'une demande de relevé, s'ils sont lisibles.
+fn jour_et_coucher_souhaité(paramètres: &str) -> Option<(&str, i64)> {
+    let jour = paramètre(paramètres, "jour")?;
+    let coucher_souhaité_ms = paramètre(paramètres, "coucher_souhaite_ms")?
+        .parse::<i64>()
+        .ok()?;
+    if !jour_lisible(jour) {
+        return None;
+    }
+    Some((jour, coucher_souhaité_ms))
 }
 
 /// Une nuit de l'agenda, telle que la page web l'envoie ; le jour est dans le chemin.
@@ -305,15 +376,9 @@ impl Serveur {
     /// Le relevé de la nuit qui finit le `jour` demandé : ses heures viennent de l'agenda, la fin de la journée du
     /// coucher souhaité.
     fn relevé(&self, paramètres: &str) -> Réponse {
-        let jour = paramètre(paramètres, "jour");
-        let coucher_souhaité_ms = paramètre(paramètres, "coucher_souhaite_ms")
-            .and_then(|valeur| valeur.parse::<i64>().ok());
-        let (Some(jour), Some(coucher_souhaité_ms)) = (jour, coucher_souhaité_ms) else {
+        let Some((jour, coucher_souhaité_ms)) = jour_et_coucher_souhaité(paramètres) else {
             return Réponse::vide(400);
         };
-        if !jour_lisible(jour) {
-            return Réponse::vide(400);
-        }
         let nuit = match self.agenda.nuit(jour) {
             Ok(Some(nuit)) => nuit,
             Ok(None) => return Réponse::vide(404),
@@ -333,6 +398,40 @@ impl Serveur {
         };
         let relevé = relevé_du_jour(&heures, &historique);
         en_json(&RelevéDuJourJson::new(relevé, &nuit, fatigue))
+    }
+
+    /// Les relevés des dernières nuits notées, jusqu'au `jour` : chacun finit au coucher noté le lendemain.
+    fn relevés(&self, paramètres: &str) -> Réponse {
+        let Some((jour, coucher_souhaité_ms)) = jour_et_coucher_souhaité(paramètres) else {
+            return Réponse::vide(400);
+        };
+        let Ok(nuits) = self
+            .agenda
+            .dernières_nuits(jour, NOMBRE_DE_NUITS_DE_LA_TENDANCE)
+        else {
+            return Réponse::vide(500);
+        };
+        let Ok(historique) = self.journal.historique() else {
+            return Réponse::vide(500);
+        };
+        let mut relevés = Vec::new();
+        for (position, nuit) in nuits.iter().enumerate() {
+            let Ok(fatigue) = self.agenda.fatigue(&nuit.jour) else {
+                return Réponse::vide(500);
+            };
+            let nuit_suivante = nuits.get(position + 1);
+            let heures = HeuresDuCoucherEtDuLever {
+                coucher_ms: nuit.coucher_ms,
+                lever_ms: nuit.lever_ms,
+                coucher_suivant_ms: nuit.coucher_suivant_ms(nuit_suivante, coucher_souhaité_ms),
+            };
+            let relevé = relevé_du_jour(&heures, &historique);
+            relevés.push(RelevéDatéJson {
+                jour: &nuit.jour,
+                relevé: RelevéDuJourJson::new(relevé, nuit, fatigue),
+            });
+        }
+        en_json(&relevés)
     }
 
     fn nuit(&self, jour: &str) -> Réponse {
@@ -481,6 +580,7 @@ impl Serveur {
             (Méthode::Get, "/api/mesures") => self.résumé(),
             (Méthode::Post, "/api/mesures") => self.réception(requête.corps),
             (Méthode::Get, "/api/releve") => self.relevé(paramètres),
+            (Méthode::Get, "/api/releves") => self.relevés(paramètres),
             (Méthode::Get, "/api/reglages") => self.réglages(),
             (Méthode::Post, "/api/reglages") => self.régler(requête.corps),
             _ => Réponse::vide(404),

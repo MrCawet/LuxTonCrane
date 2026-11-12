@@ -191,6 +191,44 @@ fn le_serveur_calcule_le_relevé_du_jour_sur_les_mesures_reçues() {
 }
 
 #[test]
+fn le_relevé_donne_pour_chaque_fenêtre_ses_bornes_et_ses_périodes_mesurées() {
+    let mut serveur = serveur_vide("releve_courbe");
+    let autorisation = format!("Bearer {JETON}");
+    let corps = format!(
+        r#"[{{"valeur_lux": 50.0, "instant_ms": {}}}]"#,
+        COUCHER_MS - HEURE_MS
+    );
+    serveur.répondre(envoi(Some(&autorisation), &corps));
+    noter_la_nuit(&mut serveur);
+
+    let chemin = chemin_du_relevé();
+    let réponse = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
+
+    let relevé: Value = serde_json::from_str(&réponse.corps).unwrap();
+    let dix_minutes_ms = 10 * 60 * 1000;
+    assert_eq!(
+        relevé["lumiere_du_soir"]["fenetre"],
+        json!({ "debut_ms": COUCHER_MS - 3 * HEURE_MS, "fin_ms": COUCHER_MS })
+    );
+    assert_eq!(
+        relevé["lumiere_du_soir"]["periodes_mesurees"],
+        json!([{
+            "debut_ms": COUCHER_MS - HEURE_MS,
+            "fin_ms": COUCHER_MS - HEURE_MS + dix_minutes_ms,
+            "valeur_lux": 50.0
+        }])
+    );
+    for fenêtre in [
+        "lumiere_de_la_nuit",
+        "lumiere_du_matin",
+        "lumiere_de_la_journee",
+    ] {
+        assert_eq!(relevé[fenêtre]["periodes_mesurees"], json!([]));
+        assert!(relevé[fenêtre]["fenetre"]["debut_ms"].is_i64());
+    }
+}
+
+#[test]
 fn le_relevé_est_refusé_sans_le_bon_jeton_sans_coucher_souhaité_ou_sans_la_nuit() {
     let mut serveur = serveur_vide("releve_refus");
     let autorisation = format!("Bearer {JETON}");
@@ -352,4 +390,61 @@ fn la_fatigue_du_jour_se_note_et_se_relit() {
         serde_json::from_str::<Value>(&lecture.corps).unwrap(),
         json!({"jour": "2026-11-08", "fatigue": "genante"})
     );
+}
+
+fn nuit_levée_à(lever_ms: i64) -> String {
+    format!(
+        r#"{{"endormissement": "agite", "continuite": "sans_reveil", "coucher_ms": {}, "lever_ms": {}}}"#,
+        lever_ms - 8 * HEURE_MS,
+        lever_ms
+    )
+}
+
+#[test]
+fn les_relevés_des_dernières_nuits_notées_prennent_le_coucher_noté_le_lendemain() {
+    let mut serveur = serveur_vide("releves");
+    let autorisation = format!("Bearer {JETON}");
+    let lever_du_7_ms = COUCHER_MS + 8 * HEURE_MS - 24 * HEURE_MS;
+    let lever_du_8_ms = COUCHER_MS + 8 * HEURE_MS;
+    let nuit_du_7 = nuit_levée_à(lever_du_7_ms);
+    let nuit_du_8 = nuit_levée_à(lever_du_8_ms);
+    serveur.répondre(requête(Méthode::Post, "/api/nuits/2026-11-07", &nuit_du_7));
+    serveur.répondre(requête(Méthode::Post, "/api/nuits/2026-11-08", &nuit_du_8));
+    let coucher_souhaité_ms = lever_du_8_ms + 15 * HEURE_MS;
+    let chemin = format!("/api/releves?jour=2026-11-08&coucher_souhaite_ms={coucher_souhaité_ms}");
+
+    let réponse = serveur.répondre(demande_du_relevé(Some(&autorisation), &chemin));
+
+    assert_eq!(réponse.statut, 200);
+    let relevés: Value = serde_json::from_str(&réponse.corps).unwrap();
+    assert_eq!(relevés[0]["jour"], json!("2026-11-07"));
+    assert_eq!(relevés[1]["jour"], json!("2026-11-08"));
+    let trois_heures_ms = 3 * HEURE_MS;
+    assert_eq!(
+        relevés[0]["lumiere_de_la_journee"]["fenetre"]["fin_ms"],
+        json!(lever_du_8_ms - 8 * HEURE_MS - trois_heures_ms)
+    );
+    assert_eq!(
+        relevés[1]["lumiere_de_la_journee"]["fenetre"]["fin_ms"],
+        json!(coucher_souhaité_ms - trois_heures_ms)
+    );
+    assert_eq!(relevés[1]["endormissement"]["niveau"], json!("agite"));
+}
+
+#[test]
+fn les_relevés_sont_refusés_sans_le_bon_jeton_ou_sans_coucher_souhaité() {
+    let mut serveur = serveur_vide("releves_refus");
+    let autorisation = format!("Bearer {JETON}");
+
+    let sans_jeton = serveur.répondre(demande_du_relevé(
+        None,
+        "/api/releves?jour=2026-11-08&coucher_souhaite_ms=1",
+    ));
+    let incomplet = serveur.répondre(demande_du_relevé(
+        Some(&autorisation),
+        "/api/releves?jour=2026-11-08",
+    ));
+
+    assert_eq!(sans_jeton.statut, 401);
+    assert_eq!(incomplet.statut, 400);
 }

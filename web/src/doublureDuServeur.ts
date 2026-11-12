@@ -10,10 +10,10 @@ export interface Demande {
 }
 
 /**
- * Doublure du serveur, pour les tests : garde les nuits, les fatigues et le coucher souhaité en mémoire, rend le relevé donné,
+ * Doublure du serveur, pour les tests : garde les nuits, les fatigues et le coucher souhaité en mémoire, rend le relevé et ceux des dernières nuits donnés,
  * et refuse tout autre jeton que `JETON`.
  */
-export function doublureDuServeur(relevé: unknown = {}) {
+export function doublureDuServeur(relevé: unknown = {}, relevésDesDernièresNuits: unknown[] = []) {
   const nuits = new Map<string, unknown>()
   const journées = new Map<string, unknown>()
   const réglages = { coucher_souhaite: '23:00' }
@@ -53,6 +53,9 @@ export function doublureDuServeur(relevé: unknown = {}) {
     }
     if (adresse.startsWith('/api/releve?')) {
       return Response.json(relevé)
+    }
+    if (adresse.startsWith('/api/releves?')) {
+      return Response.json(relevésDesDernièresNuits)
     }
     return new Response('', { status: 404 })
   })
