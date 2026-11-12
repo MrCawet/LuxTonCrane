@@ -44,7 +44,7 @@ Les roues de l'application Android (elle ne demande plus d'heure), le bouton « 
 
 ## Critères d'acceptation
 
-- [ ] Les boutons qui envoient une saisie disent « Enregistrer », sur la page web et sur l'accueil Android.
+- [x] Les boutons qui envoient une saisie disent « Enregistrer », sur la page web et sur l'accueil Android.
 - [ ] Le coucher et le lever se choisissent à la roue, à la minute près ; le coucher souhaité au quart d'heure.
 - [ ] Une fois enregistrés ou retrouvés, l'agenda du matin, la fatigue du soir et le coucher souhaité s'affichent en
   valeurs, et « Modifier » rend les champs.

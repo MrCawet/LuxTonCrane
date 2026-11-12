@@ -134,8 +134,8 @@ async function réglerLeCoucherSouhaité() {
     body: JSON.stringify({ coucher_souhaite: coucherSouhaité.value }),
   })
   messageDuRéglage.value = réponse.ok
-    ? 'Coucher souhaité gardé.'
-    : `Le coucher souhaité n'a pas pu être gardé : le serveur a répondu ${réponse.status}.`
+    ? 'Coucher souhaité enregistré.'
+    : `Le coucher souhaité n'a pas pu être enregistré : le serveur a répondu ${réponse.status}.`
 }
 
 /** Le relevé de la nuit qui a fini ce matin, avec les heures de l'agenda et le coucher souhaité. */
@@ -419,7 +419,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
         />
       </label>
       <button type="button" name="regler" class="rounded-lg border border-dracula-purple px-4 py-3 text-dracula-purple" @click="réglerLeCoucherSouhaité">
-        Garder
+        Enregistrer
       </button>
     </div>
     <p v-if="messageDuRéglage !== null">{{ messageDuRéglage }}</p>

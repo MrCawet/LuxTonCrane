@@ -54,7 +54,7 @@ async function chargerLaNuit() {
   lever.value = heureLocale(nuit.lever_ms)
 }
 
-async function garderLAgenda() {
+async function enregistrerLAgenda() {
   erreurs.value = erreursDeLAgendaDuMatin({ ...choix.value, coucher: coucher.value, lever: lever.value })
   message.value = null
   if (erreurs.value.length > 0) {
@@ -71,7 +71,7 @@ async function garderLAgenda() {
       lever_ms: heures.leverMs,
     }),
   })
-  message.value = réponse.ok ? 'Agenda gardé.' : `L'agenda n'a pas pu être gardé : le serveur a répondu ${réponse.status}.`
+  message.value = réponse.ok ? 'Agenda enregistré.' : `L'agenda n'a pas pu être enregistré : le serveur a répondu ${réponse.status}.`
 }
 
 onMounted(chargerLaNuit)
@@ -80,7 +80,7 @@ onMounted(chargerLaNuit)
 <template>
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Agenda du matin</h2>
-    <form class="flex flex-col gap-6" @submit.prevent="garderLAgenda" @invalid.capture="champRefusé">
+    <form class="flex flex-col gap-6" @submit.prevent="enregistrerLAgenda" @invalid.capture="champRefusé">
       <ChoixDuNiveau
         v-for="échelle in ÉCHELLES"
         :key="échelle.champ"
@@ -99,7 +99,7 @@ onMounted(chargerLaNuit)
           <input v-model="lever" name="lever" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
         </label>
       </div>
-      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Garder l'agenda</button>
+      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Enregistrer</button>
       <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-dracula-red">
         <li v-for="erreur in erreurs" :key="erreur">{{ erreur }}</li>
       </ul>

@@ -45,7 +45,7 @@ async function chargerLeRésumé() {
   résumé.value = await réponse.json()
 }
 
-async function garderLeJeton() {
+async function enregistrerLeJeton() {
   const saisi = jetonSaisi.value.trim()
   if (saisi === '') {
     return
@@ -69,11 +69,11 @@ onMounted(chargerLeRésumé)
   <main class="mx-auto max-w-2xl px-4 py-6 font-sans text-lg leading-relaxed text-dracula-foreground">
     <h1 class="mb-6 text-2xl font-semibold text-dracula-purple">LuxTonCrane</h1>
 
-    <form v-if="jeton === null" class="flex flex-col gap-3" @submit.prevent="garderLeJeton">
+    <form v-if="jeton === null" class="flex flex-col gap-3" @submit.prevent="enregistrerLeJeton">
       <p v-if="jetonRefusé" class="text-dracula-red">Jeton refusé par le serveur.</p>
       <label for="jeton">Jeton du serveur</label>
       <input id="jeton" v-model="jetonSaisi" type="password" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
-      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Garder le jeton</button>
+      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Enregistrer</button>
     </form>
 
     <p v-else-if="erreur !== null" class="text-dracula-red">{{ erreur }}</p>
