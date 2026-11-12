@@ -5,6 +5,12 @@ export interface Niveau {
   cequiSestPassé: string
 }
 
+/** Le titre du niveau noté, tel que l'échelle l'écrit. */
+export function titreDuNiveau(échelle: Niveau[], nom: string): string {
+  const niveau = échelle.find((candidat) => candidat.nom === nom)
+  return niveau === undefined ? nom : niveau.titre
+}
+
 // Les échelles de CONCEPTION.md, section « Agenda du sommeil ».
 export const ENDORMISSEMENT: Niveau[] = [
   { nom: 'immediat', titre: 'Immédiat', cequiSestPassé: "je ne me souviens pas d'avoir attendu" },

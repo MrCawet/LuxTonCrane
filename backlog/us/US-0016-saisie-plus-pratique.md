@@ -2,7 +2,7 @@
 id: US-0016
 type: us
 titre: Les heures se saisissent à la roue, et une saisie enregistrée se lit
-statut: en_cours
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-12
 maj_le: 2026-11-12
@@ -46,7 +46,7 @@ Les roues de l'application Android (elle ne demande plus d'heure), le bouton « 
 
 - [x] Les boutons qui envoient une saisie disent « Enregistrer », sur la page web et sur l'accueil Android.
 - [x] Le coucher et le lever se choisissent à la roue, à la minute près ; le coucher souhaité au quart d'heure.
-- [ ] Une fois enregistrés ou retrouvés, l'agenda du matin, la fatigue du soir et le coucher souhaité s'affichent en
+- [x] Une fois enregistrés ou retrouvés, l'agenda du matin, la fatigue du soir et le coucher souhaité s'affichent en
   valeurs, et « Modifier » rend les champs.
 - [ ] L'opérateur juge la saisie plus pratique, sur le téléphone et sur l'ordinateur.
 

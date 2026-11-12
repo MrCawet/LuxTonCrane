@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import ChoixDuNiveau from './ChoixDuNiveau.vue'
 import RoueDeLHeure from './RoueDeLHeure.vue'
-import { CONTINUITÉ, ENDORMISSEMENT } from './echellesDuSommeil'
+import SaisieEnregistree, { type LigneEnregistrée } from './SaisieEnregistree.vue'
+import { CONTINUITÉ, ENDORMISSEMENT, titreDuNiveau } from './echellesDuSommeil'
 import { erreursDeLAgendaDuMatin } from './erreursDeSaisie'
 import { heureLocale, heuresDeLaNuit, jourLocal } from './heuresDuReleve'
 
@@ -30,6 +31,17 @@ const coucher = ref('23:00')
 const lever = ref('07:00')
 const message = ref<string | null>(null)
 const erreurs = ref<string[]>([])
+/** Faux une fois l'agenda enregistré ou retrouvé : la page l'affiche en valeurs. */
+const enModification = ref(true)
+
+const agendaEnregistré = computed<LigneEnregistrée[]>(() => [
+  ...ÉCHELLES.map((échelle) => ({
+    libellé: échelle.titre,
+    valeur: titreDuNiveau(échelle.niveaux, choix.value[échelle.champ]),
+  })),
+  { libellé: 'Coucher', valeur: coucher.value },
+  { libellé: 'Lever', valeur: lever.value },
+])
 
 function entêtes(): HeadersInit {
   return { Authorization: `Bearer ${props.jeton}` }
@@ -44,6 +56,7 @@ async function chargerLaNuit() {
   choix.value = { endormissement: nuit.endormissement, continuite: nuit.continuite }
   coucher.value = heureLocale(nuit.coucher_ms)
   lever.value = heureLocale(nuit.lever_ms)
+  enModification.value = false
 }
 
 async function enregistrerLAgenda() {
@@ -64,6 +77,7 @@ async function enregistrerLAgenda() {
     }),
   })
   message.value = réponse.ok ? 'Agenda enregistré.' : `L'agenda n'a pas pu être enregistré : le serveur a répondu ${réponse.status}.`
+  enModification.value = !réponse.ok
 }
 
 onMounted(chargerLaNuit)
@@ -72,7 +86,8 @@ onMounted(chargerLaNuit)
 <template>
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Agenda du matin</h2>
-    <form class="flex flex-col gap-6" @submit.prevent="enregistrerLAgenda">
+    <SaisieEnregistree v-if="!enModification" :lignes="agendaEnregistré" @modifier="enModification = true" />
+    <form v-else class="flex flex-col gap-6" @submit.prevent="enregistrerLAgenda">
       <ChoixDuNiveau
         v-for="échelle in ÉCHELLES"
         :key="échelle.champ"
@@ -89,7 +104,7 @@ onMounted(chargerLaNuit)
       <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-dracula-red">
         <li v-for="erreur in erreurs" :key="erreur">{{ erreur }}</li>
       </ul>
-      <p v-if="message !== null">{{ message }}</p>
     </form>
+    <p v-if="message !== null">{{ message }}</p>
   </section>
 </template>
