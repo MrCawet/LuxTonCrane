@@ -26,6 +26,7 @@ test("la page note l'agenda de la nuit qui finit ce matin", async () => {
   await page.find('input[value="reveil_bref"]').setValue(true)
   await choisirSurLaRoue(page, 'Coucher', '23:15')
   await choisirSurLaRoue(page, 'Lever', '07:00')
+  expect(page.find('button[type="submit"]').text()).toBe('Enregistrer')
   await page.find('form').trigger('submit')
   await flushPromises()
 
@@ -36,8 +37,30 @@ test("la page note l'agenda de la nuit qui finit ce matin", async () => {
     coucher_ms: COUCHER_MS,
     lever_ms: LEVER_MS,
   })
-  expect(page.find('button[type="submit"]').text()).toBe('Enregistrer')
   expect(page.text()).toContain('Agenda enregistré.')
+})
+
+test("l'agenda enregistré s'affiche en valeurs, et « Modifier » rend les champs", async () => {
+  doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await page.find('input[value="calme"]').setValue(true)
+  await page.find('input[value="reveil_bref"]').setValue(true)
+  await choisirSurLaRoue(page, 'Coucher', '23:15')
+  await choisirSurLaRoue(page, 'Lever', '07:00')
+  await page.find('form').trigger('submit')
+  await flushPromises()
+
+  expect(page.find('form').exists()).toBe(false)
+  expect(page.text()).toContain('Endormissement : Calme')
+  expect(page.text()).toContain('Continuité de la nuit : Réveil bref')
+  expect(page.text()).toContain('Coucher : 23:15')
+  expect(page.text()).toContain('Lever : 07:00')
+
+  await page.find('button[name="modifier"]').trigger('click')
+
+  expect(heureDeLaRoue(page, 'Coucher')).toBe('23:15')
 })
 
 test('une nuit déjà notée se retrouve préremplie', async () => {
@@ -52,6 +75,9 @@ test('une nuit déjà notée se retrouve préremplie', async () => {
 
   const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
   await flushPromises()
+
+  expect(page.text()).toContain('Endormissement : Agité')
+  await page.find('button[name="modifier"]').trigger('click')
 
   expect((page.find('input[value="agite"]').element as HTMLInputElement).checked).toBe(true)
   expect((page.find('input[value="sans_reveil"]').element as HTMLInputElement).checked).toBe(true)

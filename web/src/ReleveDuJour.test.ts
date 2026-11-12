@@ -131,15 +131,20 @@ test('le coucher souhaité se retrouve et se règle', async () => {
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
   await flushPromises()
+  expect(page.text()).toContain('Coucher souhaité : 22:30')
+
+  await page.find('button[name="modifier"]').trigger('click')
   expect(heureDeLaRoue(page, 'Coucher souhaité')).toBe('22:30')
+  expect(page.find('button[name="regler"]').text()).toBe('Enregistrer')
 
   await choisirSurLaRoue(page, 'Coucher souhaité', '23:45')
   await page.find('button[name="regler"]').trigger('click')
   await flushPromises()
 
   expect(serveur.réglages.coucher_souhaite).toBe('23:45')
-  expect(page.find('button[name="regler"]').text()).toBe('Enregistrer')
   expect(page.text()).toContain('Coucher souhaité enregistré.')
+  expect(page.text()).toContain('Coucher souhaité : 23:45')
+  expect(page.find('button[name="regler"]').exists()).toBe(false)
 })
 
 test('le coucher souhaité se choisit au quart d\'heure', async () => {
@@ -147,6 +152,7 @@ test('le coucher souhaité se choisit au quart d\'heure', async () => {
 
   const page = mount(ReleveDuJour, { props: { jeton: JETON } })
   await flushPromises()
+  await page.find('button[name="modifier"]').trigger('click')
 
   expect(minutesDeLaRoue(page, 'Coucher souhaité')).toEqual(['00', '15', '30', '45'])
 })
