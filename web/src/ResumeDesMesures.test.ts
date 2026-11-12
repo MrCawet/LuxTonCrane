@@ -30,6 +30,7 @@ test('sans jeton gardé, la page demande le jeton', async () => {
   await flushPromises()
 
   expect(page.find('input[type="password"]').exists()).toBe(true)
+  expect(page.find('button[type="submit"]').text()).toBe('Enregistrer')
 })
 
 test('avec le jeton, la page affiche le nombre de mesures reçues et la dernière', async () => {

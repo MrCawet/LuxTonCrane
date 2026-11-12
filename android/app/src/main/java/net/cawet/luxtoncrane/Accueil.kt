@@ -168,19 +168,19 @@ class Accueil : Activity() {
         column.addView(champ)
 
         val bouton = Button(this)
-        bouton.text = "Garder le jeton"
+        bouton.text = "Enregistrer"
         column.addView(bouton)
 
         étiquette.text = étatDuJeton()
         bouton.setOnClickListener {
             val jeton = jetonSaisi(champ.text.toString())
             if (jeton == null) {
-                étiquette.text = "Ce n'est pas un jeton : il ne contient ni espace, ni accent. Il n'est pas gardé."
+                étiquette.text = "Ce n'est pas un jeton : il ne contient ni espace, ni accent. Il n'est pas enregistré."
                 return@setOnClickListener
             }
             garderLeJetonDuServeur(this, jeton)
             champ.text.clear()
-            étiquette.text = "Nouveau jeton gardé."
+            étiquette.text = "Nouveau jeton enregistré."
             demanderLaSynchronisation()
         }
     }
@@ -188,7 +188,7 @@ class Accueil : Activity() {
     private fun étatDuJeton(): String {
         val jetonGardé = jetonDuServeur(this) != null
         if (jetonGardé) {
-            return "Jeton du serveur gardé."
+            return "Jeton du serveur enregistré."
         }
         return "Aucun jeton du serveur : les mesures ne sont pas envoyées."
     }

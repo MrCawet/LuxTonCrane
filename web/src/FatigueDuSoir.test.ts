@@ -19,11 +19,29 @@ test("la page note la fatigue d'aujourd'hui", async () => {
   await flushPromises()
 
   await page.find('input[value="genante"]').setValue(true)
+  expect(page.find('button[type="submit"]').text()).toBe('Enregistrer')
   await page.find('form').trigger('submit')
   await flushPromises()
 
   expect(serveur.journées.get('2026-11-08')).toEqual({ jour: '2026-11-08', fatigue: 'genante' })
-  expect(page.text()).toContain('Fatigue gardée.')
+  expect(page.text()).toContain('Fatigue enregistrée.')
+})
+
+test("la fatigue enregistrée s'affiche en valeur, et « Modifier » rend les champs", async () => {
+  doublureDuServeur()
+  const page = mount(FatigueDuSoir, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await page.find('input[value="genante"]').setValue(true)
+  await page.find('form').trigger('submit')
+  await flushPromises()
+
+  expect(page.find('form').exists()).toBe(false)
+  expect(page.text()).toContain('Fatigue de la journée : Gênante')
+
+  await page.find('button[name="modifier"]').trigger('click')
+
+  expect((page.find('input[value="genante"]').element as HTMLInputElement).checked).toBe(true)
 })
 
 test('une fatigue déjà notée se retrouve préremplie', async () => {
@@ -32,6 +50,9 @@ test('une fatigue déjà notée se retrouve préremplie', async () => {
 
   const page = mount(FatigueDuSoir, { props: { jeton: JETON } })
   await flushPromises()
+
+  expect(page.text()).toContain('Fatigue de la journée : Somnolence')
+  await page.find('button[name="modifier"]').trigger('click')
 
   expect((page.find('input[value="somnolence"]').element as HTMLInputElement).checked).toBe(true)
 })

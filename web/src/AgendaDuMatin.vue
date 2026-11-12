@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import ChoixDuNiveau from './ChoixDuNiveau.vue'
-import { CONTINUITÉ, ENDORMISSEMENT } from './echellesDuSommeil'
-import { erreursDeLAgendaDuMatin, raisonDuNavigateur } from './erreursDeSaisie'
+import RoueDeLHeure from './RoueDeLHeure.vue'
+import SaisieEnregistree, { type LigneEnregistrée } from './SaisieEnregistree.vue'
+import { CONTINUITÉ, ENDORMISSEMENT, titreDuNiveau } from './echellesDuSommeil'
+import { erreursDeLAgendaDuMatin } from './erreursDeSaisie'
 import { heureLocale, heuresDeLaNuit, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
@@ -29,15 +31,17 @@ const coucher = ref('23:00')
 const lever = ref('07:00')
 const message = ref<string | null>(null)
 const erreurs = ref<string[]>([])
+/** Faux une fois l'agenda enregistré ou retrouvé : la page l'affiche en valeurs. */
+const enModification = ref(true)
 
-const NOMS_DES_CHAMPS: Record<string, string> = { coucher: 'Coucher', lever: 'Lever' }
-
-/** Le navigateur refuse un champ : la page en dit la raison au lieu de bloquer en silence. */
-function champRefusé(évènement: Event) {
-  const champ = évènement.target as HTMLInputElement
-  message.value = null
-  erreurs.value = [raisonDuNavigateur(NOMS_DES_CHAMPS[champ.name] ?? champ.name, champ)]
-}
+const agendaEnregistré = computed<LigneEnregistrée[]>(() => [
+  ...ÉCHELLES.map((échelle) => ({
+    libellé: échelle.titre,
+    valeur: titreDuNiveau(échelle.niveaux, choix.value[échelle.champ]),
+  })),
+  { libellé: 'Coucher', valeur: coucher.value },
+  { libellé: 'Lever', valeur: lever.value },
+])
 
 function entêtes(): HeadersInit {
   return { Authorization: `Bearer ${props.jeton}` }
@@ -52,9 +56,10 @@ async function chargerLaNuit() {
   choix.value = { endormissement: nuit.endormissement, continuite: nuit.continuite }
   coucher.value = heureLocale(nuit.coucher_ms)
   lever.value = heureLocale(nuit.lever_ms)
+  enModification.value = false
 }
 
-async function garderLAgenda() {
+async function enregistrerLAgenda() {
   erreurs.value = erreursDeLAgendaDuMatin({ ...choix.value, coucher: coucher.value, lever: lever.value })
   message.value = null
   if (erreurs.value.length > 0) {
@@ -71,7 +76,8 @@ async function garderLAgenda() {
       lever_ms: heures.leverMs,
     }),
   })
-  message.value = réponse.ok ? 'Agenda gardé.' : `L'agenda n'a pas pu être gardé : le serveur a répondu ${réponse.status}.`
+  message.value = réponse.ok ? 'Agenda enregistré.' : `L'agenda n'a pas pu être enregistré : le serveur a répondu ${réponse.status}.`
+  enModification.value = !réponse.ok
 }
 
 onMounted(chargerLaNuit)
@@ -80,7 +86,8 @@ onMounted(chargerLaNuit)
 <template>
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Agenda du matin</h2>
-    <form class="flex flex-col gap-6" @submit.prevent="garderLAgenda" @invalid.capture="champRefusé">
+    <SaisieEnregistree v-if="!enModification" :lignes="agendaEnregistré" @modifier="enModification = true" />
+    <form v-else class="flex flex-col gap-6" @submit.prevent="enregistrerLAgenda">
       <ChoixDuNiveau
         v-for="échelle in ÉCHELLES"
         :key="échelle.champ"
@@ -90,20 +97,14 @@ onMounted(chargerLaNuit)
         :niveaux="échelle.niveaux"
       />
       <div class="grid grid-cols-2 gap-3">
-        <label class="flex flex-col gap-1">
-          Coucher
-          <input v-model="coucher" name="coucher" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
-        </label>
-        <label class="flex flex-col gap-1">
-          Lever
-          <input v-model="lever" name="lever" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
-        </label>
+        <RoueDeLHeure v-model="coucher" nom="Coucher" :pas-en-minutes="1" />
+        <RoueDeLHeure v-model="lever" nom="Lever" :pas-en-minutes="1" />
       </div>
-      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Garder l'agenda</button>
+      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Enregistrer</button>
       <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-dracula-red">
         <li v-for="erreur in erreurs" :key="erreur">{{ erreur }}</li>
       </ul>
-      <p v-if="message !== null">{{ message }}</p>
     </form>
+    <p v-if="message !== null">{{ message }}</p>
   </section>
 </template>

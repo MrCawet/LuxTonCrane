@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import CourbeDeLaLumiere from './CourbeDeLaLumiere.vue'
+import RoueDeLHeure from './RoueDeLHeure.vue'
+import SaisieEnregistree from './SaisieEnregistree.vue'
 import TendanceDesNuits, { type JourDeLaTendance, type Repère } from './TendanceDesNuits.vue'
 import type { FenêtreDuRelevé, PériodeMesurée } from './courbeDeLaLumiere'
-import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, type Niveau } from './echellesDuSommeil'
+import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, titreDuNiveau, type Niveau } from './echellesDuSommeil'
 import { coucherSouhaitéMs, jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
@@ -110,6 +112,8 @@ const relevé = ref<RelevéDuJour | null>(null)
 const relevésDesDernièresNuits = ref<RelevéDaté[]>([])
 const erreur = ref<string | null>(null)
 const messageDuRéglage = ref<string | null>(null)
+/** Le coucher souhaité a toujours une valeur : la page l'affiche, jusqu'à ce qu'on veuille le modifier. */
+const coucherSouhaitéEnModification = ref(false)
 
 function entêtes(): HeadersInit {
   return { Authorization: `Bearer ${props.jeton}` }
@@ -124,18 +128,15 @@ async function chargerLeRéglage() {
 }
 
 async function réglerLeCoucherSouhaité() {
-  if (coucherSouhaité.value === '') {
-    messageDuRéglage.value = "Indique l'heure du coucher souhaité."
-    return
-  }
   const réponse = await fetch('/api/reglages', {
     method: 'POST',
     headers: entêtes(),
     body: JSON.stringify({ coucher_souhaite: coucherSouhaité.value }),
   })
   messageDuRéglage.value = réponse.ok
-    ? 'Coucher souhaité gardé.'
-    : `Le coucher souhaité n'a pas pu être gardé : le serveur a répondu ${réponse.status}.`
+    ? 'Coucher souhaité enregistré.'
+    : `Le coucher souhaité n'a pas pu être enregistré : le serveur a répondu ${réponse.status}.`
+  coucherSouhaitéEnModification.value = !réponse.ok
 }
 
 /** Le relevé de la nuit qui a fini ce matin, avec les heures de l'agenda et le coucher souhaité. */
@@ -187,12 +188,6 @@ function pourcentage(part: number): string {
 
 function étiquetteDe(objectif: Objectif): string {
   return objectif.tenu ? `${objectif.nom} tenu` : `${objectif.nom} non tenu`
-}
-
-/** Le titre du niveau noté, tel que l'échelle l'écrit. */
-function titreDuNiveau(échelle: Niveau[], nom: string): string {
-  const niveau = échelle.find((candidat) => candidat.nom === nom)
-  return niveau === undefined ? nom : niveau.titre
 }
 
 function ligneDeLaNote(libellé: string, échelle: Niveau[], note: Note): Ligne {
@@ -407,19 +402,15 @@ const fenêtres = computed<Fenêtre[]>(() => {
 <template>
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Relevé du jour</h2>
-    <div class="flex items-end gap-3">
-      <label class="flex flex-col gap-1">
-        Coucher souhaité
-        <input
-          v-model="coucherSouhaité"
-          name="coucher_souhaite"
-          type="time"
-          step="900"
-          class="rounded-lg border border-dracula-comment bg-dracula-background p-3"
-        />
-      </label>
+    <SaisieEnregistree
+      v-if="!coucherSouhaitéEnModification"
+      :lignes="[{ libellé: 'Coucher souhaité', valeur: coucherSouhaité }]"
+      @modifier="coucherSouhaitéEnModification = true"
+    />
+    <div v-else class="flex items-end gap-3">
+      <RoueDeLHeure v-model="coucherSouhaité" nom="Coucher souhaité" :pas-en-minutes="15" />
       <button type="button" name="regler" class="rounded-lg border border-dracula-purple px-4 py-3 text-dracula-purple" @click="réglerLeCoucherSouhaité">
-        Garder
+        Enregistrer
       </button>
     </div>
     <p v-if="messageDuRéglage !== null">{{ messageDuRéglage }}</p>

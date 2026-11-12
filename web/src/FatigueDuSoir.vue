@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import ChoixDuNiveau from './ChoixDuNiveau.vue'
-import { FATIGUE } from './echellesDuSommeil'
+import SaisieEnregistree from './SaisieEnregistree.vue'
+import { FATIGUE, titreDuNiveau } from './echellesDuSommeil'
 import { jourLocal } from './heuresDuReleve'
 
 const props = defineProps<{ jeton: string }>()
@@ -11,6 +12,8 @@ const jour = jourLocal(new Date())
 
 const fatigue = ref('')
 const message = ref<string | null>(null)
+/** Faux une fois la fatigue enregistrée ou retrouvée : la page l'affiche en valeur. */
+const enModification = ref(true)
 
 function entêtes(): HeadersInit {
   return { Authorization: `Bearer ${props.jeton}` }
@@ -21,10 +24,11 @@ async function chargerLaFatigue() {
   if (réponse.ok) {
     const journée: { fatigue: string } = await réponse.json()
     fatigue.value = journée.fatigue
+    enModification.value = false
   }
 }
 
-async function garderLaFatigue() {
+async function enregistrerLaFatigue() {
   if (fatigue.value === '') {
     message.value = 'Choisis un niveau de fatigue.'
     return
@@ -34,7 +38,8 @@ async function garderLaFatigue() {
     headers: entêtes(),
     body: JSON.stringify({ fatigue: fatigue.value }),
   })
-  message.value = réponse.ok ? 'Fatigue gardée.' : `La fatigue n'a pas pu être gardée : le serveur a répondu ${réponse.status}.`
+  message.value = réponse.ok ? 'Fatigue enregistrée.' : `La fatigue n'a pas pu être enregistrée : le serveur a répondu ${réponse.status}.`
+  enModification.value = !réponse.ok
 }
 
 onMounted(chargerLaFatigue)
@@ -43,10 +48,15 @@ onMounted(chargerLaFatigue)
 <template>
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Fatigue du soir</h2>
-    <form class="flex flex-col gap-6" @submit.prevent="garderLaFatigue">
+    <SaisieEnregistree
+      v-if="!enModification"
+      :lignes="[{ libellé: 'Fatigue de la journée', valeur: titreDuNiveau(FATIGUE, fatigue) }]"
+      @modifier="enModification = true"
+    />
+    <form v-else class="flex flex-col gap-6" @submit.prevent="enregistrerLaFatigue">
       <ChoixDuNiveau v-model="fatigue" nom="fatigue" titre="Fatigue de la journée" :niveaux="FATIGUE" />
-      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Garder la fatigue</button>
-      <p v-if="message !== null">{{ message }}</p>
+      <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Enregistrer</button>
     </form>
+    <p v-if="message !== null">{{ message }}</p>
   </section>
 </template>
