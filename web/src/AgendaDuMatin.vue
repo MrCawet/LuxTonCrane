@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import ChoixDuNiveau from './ChoixDuNiveau.vue'
+import RoueDeLHeure from './RoueDeLHeure.vue'
 import { CONTINUITÉ, ENDORMISSEMENT } from './echellesDuSommeil'
 import { erreursDeLAgendaDuMatin, raisonDuNavigateur } from './erreursDeSaisie'
 import { heureLocale, heuresDeLaNuit, jourLocal } from './heuresDuReleve'
@@ -90,14 +91,8 @@ onMounted(chargerLaNuit)
         :niveaux="échelle.niveaux"
       />
       <div class="grid grid-cols-2 gap-3">
-        <label class="flex flex-col gap-1">
-          Coucher
-          <input v-model="coucher" name="coucher" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
-        </label>
-        <label class="flex flex-col gap-1">
-          Lever
-          <input v-model="lever" name="lever" type="time" class="rounded-lg border border-dracula-comment bg-dracula-background p-3" />
-        </label>
+        <RoueDeLHeure v-model="coucher" nom="Coucher" :pas-en-minutes="1" />
+        <RoueDeLHeure v-model="lever" nom="Lever" :pas-en-minutes="1" />
       </div>
       <button type="submit" class="rounded-lg bg-dracula-purple p-3 font-semibold text-dracula-background">Enregistrer</button>
       <ul v-if="erreurs.length > 0" class="list-disc pl-5 text-dracula-red">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import CourbeDeLaLumiere from './CourbeDeLaLumiere.vue'
+import RoueDeLHeure from './RoueDeLHeure.vue'
 import TendanceDesNuits, { type JourDeLaTendance, type Repère } from './TendanceDesNuits.vue'
 import type { FenêtreDuRelevé, PériodeMesurée } from './courbeDeLaLumiere'
 import { CONTINUITÉ, ENDORMISSEMENT, FATIGUE, type Niveau } from './echellesDuSommeil'
@@ -124,10 +125,6 @@ async function chargerLeRéglage() {
 }
 
 async function réglerLeCoucherSouhaité() {
-  if (coucherSouhaité.value === '') {
-    messageDuRéglage.value = "Indique l'heure du coucher souhaité."
-    return
-  }
   const réponse = await fetch('/api/reglages', {
     method: 'POST',
     headers: entêtes(),
@@ -408,16 +405,7 @@ const fenêtres = computed<Fenêtre[]>(() => {
   <section class="flex flex-col gap-5 rounded-2xl bg-dracula-current-line p-5">
     <h2 class="text-2xl font-semibold">Relevé du jour</h2>
     <div class="flex items-end gap-3">
-      <label class="flex flex-col gap-1">
-        Coucher souhaité
-        <input
-          v-model="coucherSouhaité"
-          name="coucher_souhaite"
-          type="time"
-          step="900"
-          class="rounded-lg border border-dracula-comment bg-dracula-background p-3"
-        />
-      </label>
+      <RoueDeLHeure v-model="coucherSouhaité" nom="Coucher souhaité" :pas-en-minutes="15" />
       <button type="button" name="regler" class="rounded-lg border border-dracula-purple px-4 py-3 text-dracula-purple" @click="réglerLeCoucherSouhaité">
         Enregistrer
       </button>
