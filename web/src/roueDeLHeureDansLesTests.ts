@@ -14,9 +14,11 @@ export function heureDeLaRoue(page: VueWrapper, nom: string): string {
   return `${heures}:${minutes}`
 }
 
-/** Les minutes que propose la roue nommée `nom`. */
+/** Les minutes que propose la roue nommée `nom`, sur un tour. */
 export function minutesDeLaRoue(page: VueWrapper, nom: string): string[] {
-  return page.findAll(`[aria-label="${nom}, minutes"] button`).map((bouton) => bouton.attributes('value') ?? '')
+  const boutons = page.findAll(`[aria-label="${nom}, minutes"] button`)
+  const valeurs = boutons.map((bouton) => bouton.attributes('value') ?? '')
+  return [...new Set(valeurs)]
 }
 
 /**

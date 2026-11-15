@@ -31,16 +31,28 @@ function choisirLaMinute(nouvelleMinute: string) {
 }
 
 // La roue se fait tourner au doigt ou à la molette : quand elle s'arrête, la valeur au centre est choisie.
+// Elle tourne sans fin : ses valeurs se répètent sur trois tours, et elle revient sur celui du milieu dès qu'elle
+// s'arrête, pour en garder un de chaque côté.
+const TURNS = [0, 1, 2]
+const MIDDLE_TURN = 1
 const hoursColumn = ref<HTMLElement | null>(null)
 const minutesColumn = ref<HTMLElement | null>(null)
 const SCROLL_SETTLE_MS = 120
 let settleTimer: ReturnType<typeof setTimeout> | undefined
 
-function centeredValue(column: HTMLElement, values: string[]): string {
-  const itemHeight = (column.firstElementChild as HTMLElement).offsetHeight
+function itemHeightOf(column: HTMLElement): number {
+  return (column.firstElementChild as HTMLElement).offsetHeight
+}
+
+function centeredValueBackOnMiddleTurn(column: HTMLElement, values: string[]): string {
+  const itemHeight = itemHeightOf(column)
   const rank = Math.round(column.scrollTop / itemHeight)
-  const clampedRank = Math.min(Math.max(rank, 0), values.length - 1)
-  return values[clampedRank]
+  const rankInTurn = ((rank % values.length) + values.length) % values.length
+  const rankOnMiddleTurn = MIDDLE_TURN * values.length + rankInTurn
+  if (rank !== rankOnMiddleTurn) {
+    column.scrollTo({ top: rankOnMiddleTurn * itemHeight, behavior: 'instant' })
+  }
+  return values[rankInTurn]
 }
 
 function onScroll() {
@@ -50,28 +62,48 @@ function onScroll() {
       return
     }
     // Les deux d'un coup : le modèle ne prend sa nouvelle valeur qu'au rendu suivant.
-    const heureAuCentre = centeredValue(hoursColumn.value, HEURES)
-    const minuteAuCentre = centeredValue(minutesColumn.value, minutes.value)
+    const heureAuCentre = centeredValueBackOnMiddleTurn(hoursColumn.value, HEURES)
+    const minuteAuCentre = centeredValueBackOnMiddleTurn(minutesColumn.value, minutes.value)
     heureChoisie.value = `${heureAuCentre}:${minuteAuCentre}`
   }, SCROLL_SETTLE_MS)
 }
 
-function scrollToValue(column: HTMLElement | null, values: string[], value: string, behavior: ScrollBehavior) {
+function showOnMiddleTurn(column: HTMLElement | null, values: string[], value: string) {
   const rank = values.indexOf(value)
   if (column === null || rank === -1) {
     return
   }
-  const itemHeight = (column.firstElementChild as HTMLElement).offsetHeight
-  column.scrollTo({ top: rank * itemHeight, behavior })
+  const rankOnMiddleTurn = MIDDLE_TURN * values.length + rank
+  column.scrollTo({ top: rankOnMiddleTurn * itemHeightOf(column), behavior: 'instant' })
 }
 
-function scrollToChoice(behavior: ScrollBehavior) {
-  scrollToValue(hoursColumn.value, HEURES, heure.value, behavior)
-  scrollToValue(minutesColumn.value, minutes.value, minute.value, behavior)
+// Vers la copie la plus proche : de 00 à 23, la roue recule d'un cran au lieu de parcourir tout un tour.
+function turnToNearest(column: HTMLElement | null, values: string[], value: string) {
+  const rank = values.indexOf(value)
+  if (column === null || rank === -1) {
+    return
+  }
+  const itemHeight = itemHeightOf(column)
+  const positions = TURNS.map((turn) => (turn * values.length + rank) * itemHeight)
+  const distanceOf = (position: number) => Math.abs(position - column.scrollTop)
+  const nearestPosition = positions.reduce((nearest, position) =>
+    distanceOf(position) < distanceOf(nearest) ? position : nearest,
+  )
+  column.scrollTo({ top: nearestPosition, behavior: 'smooth' })
 }
 
-onMounted(() => scrollToChoice('instant'))
-watch(heureChoisie, () => scrollToChoice('smooth'), { flush: 'post' })
+onMounted(() => {
+  showOnMiddleTurn(hoursColumn.value, HEURES, heure.value)
+  showOnMiddleTurn(minutesColumn.value, minutes.value, minute.value)
+})
+watch(
+  heureChoisie,
+  () => {
+    turnToNearest(hoursColumn.value, HEURES, heure.value)
+    turnToNearest(minutesColumn.value, minutes.value, minute.value)
+  },
+  { flush: 'post' },
+)
 </script>
 
 <template>
@@ -87,17 +119,19 @@ watch(heureChoisie, () => scrollToChoice('smooth'), { flush: 'post' })
         class="roue h-36 snap-y snap-mandatory overflow-y-scroll py-12"
         @scroll="onScroll"
       >
-        <button
-          v-for="valeur in HEURES"
-          :key="valeur"
-          type="button"
-          :value="valeur"
-          :aria-pressed="valeur === heure"
-          class="block h-12 w-full snap-center text-dracula-foreground/50 aria-pressed:font-semibold aria-pressed:text-dracula-foreground"
-          @click="choisirLHeure(valeur)"
-        >
-          {{ valeur }}
-        </button>
+        <template v-for="tour in TURNS" :key="tour">
+          <button
+            v-for="valeur in HEURES"
+            :key="valeur"
+            type="button"
+            :value="valeur"
+            :aria-pressed="tour === MIDDLE_TURN && valeur === heure"
+            class="block h-12 w-full snap-center text-dracula-foreground/50 aria-pressed:font-semibold aria-pressed:text-dracula-foreground"
+            @click="choisirLHeure(valeur)"
+          >
+            {{ valeur }}
+          </button>
+        </template>
       </div>
       <div
         ref="minutesColumn"
@@ -106,17 +140,19 @@ watch(heureChoisie, () => scrollToChoice('smooth'), { flush: 'post' })
         class="roue h-36 snap-y snap-mandatory overflow-y-scroll py-12"
         @scroll="onScroll"
       >
-        <button
-          v-for="valeur in minutes"
-          :key="valeur"
-          type="button"
-          :value="valeur"
-          :aria-pressed="valeur === minute"
-          class="block h-12 w-full snap-center text-dracula-foreground/50 aria-pressed:font-semibold aria-pressed:text-dracula-foreground"
-          @click="choisirLaMinute(valeur)"
-        >
-          {{ valeur }}
-        </button>
+        <template v-for="tour in TURNS" :key="tour">
+          <button
+            v-for="valeur in minutes"
+            :key="valeur"
+            type="button"
+            :value="valeur"
+            :aria-pressed="tour === MIDDLE_TURN && valeur === minute"
+            class="block h-12 w-full snap-center text-dracula-foreground/50 aria-pressed:font-semibold aria-pressed:text-dracula-foreground"
+            @click="choisirLaMinute(valeur)"
+          >
+            {{ valeur }}
+          </button>
+        </template>
       </div>
     </div>
   </fieldset>

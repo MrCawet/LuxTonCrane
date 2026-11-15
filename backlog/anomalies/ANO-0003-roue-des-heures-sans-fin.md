@@ -2,7 +2,7 @@
 id: ANO-0003
 type: anomalie
 titre: La roue des heures s'arrête à 23 et à 00 au lieu de tourner en boucle
-statut: en_cours
+statut: a_valider
 priorite: confort
 cree_le: 2026-11-15
 maj_le: 2026-11-15
@@ -24,5 +24,5 @@ proposée par l'agent, `confort` : la saisie marche, elle demande seulement de f
 
 ## Critères d'acceptation
 
-- [ ] Sur la roue, après 23 vient 00 et avant 00 vient 23 ; de même pour les minutes, après la dernière vient 00.
+- [x] Sur la roue, après 23 vient 00 et avant 00 vient 23 ; de même pour les minutes, après la dernière vient 00.
 - [ ] La roue se fait tourner sans fin dans les deux sens, au doigt comme à la molette.
