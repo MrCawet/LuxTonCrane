@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import AgendaDuMatin from './AgendaDuMatin.vue'
 import { JETON, doublureDuServeur } from './doublureDuServeur'
-import { choisirSurLaRoue, heureDeLaRoue, minutesDeLaRoue } from './roueDeLHeureDansLesTests'
+import { autourDuChoix, choisirSurLaRoue, heureDeLaRoue, minutesDeLaRoue } from './roueDeLHeureDansLesTests'
 
 const COUCHER_MS = new Date(2026, 10, 7, 23, 15).getTime()
 const LEVER_MS = new Date(2026, 10, 8, 7, 0).getTime()
@@ -103,6 +103,21 @@ test("les heures du coucher et du lever se choisissent à la minute près", asyn
   for (const nom of ['Coucher', 'Lever']) {
     expect(minutesDeLaRoue(page, nom)).toHaveLength(60)
   }
+})
+
+// Se coucher à 1 h ne demande pas de remonter toute la colonne (ANO-0003).
+test('la roue tourne en boucle : après 23 vient 00, après 59 vient 00', async () => {
+  doublureDuServeur()
+  const page = mount(AgendaDuMatin, { props: { jeton: JETON } })
+  await flushPromises()
+
+  await choisirSurLaRoue(page, 'Coucher', '00:00')
+  expect(autourDuChoix(page, 'Coucher', 'heures')).toEqual(['23', '00', '01'])
+  expect(autourDuChoix(page, 'Coucher', 'minutes')).toEqual(['59', '00', '01'])
+
+  await choisirSurLaRoue(page, 'Lever', '23:59')
+  expect(autourDuChoix(page, 'Lever', 'heures')).toEqual(['22', '23', '00'])
+  expect(autourDuChoix(page, 'Lever', 'minutes')).toEqual(['58', '59', '00'])
 })
 
 test("la page dit pourquoi elle refuse l'agenda, et n'envoie rien", async () => {

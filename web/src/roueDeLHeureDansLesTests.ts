@@ -18,3 +18,14 @@ export function heureDeLaRoue(page: VueWrapper, nom: string): string {
 export function minutesDeLaRoue(page: VueWrapper, nom: string): string[] {
   return page.findAll(`[aria-label="${nom}, minutes"] button`).map((bouton) => bouton.attributes('value') ?? '')
 }
+
+/**
+ * Ce que la colonne `colonne` (« heures » ou « minutes ») de la roue nommée `nom` montre autour de son choix :
+ * la valeur d'avant, le choix, la valeur d'après.
+ */
+export function autourDuChoix(page: VueWrapper, nom: string, colonne: string): string[] {
+  const boutons = page.findAll(`[aria-label="${nom}, ${colonne}"] button`)
+  const rangDuChoix = boutons.findIndex((bouton) => bouton.attributes('aria-pressed') === 'true')
+  const voisinage = boutons.slice(rangDuChoix - 1, rangDuChoix + 2)
+  return voisinage.map((bouton) => bouton.attributes('value') ?? '')
+}
